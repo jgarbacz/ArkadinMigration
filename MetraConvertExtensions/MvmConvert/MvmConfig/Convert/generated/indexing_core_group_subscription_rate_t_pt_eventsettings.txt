@@ -1,0 +1,51 @@
+<proc name="indexing_core_group_subscription_rate_t_pt_eventsettings">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <!-- Insert child->parent into local index -->
+  <if>
+    <condition>(OBJECT.tx_name ne '' and OBJECT.id_po ne '' and OBJECT.id_pi_template ne '' and OBJECT.id_paramtable ne '') and (OBJECT.tx_name ne '' and OBJECT.id_po ne '')</condition>
+    <then>
+      <!-- Duplicate children will be noticed later once we're going through the sorted object list -->
+      <index_insert>
+        <index>'MC_CHILD_PARENT_MAP'</index>
+        <field name="child_keys">OBJECT.tx_name ~ "	`|" ~ OBJECT.id_po ~ "	`|" ~ OBJECT.id_pi_template ~ "	`|" ~ OBJECT.id_paramtable ~ "	`|" ~ lpad(OBJECT._mc_record_offset, 11, "0")</field>
+        <field name="child_namespace">'GROUP_SUBSCRIPTION_RATE_T_PT_EVENTSETTINGS'</field>
+        <field name="child_sort_key">''</field>
+        <field name="parent_keys">OBJECT.tx_name ~ "	`|" ~ OBJECT.id_po</field>
+        <field name="parent_namespace">'GROUP_SUBSCRIPTION'</field>
+      </index_insert>
+      <do>TEMP.count = 1</do>
+      <index_get>
+        <index>'MC_CHILD_COUNT'</index>
+        <field name="parent_keys">OBJECT.tx_name ~ "	`|" ~ OBJECT.id_po</field>
+        <field name="parent_namespace">'GROUP_SUBSCRIPTION'</field>
+        <field name="child_count">TEMP.child_count</field>
+        <then>
+          <do>TEMP.count = TEMP.child_count + 1</do>
+        </then>
+      </index_get>
+      <index_remove>
+        <index>'MC_CHILD_COUNT'</index>
+        <field name="parent_keys">OBJECT.tx_name ~ "	`|" ~ OBJECT.id_po</field>
+        <field name="parent_namespace">'GROUP_SUBSCRIPTION'</field>
+      </index_remove>
+      <index_insert>
+        <index>'MC_CHILD_COUNT'</index>
+        <field name="parent_keys">OBJECT.tx_name ~ "	`|" ~ OBJECT.id_po</field>
+        <field name="parent_namespace">'GROUP_SUBSCRIPTION'</field>
+        <field name="child_count">TEMP.count</field>
+      </index_insert>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.tx_name ne '' and OBJECT.id_po ne '' and OBJECT.id_pi_template ne '' and OBJECT.id_paramtable ne ''</condition>
+    <then>
+      <index_insert_if_none>
+        <index>'MC_PARENT_LOOKUP'</index>
+        <field name="parent_keys">OBJECT.tx_name ~ "	`|" ~ OBJECT.id_po ~ "	`|" ~ OBJECT.id_pi_template ~ "	`|" ~ OBJECT.id_paramtable ~ "	`|" ~ lpad(OBJECT._mc_record_offset, 11, "0")</field>
+        <field name="parent_namespace">'GROUP_SUBSCRIPTION_RATE_T_PT_EVENTSETTINGS'</field>
+      </index_insert_if_none>
+    </then>
+  </if>
+</proc>

@@ -1,0 +1,89 @@
+<proc name="pass_1_47">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <if>
+    <condition>OBJECT._mc_error ne ''</condition>
+    <then>
+      <return />
+    </then>
+  </if>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'48'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_ACCOUNT_ANCESTOR'</object_type>
+    <object_id>TEMP.GeNsYm672__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm672__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm672__mc).id_ancestor = OBJECT.id_ancestor</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc).id_descendent = OBJECT.id_descendent</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc).num_generations = OBJECT.num_generations</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc).b_children = OBJECT.b_children</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc).vt_start = OBJECT.vt_start</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc).vt_end = OBJECT.vt_end</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc).tx_path = OBJECT.tx_path</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc)._mc_record_type_id = 48</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_account_ancestor' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm672__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm672__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm672__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm672__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'49'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_DM_ACCOUNT_ANCESTOR'</object_type>
+    <object_id>TEMP.GeNsYm673__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm673__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm673__mc).id_dm_ancestor = OBJECT.id_dm_ancestor</do>
+  <do>OBJECT(TEMP.GeNsYm673__mc).id_dm_descendent = OBJECT.id_dm_descendent</do>
+  <do>OBJECT(TEMP.GeNsYm673__mc).num_generations = OBJECT.num_generations</do>
+  <do>OBJECT(TEMP.GeNsYm673__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm673__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm673__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm673__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm673__mc)._mc_record_type_id = 49</do>
+  <do>OBJECT(TEMP.GeNsYm673__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm673__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm673__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm673__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm673__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_dm_account_ancestor' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm673__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm673__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm673__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm673__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+</proc>

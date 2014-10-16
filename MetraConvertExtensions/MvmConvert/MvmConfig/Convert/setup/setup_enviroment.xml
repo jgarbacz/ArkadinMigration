@@ -1,0 +1,421 @@
+<procs>
+
+<proc name='setup_enviroment'>
+
+  <!--
+  TODO: clean this up!
+  DB objects needed to run mvm:
+  mvm_get_mvm_run_id (proc in ADE config)
+  mvm_param_table_props (table in RME config, also in source database config)
+  for clusters: mvm_server_credentials, mvm_clusters (tables in ADE config), insert appropriate row(s) into mvm_clusters
+  -->
+
+  <c>This init block has higher priority than the default databases file</c>
+  <initialize namespace="global" priority="1100000">
+    <print>'Initialize environment for conversion'</print>
+
+    <!-- Delimiters -->
+    <call_proc_for_current_object>
+      <name>'set_delimiters'</name>
+    </call_proc_for_current_object>
+
+    <do>GLOBAL.path_separator = '\'</do>
+      
+    <!-- 
+    Addition by TCF May 2014.
+    The current version of MetraConvert can only handle ANSI characters 32 - 127.
+    Added the ability to handle all ANSI characters as well as Uniicode.
+    Set up the "run mode" for program. 
+    "ANSI" mode will generate ANSI-formatted characters for the files to be 
+    bulk-loaded into the database. "Unicode" mode will encode characters as
+    UCS-2 Little Endian. There are a couple of drawbacks to using Unicode:
+    1) The files will take a up a little more disk space
+    2) For SQL Server deployments, there is a bug with BCP that is causing
+       Unicode file loads to fail (or rather, the first row is getting the 
+       BOM appended to the first field) when a Format File is specified. So I 
+       have coded MetraConvert to NOT use a Format File. This will degrade 
+       performance a bit, and may cause other unforeseen issues.
+    -->
+    <if>
+        <condition>GLOBAL.run_mode Ne 'ANSI' and GLOBAL.run_mode Ne 'Unicode'</condition>
+        <then>
+            <do>GLOBAL.run_mode = 'ANSI'</do>
+        </then>
+    </if>
+
+    <!-- 
+    Addition by TCF May 2014.
+    Some differences between versions of MVM simply do not reconcile; methods and
+    objects are removed altogetherm signatures to methods and objects are changed
+    in ways that it is impossible to deal with in an agnostic fashion. This provides
+    a means to deal with those differences.
+    -->
+    <if>
+        <condition>GLOBAL.mvmversionmajor eq ''</condition>
+        <then>
+            <do>GLOBAL.mvmversionmajor = 1</do>
+        </then>
+    </if>
+    <print>'I am programmed to run on MVM major version number ' ~ GLOBAL.mvmversionmajor</print>
+
+    <!--
+	Addition by TCF June 2014.
+	Implementing this parameter as a workaround for a character parsing issue with the input
+	files. See below for details.
+	-->
+    <if>
+        <condition>GLOBAL.cr Ne 'n'</condition>
+        <then>
+            <do>GLOBAL.cr = 'y'</do>
+        </then>
+        <else>
+            <print>
+                'You have passed the cr parameter as &quot;n&quot;, which tells MetraConvert to replace carriage return + line
+                feed (char(13),char(10)) with just line feed  (char(10)) when parsing input files. If you get an exception along the
+                lines of &quot;could not read any data from file...are delimiters configured correctly?&quot;, try removing this
+                parameter or changing it to &quot;y&quot;.'
+            </print>
+        </else>
+    </if>
+      
+    <!--
+    Addition by TCF July 2014.
+    Workaround for issue arkadin was having w/ account name load. Add a variable to apply in the generate_find_ancstors proc
+    -->
+    <if>
+        <condition>GLOBAL.qckhier Ne 'y'</condition>
+        <then>
+            <do>GLOBAL.qckhier = 'n'</do>
+        </then>
+    </if>
+	
+	<!--
+    Addition by TCF September 2014.
+    Add a variable that we can use to record process state information at various points in time.
+    -->
+    <if>
+        <condition>GLOBAL.benchmark Ne 'y'</condition>
+        <then>
+            <do>GLOBAL.benchmark = 'n'</do>
+        </then>
+    </if>
+
+    <!-- Location of migration configuration files -->
+    <get_rmp_dir>GLOBAL.rmp_directory</get_rmp_dir>
+    <get_rmp_bin_dir>GLOBAL.rmp_bin_directory</get_rmp_bin_dir>
+    <do>GLOBAL.extensions_directory = GLOBAL.rmp_directory ~ GLOBAL.path_separator ~ 'Extensions'</do>
+    <if>
+      <condition>GLOBAL.override_extensions_dir ne ''</condition>
+      <then>
+        <do>GLOBAL.extensions_directory = GLOBAL.override_extensions_dir</do>
+      </then>
+    </if>
+    <join>
+      <delim>GLOBAL.path_separator</delim>
+      <input>GLOBAL.extensions_directory</input>
+      <input>'MvmConvert'</input>
+      <input>'MvmConfig'</input>
+      <input>'Convert'</input>
+      <output>GLOBAL.config_directory</output>
+    </join>
+    <do>GLOBAL.gen_directory = GLOBAL.config_directory ~ GLOBAL.path_separator ~ 'generated'</do>
+
+    <!-- Base directory of migration input files -->
+    <if>
+      <condition>GLOBAL.data_directory eq ''</condition>
+      <then>
+        <do>GLOBAL.data_directory = GLOBAL.rmp_directory ~ GLOBAL.path_separator ~ 'MetraConvertData'</do>
+      </then>
+    </if>
+
+    <!-- Location of all migration data files -->
+    <do>GLOBAL.input_directory = GLOBAL.data_directory ~ GLOBAL.path_separator ~ 'input_files'</do>
+    <do>GLOBAL.sorted_directory = GLOBAL.data_directory ~ GLOBAL.path_separator ~ 'temp_files'</do>
+    <do>GLOBAL.error_directory = GLOBAL.data_directory ~ GLOBAL.path_separator ~ 'error_files'</do>
+    <do>GLOBAL.table_directory = GLOBAL.data_directory ~ GLOBAL.path_separator ~ 'table_output'</do>
+    <do>GLOBAL.migration_directory = GLOBAL.data_directory ~ GLOBAL.path_separator ~ 'migration_info'</do>
+    <do>GLOBAL.record_types_directory = GLOBAL.data_directory ~ GLOBAL.path_separator ~ 'record_types'</do>
+    <do>GLOBAL.gen_interfaces_directory = GLOBAL.data_directory ~ GLOBAL.path_separator ~ 'record_types' ~ GLOBAL.path_separator ~ 'interfaces'</do>
+    <do>GLOBAL.gen_record_types_directory = GLOBAL.data_directory ~ GLOBAL.path_separator ~ 'record_types' ~ GLOBAL.path_separator ~ 'generated'</do>
+    <do>GLOBAL.sort_filename = 'sorted.data'</do>
+    <do>GLOBAL.input_filename = 'input.data'</do>
+    <do>GLOBAL.mashed_filename = GLOBAL.table_directory ~ GLOBAL.path_separator ~ 'MC_MASHED_ID_ACC_MAP'</do>
+    <do>GLOBAL.nmlogin_cache_filename = 'MC_NM_LOGINS'</do>
+      
+    <!-- 
+    Added by TCF September 2014. These values hold the default capacity for indexes. In most cases it will be best to 
+    leave these as 4: the same default value that .NET uses for the underlying array values of collections. It can also 
+    be appropriate to set some of these values on a case-by-case basis when they are a known entity for any given implementation;
+    for instance, the number of record_types.
+    Finally, please note these are not ALL of the indexes used by the application; we are focusing on the indexes initalized
+    in setup_all, since these are the ones that grow very large and are constantly being appended to. I am omitting some of 
+    collections whose length cannot be estimated (e.g. MC_RECORD_ERRORS). Also omitting the indexes initialized in 
+    setup_records, at least for now; it would probably be best to do those too, just to squeeze every possibile bit of performance
+    out of this thing, but those indexes are comparatively trivial.
+    -->
+      <do>GLOBAL.idxCap_MC_MAPPINGS = 4</do>                   <!-- arkadin custom; ~24 rows -->
+      <do>GLOBAL.idxCap_MC_GENERATED_PROCS = 4</do>           <!-- arkadin custom; ~3003 procs -->
+      <do>GLOBAL.idxCap_MC_GLOBAL_PARAMETERS = 4</do>
+      <do>GLOBAL.idxCap_MC_RECORD_FINAL_PASS = 4</do>         <!-- arkadin custom; 117 record types (* events and passes) -->
+      <do>GLOBAL.idxCap_MC_CHILD_PARENT_MAP = 4</do><!-- ***** TODO: set programmatically -->
+      <do>GLOBAL.idxCap_MC_CHILD_COUNT = 4</do><!-- ***** TODO: set programmatically -->
+      <do>GLOBAL.idxCap_MC_PARENT_LOOKUP = 4</do><!-- ***** TODO: set programmatically -->
+      <do>GLOBAL.idxCap_MC_RECORD_COUNT = 4</do>               <!-- arkadin custom; 117 rows-->
+      <do>GLOBAL.idxCap_MC_OBJECT_ANCESTORS = 4</do><!-- ***** TODO: set programmatically -->
+      <do>GLOBAL.idxCap_MC_OBJECT_ANCESTORS_BY_OID = 4</do><!-- ***** TODO: set programmatically -->
+      <do>GLOBAL.idxCap_MC_RECORD_ERROR_COUNT = 4</do>         <!-- arkadin custom; 117 record types-->
+      <do>GLOBAL.idxCap_MC_HIERARCHY_REFERENCES = 4</do><!-- ***** TODO: set programmatically -->
+      <do>GLOBAL.idxCap_MC_PARENT_QUERIES = 4</do>                              <!-- arkadin custom; 117 record types -->
+      <do>GLOBAL.idxCap_MC_RATE_SCHEDULES = 4</do><!-- ***** TODO: set programmatically -->
+
+    <!-- Make sure that required directories exist -->
+    <c>Make sure that data directories have been created</c>
+    <create_directory>GLOBAL.input_directory</create_directory>
+    <create_directory>GLOBAL.sorted_directory</create_directory>
+    <create_directory>GLOBAL.error_directory</create_directory>
+    <create_directory>GLOBAL.table_directory</create_directory>
+    <create_directory>GLOBAL.migration_directory</create_directory>
+    <create_directory>GLOBAL.gen_directory</create_directory>
+    <create_directory>GLOBAL.gen_record_types_directory</create_directory>
+    <create_directory>GLOBAL.gen_interfaces_directory</create_directory>
+
+    <!-- Load the record type configuration -->
+    <load_procs_from_files>
+      <input_dir>GLOBAL.record_types_directory</input_dir>
+      <input_match>'*.xml'</input_match>
+      <error_count>TEMP.total_errors</error_count>
+    </load_procs_from_files>
+    <if>
+      <condition>TEMP.total_errors ne '0'</condition>
+      <then>
+        <fatal>'Could not parse ' ~ TEMP.total_errors ~ ' of the record type definition files in ' ~ GLOBAL.record_types_directory</fatal>
+      </then>
+    </if>
+
+    <!-- Tuning the work producer -->
+    <do>GLOBAL.producer_queue_length = 16</do>
+    <do>GLOBAL.produce_batch_size = 1000</do>
+
+    <!-- Block size of sequences pulled from the database -->
+    <do>GLOBAL.sequence_blocksize = 1000</do> <!-- FIXME test and increase sequence_blocksize and test missing t_current_id rows -->
+
+    <!-- Various behavior settings -->
+    <do>GLOBAL.clustered = '1'</do>
+    <do>GLOBAL.process_children_of_error = '1'</do>
+    <do>GLOBAL.log_level = 'all'</do>
+    <do>GLOBAL.direct_load = '0'</do>    <!-- Is the system offline so that we can direct load? -->
+
+    <if>
+      <condition>GLOBAL.target_login ne ''</condition>
+      <then>
+        <print>'using conversion preset target_login: server='~OBJECT(GLOBAL.target_login).database_server~', name='~OBJECT(GLOBAL.target_login).database_name~', type='~ OBJECT(GLOBAL.target_login).database_type</print>
+      </then>
+      <condition>GLOBAL.db_type ne '' and GLOBAL.db_server ne '' and GLOBAL.db_name ne '' and GLOBAL.db_user ne '' and GLOBAL.db_password ne ''</condition>
+      <then>
+        <spawn>
+          <object_type>'LOGIN'</object_type>
+          <object_id>GLOBAL.target_login</object_id>
+        </spawn>
+        <index_insert>
+          <index>'GLOBAL_OBJECTS'</index>
+          <field name="object_id">GLOBAL.target_login</field>
+        </index_insert>
+
+        <do>OBJECT(GLOBAL.target_login).database_type = GLOBAL.db_type</do>
+        <do>OBJECT(GLOBAL.target_login).database_server = GLOBAL.db_server</do>
+        <do>OBJECT(GLOBAL.target_login).database_name = GLOBAL.db_name</do>
+        <do>OBJECT(GLOBAL.target_login).database_user = GLOBAL.db_user</do>
+        <do>OBJECT(GLOBAL.target_login).database_password = GLOBAL.db_password</do>
+
+        <do>OBJECT(GLOBAL.target_login).database_log_level='debug'</do>
+
+        <print>'using conversion target_login: server='~OBJECT(GLOBAL.target_login).database_server~', name='~OBJECT(GLOBAL.target_login).database_name~', user='~ OBJECT(GLOBAL.target_login).database_user~', type='~ OBJECT(GLOBAL.target_login).database_type</print>
+      </then>
+    </if>
+  </initialize>
+
+  <!-- TODO: date_convert should take the formats as elements not attributes, so they can be variable -->
+  <initialize namespace="global" priority="1">
+    <!-- This happens after the default databases.xml init block -->
+    <if>
+      <condition>OBJECT(GLOBAL.target_login).database_type eq 'oracle'</condition>
+      <then>
+        <do>GLOBAL.global_date_format = 'YYYYMMDDHH24MISS'</do>
+        <do>GLOBAL.dotnet_date_format = 'yyyyMMddHHmmss'</do>
+        <do>GLOBAL.maxdate = '20380101000000'</do>
+        <do>GLOBAL.earlydate = '20100101000000'</do>
+      </then>
+      <else>
+        <do>GLOBAL.global_date_format = 'YYYY-MM-DD HH24:MI:SS'</do>
+        <do>GLOBAL.dotnet_date_format = 'yyyy-MM-dd HH:mm:ss'</do>
+        <do>GLOBAL.maxdate = '2038-01-01 00:00:00'</do>
+        <do>GLOBAL.earlydate = '2010-01-01 00:00:00'</do>
+      </else>
+    </if>
+    <print>'maxdate='~GLOBAL.maxdate</print>
+
+    <if>
+      <condition>OBJECT(GLOBAL.target_login).database_type eq 'oracle'</condition>
+      <then>
+        <date_convert>
+          <from format='yyyyMMddHHmmss'>GLOBAL.mvm_startup_date</from>
+          <to format='yyyyMMdd'>GLOBAL.mvm_startup_day</to>
+        </date_convert>
+        <date_convert>
+          <from format='yyyyMMdd'>GLOBAL.mvm_startup_day</from>
+          <to format='yyyyMMddHHmmss'>GLOBAL.mvm_startup_day</to>
+        </date_convert>
+        <do>GLOBAL.dbdate = "to_date('" ~ GLOBAL.mvm_startup_date ~ "', '" ~ GLOBAL.global_date_format ~ "')"</do>
+      </then>
+      <else>
+        <date_convert>
+          <from format='yyyy-MM-dd HH:mm:ss.fff'>GLOBAL.mvm_startup_date</from>
+          <to format='yyyy-MM-dd'>GLOBAL.mvm_startup_day</to>
+        </date_convert>
+        <date_convert>
+          <from format='yyyy-MM-dd'>GLOBAL.mvm_startup_day</from>
+          <to format='yyyy-MM-dd HH:mm:ss'>GLOBAL.mvm_startup_day</to>
+        </date_convert>
+        <do>GLOBAL.dbdate = "convert(datetime, '" ~ GLOBAL.mvm_startup_date ~ "')"</do>
+      </else>
+    </if>
+    <print>'Startup_date: ' ~ GLOBAL.mvm_startup_date ~ ', startup_day: ' ~ GLOBAL.mvm_startup_day ~ ', dbdate: ' ~ GLOBAL.dbdate ~ ', maxdate: ' ~ GLOBAL.maxdate</print>
+  </initialize>
+
+  <!-- Set up the logical name for the database -->
+  <do>OBJECT(GLOBAL.target_login).database_logical_name = 'NetMeter'</do>
+</proc>
+
+<proc name='mc_map_reduce'>
+  <param name='producer_proc' />
+  <param name='consumer_proc' />
+  <param name='reducer_proc' />
+
+  <if>
+    <condition>GLOBAL.clustered eq ''</condition>
+    <then>
+      <print>'Map/reduce does nothing when not clustered'</print>
+    </then>
+    <else>
+      <map_reduce>
+        <producer_queue_length>GLOBAL.producer_queue_length</producer_queue_length>
+        <producer_proc>
+          <name>TEMP.producer_proc</name>
+        </producer_proc>
+        <consumer_proc>
+          <name>TEMP.consumer_proc</name>
+          <include_object_fields_in_output>1</include_object_fields_in_output>
+        </consumer_proc>
+        <reducer_proc>
+          <name>TEMP.reducer_proc</name>
+        </reducer_proc>
+      </map_reduce>
+    </else>
+  </if>
+</proc>
+
+<!-- 
+Added by TCF September 2014 
+Note that these are new modules I added to MVM, so make sure you have the revised version
+of MVM's mvm.exe before calling these procs!!
+-->
+<proc name='print_internals_ext'>
+    <if>
+        <condition>GLOBAL.benchmark Eq 'y'</condition>
+        <then>
+            <get_server_data>
+                <memory>y</memory>
+                <index>y</index>
+                <buffers>y</buffers>
+                <objects>y</objects>
+                <output>TEMP.foo</output>
+            </get_server_data>
+            <print>TEMP.foo</print>
+        </then>
+    </if>
+</proc>
+
+<proc name='print_internals'>
+    <if>
+        <condition>GLOBAL.benchmark Eq 'y'</condition>
+        <then>
+            <get_server_data>
+                <memory>y</memory>
+                <index>n</index>
+                <buffers>n</buffers>
+                <objects>n</objects>
+                <output>TEMP.foo</output>
+            </get_server_data>
+            <print>TEMP.foo</print>
+        </then>
+    </if>
+</proc>
+
+<proc name='set_delimiters'>
+  <if>
+    <condition>GLOBAL.field_delim eq ''</condition>
+    <then>
+      <do>GLOBAL.field_delim = '`|'</do>
+    </then>
+  </if>
+  <if>
+    <condition>GLOBAL.record_delim eq ''</condition>
+    <then>
+      <do>GLOBAL.record_delim = '&#60;&#x0d;&#x0a;'</do>
+    </then>
+  </if>
+
+  <!--
+  Addition by TCF June 2014.
+  Encountering an odd behavior, not sure if this environment-specific or not. When running MC in 
+  one environment, when it goes to parse the input file it is not recognizing the carriage return
+  character (Char(13), or &#x0d;) from the data. So it errors out when it tries to use a delimiter
+  that includes the carriage return character, i.e. carriage return-linefeed (the character sequence
+  [13,10]). This is just a hack to deal with that issue.
+  -->
+  <if>
+    <condition>GLOBAL.cr Eq 'n'</condition>
+    <then>
+        <do>GLOBAL.record_delim_crlf_issue = '<![CDATA[&#60;&#x0a;]]>'</do>
+    </then>
+    <else>
+        <do>GLOBAL.record_delim_crlf_issue = '&#60;&#x0d;&#x0a;'</do>
+    </else>
+  </if>  
+    
+  <!-- 
+  Modification by TCF May 2014.
+  The function interpolate_escapes is not supported in more recent versions
+  of MVM. Everything seems to work ok without them, so I am commenting the
+  calls here.
+  -->
+  <!--<do>GLOBAL.field_delim = interpolate_escapes(GLOBAL.field_delim)</do>
+  <do>GLOBAL.record_delim = interpolate_escapes(GLOBAL.record_delim)</do>-->
+  <do>GLOBAL.escaped_field_delim = xml_encode(GLOBAL.field_delim)</do>
+  <do>GLOBAL.escaped_record_delim = xml_encode(GLOBAL.record_delim)</do>
+  <!-- 
+  Added by TCF May 2014.
+  There is a bug in BCP where you cannot load from Unicode formatted files
+  when using a Format File (it picks up the BOM and tries to append it to the
+  first record in the first row). For some reason, this is not an issue when 
+  you bypass the Format File and just pass your file format and delimiter
+  parameters direct to the command line. Anyway, when MVM picks up the 
+  record_delim variable-even escaped_record_delim-it is writing the carriage
+  return to the BCP command line command, rather than "\n". So I am adding this
+  variable to bypass that issue. Note this issue could also impact field_delim, 
+  e.g. of you wanted to pass "\t" as a delimiter; have not tested for that.
+  TODO: figure out how to deal with this in a better way, such that you can pass
+  the value in as a configuration parameter.
+  -->
+  <do>GLOBAL.cdata_record_delim = '<![CDATA[<\n]]>'</do>
+
+  <!--
+  The internal delimiter is used in _mc_sort_key. We prepend a tab to the user-
+  configured delimiter so that spawned child objects should always sort before
+  subsequent child objects.
+  TODO: make the internal sort key completely structural
+  -->
+  <do>GLOBAL.internal_escaped_delim = '&#x09;' ~ GLOBAL.escaped_field_delim</do>
+</proc>
+
+</procs>

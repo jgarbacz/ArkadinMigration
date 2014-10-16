@@ -1,0 +1,26 @@
+<proc name="pass_write_9">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'id_site'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'mc/t_localized_site'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_site_user.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="nm_login">OBJECT.nm_login</field>
+      <field name="id_site">OBJECT.id_site</field>
+      <field name="id_profile">OBJECT.id_profile</field>
+    </data>
+  </print_record>
+</proc>

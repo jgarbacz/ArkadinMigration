@@ -1,0 +1,399 @@
+<procs>
+
+<proc name="sort_input">
+  <param name="phase" />
+  <param name="stage" />
+
+  <!--
+  <c>Determine whether we need to re-process the input files</c>
+  <do>TEMP.need_to_reprocess = '1'</do>
+  <do>TEMP.migfiles = GLOBAL.migration_directory ~ GLOBAL.path_separator ~ 'migration_input_files.txt'</do>
+  <file_exists>
+    <input>TEMP.migfiles</input>
+    <output>TEMP.havemigfiles</output>
+  </file_exists>
+  <if>
+    <condition>TEMP.havemigfiles eq '1'</condition>
+    <then>
+      <do>TEMP.need_to_reprocess = '0'</do>
+      <do>TEMP.filecount = 0</do>
+      <file_select>
+        <input_file>TEMP.migfiles</input_file>
+        <format field_delim=',' trim='true'>
+          <field name='filename' length='256'/>
+          <field name='size' length='10'/>
+          <field name='wtime' length='40'/>
+        </format>
+        <cursor>TEMP.migcsr</cursor>
+        <loop>
+          <file_info>
+            <filename>OBJECT(TEMP.migcsr).filename</filename>
+            <size>TEMP.current_size</size>
+            <wtime>TEMP.current_wtime</wtime>
+          </file_info>
+          <if>
+            <condition>
+              TEMP.current_wtime eq '' or
+              TEMP.current_wtime ne OBJECT(TEMP.migcsr).wtime or
+              TEMP.current_size NE OBJECT(TEMP.migcsr).size
+            </condition>
+            <then>
+              <do>TEMP.need_to_reprocess = '1'</do>
+            </then>
+          </if>
+          <do>TEMP.filecount += 1</do>
+        </loop>
+      </file_select>
+      <if>
+        <condition>TEMP.filecount NE TEMP.datafile_count</condition>
+        <then>
+          <do>TEMP.need_to_reprocess = '1'</do>
+        </then>
+      </if>
+    </then>
+  </if>
+  -->
+
+  <!-- Clear indexes before starting the stage -->
+  <index_clear>
+    <index>'MC_CHILD_PARENT_MAP'</index>
+  </index_clear>
+  <index_clear>
+    <index>'MC_CHILD_COUNT'</index>
+  </index_clear>
+  <index_clear>
+    <index>'MC_PARENT_LOOKUP'</index>
+  </index_clear>
+
+  <do>TEMP.need_to_reprocess = '1'</do>  <!-- TODO: make better decisions about whether we need to reprocess input files-->
+  <if>
+    <condition>TEMP.need_to_reprocess eq '1'</condition>
+    <then>
+      <print>'Pre-processing input data files, phase [' ~ TEMP.phase ~ '], stage [' ~ TEMP.stage ~ ']'</print>
+
+      <!-- Tell each child to close the inbox files for this stage -->
+      <do>TEMP.my_batch_id = ''</do>
+      <slave_node_id_select>
+        <cursor>TEMP.slavecsr</cursor>
+        <loop>
+          <remote_queue_proc>
+            <name>'merge_stage_input_files'</name>
+            <process_id>OBJECT(TEMP.slavecsr).node_id</process_id>
+            <batch_id>TEMP.my_batch_id</batch_id>
+            <param name='phase'>TEMP.phase</param>
+            <param name='stage'>TEMP.stage</param>
+            <param name='which'>'first'</param>
+          </remote_queue_proc>
+        </loop>
+      </slave_node_id_select>
+      <wait_for_batch_complete>TEMP.my_batch_id</wait_for_batch_complete>
+
+      <!-- Build a map of children to their parents -->
+      <if>
+        <condition>GLOBAL.clustered eq ''</condition>
+        <then>
+          <warning>'Map/reduce does nothing when not clustered!'</warning>
+        </then>
+      </if>
+      <stopwatch name='cpmap_stopwatch' ms='TEMP.ms' total_ms='GLOBAL.total_ms'>
+        <map_reduce>
+          <producer_queue_length>GLOBAL.producer_queue_length</producer_queue_length>
+          <producer_proc>
+            <name>'input_file_producer'</name>
+            <param name='phase'>TEMP.phase</param>
+            <param name='stage'>TEMP.stage</param>
+            <param name='print'>1</param>
+          </producer_proc>
+          <consumer_proc>
+            <name>'indexing_consumer'</name>
+            <include_object_fields_in_output>1</include_object_fields_in_output>
+          </consumer_proc>
+          <reducer_proc>
+            <name>'indexing_reducer'</name>
+          </reducer_proc>
+        </map_reduce>
+      </stopwatch>
+      <print>'Child-parent map for phase ' ~ TEMP.phase ~ ', stage ' ~ TEMP.stage ~ ' took ' ~ TEMP.ms</print>
+
+      <!-- Push the full child/parent map down to the kids -->
+      <slave_node_id_select>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <push_index>
+            <process_id>OBJECT(TEMP.csr).node_id</process_id>
+            <clear_source>0</clear_source>
+            <source>
+              <index>'MC_CHILD_PARENT_MAP'</index>
+            </source>
+            <target>
+              <index>'MC_CHILD_PARENT_MAP'</index>
+            </target>
+          </push_index>
+          <push_index>
+            <process_id>OBJECT(TEMP.csr).node_id</process_id>
+            <clear_source>0</clear_source>
+            <source>
+              <index>'MC_PARENT_LOOKUP'</index>
+            </source>
+            <target>
+              <index>'MC_PARENT_LOOKUP'</index>
+            </target>
+          </push_index>
+        </loop>
+      </slave_node_id_select>
+
+      <!-- Next we construct an ancestor-order sort key for each record -->
+      <stopwatch name='sortkey_stopwatch' ms='TEMP.ms' total_ms='GLOBAL.total_ms'>
+        <map_reduce>
+          <producer_queue_length>GLOBAL.producer_queue_length</producer_queue_length>
+          <producer_proc>
+            <name>'input_file_producer'</name>
+            <param name='phase'>TEMP.phase</param>
+            <param name='stage'>TEMP.stage</param>
+            <param name='print'>0</param>
+          </producer_proc>
+          <consumer_proc>
+            <name>'sorting_consumer'</name>
+            <include_object_fields_in_output>1</include_object_fields_in_output>
+            <param name='phase'>TEMP.phase</param>
+            <param name='stage'>TEMP.stage</param>
+          </consumer_proc>
+          <reducer_proc>
+            <name>'sorting_reducer'</name>
+          </reducer_proc>
+        </map_reduce>
+      </stopwatch>
+      <print>'Sort keys for phase ' ~ TEMP.phase ~ ', stage ' ~ TEMP.stage ~ ' took ' ~ TEMP.ms</print>
+
+      <!-- Now tell each child to merge its files into one for us to re-merge -->
+      <do>TEMP.my_batch_id = ''</do>
+      <slave_node_id_select>
+        <cursor>TEMP.slavecsr</cursor>
+        <loop>
+          <remote_queue_proc>
+            <name>'merge_sorted_files'</name>
+            <process_id>OBJECT(TEMP.slavecsr).node_id</process_id>
+            <batch_id>TEMP.my_batch_id</batch_id>
+            <param name='phase'>TEMP.phase</param>
+            <param name='stage'>TEMP.stage</param>
+          </remote_queue_proc>
+        </loop>
+      </slave_node_id_select>
+
+      <wait_for_batch_complete>TEMP.my_batch_id</wait_for_batch_complete>
+    </then>
+    <else>
+      <print>"Skipping preprocessing of input files since they haven't changed"</print>
+    </else>
+  </if>
+
+  <!--
+  <index_select_keys>
+    <index>'MC_CHILD_PARENT_MAP'</index>
+    <cursor>TEMP.pccsr</cursor>
+    <loop>
+      <index_select>
+        <index>'MC_CHILD_PARENT_MAP'</index>
+        <field name='child_keys'>OBJECT(TEMP.pccsr).child_keys</field>
+        <field name='child_namespace'>OBJECT(TEMP.pccsr).child_namespace</field>
+        <cursor>TEMP.pccsr2</cursor>
+        <loop>
+          <print>TEMP.stage ~ ' CPMAP keys: ' ~ OBJECT(TEMP.pccsr2).child_keys ~ ' and ' ~ OBJECT(TEMP.pccsr2).child_namespace ~ ', parent: ' ~ OBJECT(TEMP.pccsr2).parent_keys ~ ' with ' ~ OBJECT(TEMP.pccsr2).parent_namespace</print>
+        </loop>
+      </index_select>
+    </loop>
+  </index_select_keys>
+  -->
+
+  <!-- TODO: finish stuff with input file status
+  <c>Write the status of the current set of input files</c>
+  <index_select_keys>
+    <index>'MC_DATAFILES'</index>
+    <cursor>TEMP.dfcsr</cursor>
+    <loop>
+      <do>OBJECT.filename = OBJECT(TEMP.dfcsr).filename</do>
+      <file_info>
+        <filename>OBJECT(TEMP.dfcsr).filename</filename>
+        <size>OBJECT.size</size>
+        <wtime>OBJECT.wtime</wtime>
+      </file_info>
+      <call_proc_for_current_object>
+        <name>'print_file_info'</name>
+        <param name='filename'>TEMP.migfiles</param>
+      </call_proc_for_current_object>
+    </loop>
+  </index_select_keys>
+  -->
+
+</proc>
+
+<!-- This proc writes lines to the status file -->
+<proc name='print_file_info'>
+  <param name='filename' />
+  <print_file>
+    <file>TEMP.filename</file>
+    <format field_delim=',' trim='true'>
+      <field name='filename' length='256'/>
+      <field name='size' length='10'/>
+      <field name='wtime' length='40'/>
+    </format>
+  </print_file>
+</proc>
+
+<proc name='input_file_producer'>
+  <param name='phase' />
+  <param name='stage' />
+  <param name='print' />
+
+  <index_select>
+    <index>'MC_STAGE_INPUT_RECORDS'</index>
+    <field name='phase'>TEMP.phase</field>
+    <field name='stage'>TEMP.stage</field>
+    <cursor>TEMP.rcsr</cursor>
+    <loop>
+      <!-- FIXME: chunk the files based on some configurable size -->
+      <!-- First look for input flat files -->
+      <index_select>
+        <index>'MC_DATAFILES'</index>
+        <field name='record_type'>OBJECT(TEMP.rcsr).record_type</field>
+        <cursor>TEMP.dfcsr</cursor>
+        <loop>
+          <do>OBJECT(TEMP.dfcsr).start_offset = 0</do>
+          <do>OBJECT(TEMP.dfcsr).file_type = 'file'</do>
+          <file_info>
+            <filename>OBJECT(TEMP.dfcsr).filename</filename>
+            <size>OBJECT(TEMP.dfcsr).length</size>
+          </file_info>
+          <if>
+            <condition>TEMP.print eq '1'</condition>
+            <then>
+              <print>'Scanning input flat file ' ~ OBJECT(TEMP.dfcsr).filename</print>
+            </then>
+          </if>
+          <pipe_row>TEMP.dfcsr</pipe_row>
+        </loop>
+      </index_select>
+	  
+	  <!-- Now look for input object files -->
+      <glob_select>
+        <glob>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ TEMP.phase ~ '.' ~ TEMP.stage ~ '.' ~ OBJECT(TEMP.rcsr).record_type ~ '.' ~ GLOBAL.input_filename ~ '*'</glob>
+        <cursor_value>'filename'</cursor_value>
+        <cursor>TEMP.filecsr</cursor>
+        <loop>
+          <do>OBJECT(TEMP.filecsr).start_offset = 0</do>
+          <do>OBJECT(TEMP.filecsr).file_type = 'kv'</do>
+          <do>OBJECT(TEMP.filecsr).record_type = OBJECT(TEMP.rcsr).record_type</do>
+          <file_info>
+            <filename>OBJECT(TEMP.filecsr).filename</filename>
+            <size>OBJECT(TEMP.filecsr).length</size>
+          </file_info>
+          <if>
+            <condition>TEMP.print eq '1'</condition>
+            <then>
+              <print>'Scanning input object file ' ~ OBJECT(TEMP.filecsr).filename</print>
+            </then>
+          </if>
+          <pipe_row>TEMP.filecsr</pipe_row>
+        </loop>
+      </glob_select>
+    </loop>
+  </index_select>
+  
+  <call_proc_for_current_object>
+	<name>'print_internals_ext'</name>
+  </call_proc_for_current_object>
+</proc>
+
+<proc name='indexing_consumer'>
+  <call_dynamic_proc_for_current_object>
+    <name>'indexing_consumer_' ~ OBJECT.file_type ~ '_' ~ OBJECT.record_type</name>
+  </call_dynamic_proc_for_current_object>
+
+  <!-- Push our results back to the parent index -->
+  <push_index>
+    <process_id>GLOBAL.master_id</process_id>
+    <clear_source>1</clear_source>
+    <source>
+      <index>'MC_CHILD_PARENT_MAP'</index>
+    </source>
+    <target>
+      <index>'MC_CHILD_PARENT_MAP'</index>
+    </target>
+  </push_index>
+  <push_index>
+    <process_id>GLOBAL.master_id</process_id>
+    <clear_source>1</clear_source>
+    <source>
+      <index>'MC_CHILD_COUNT'</index>
+    </source>
+    <target>
+      <index>'MC_CHILD_COUNT'</index>
+    </target>
+  </push_index>
+  <push_index>
+    <process_id>GLOBAL.master_id</process_id>
+    <clear_source>1</clear_source>
+    <source>
+      <index>'MC_PARENT_LOOKUP'</index>
+    </source>
+    <target>
+      <index>'MC_PARENT_LOOKUP'</index>
+    </target>
+  </push_index>
+  <push_index>
+    <process_id>GLOBAL.master_id</process_id>
+    <clear_source>1</clear_source>
+    <source>
+      <index>'MC_RECORD_COUNT'</index>
+    </source>
+    <target>
+      <index>'MC_RECORD_COUNT'</index>
+    </target>
+  </push_index>
+</proc>
+
+<proc name='indexing_reducer'>
+  <!-- Reduces the results from the indexing consumer -->
+</proc>
+
+<proc name='sorting_consumer'>
+  <param name='phase' />
+  <param name='stage' />
+
+  <call_dynamic_proc_for_current_object>
+    <name>'sorting_consumer_' ~ OBJECT.file_type ~ '_' ~ OBJECT.record_type</name>
+    <param name='phase'>TEMP.phase</param>
+    <param name='stage'>TEMP.stage</param>
+  </call_dynamic_proc_for_current_object>
+</proc>
+
+<proc name='sorting_reducer'>
+  <!-- Reduces the results from the sorting consumer -->
+</proc>
+
+<proc name='merge_sorted_files'>
+  <param name='phase' />
+  <param name='stage' />
+
+  <print>'MEMFLAGSTART: merge_sorted_files'</print>
+  
+  <!-- Merges the results from the sorting consumer -->
+  <sorted_object_file_close>
+    <file>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ TEMP.phase ~ '.' ~ TEMP.stage ~ '.' ~ GLOBAL.sort_filename ~ GLOBAL.node_id</file>
+  </sorted_object_file_close>
+  <!--<file_delete>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ TEMP.phase ~ '.' ~ TEMP.stage ~ '.' ~ GLOBAL.sort_filename ~ GLOBAL.node_id</file_delete>-->
+
+  <print>'MEMFLAGEND: merge_sorted_files'</print>
+
+  <index_clear>
+    <index>'MC_CHILD_PARENT_MAP'</index>
+  </index_clear>
+  <index_clear>
+    <index>'MC_CHILD_COUNT'</index>
+  </index_clear>
+  <index_clear>
+    <index>'MC_PARENT_LOOKUP'</index>
+  </index_clear>
+</proc>
+
+</procs>

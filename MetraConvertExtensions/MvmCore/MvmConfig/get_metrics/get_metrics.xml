@@ -1,0 +1,89 @@
+﻿<procs>
+  <proc name='get_metrics'>
+
+    <initialize>
+      <c>Setup the minimal log level to print on our console logger</c>
+      <spawn>
+        <object_type>'LOGGER'</object_type>
+        <object_id>GLOBAL.logger</object_id>
+      </spawn>
+      <do>OBJECT(GLOBAL.logger).log_type='console'</do>
+      <do>OBJECT(GLOBAL.logger).log_level='info'</do>
+      <spawn>
+        <object_type>'LOGIN'</object_type>
+        <object_id>GLOBAL.target_login</object_id>
+      </spawn>
+
+      <do>GLOBAL.null_value = 'NULL'</do>
+      <do>GLOBAL.unset_value = 'UNSET'</do>
+      <do>GLOBAL.unset_force_value = 'UNSET_FORCE'</do>
+      <do>OBJECT(GLOBAL.target_login).database_type='oracle'</do>
+      <do>OBJECT(GLOBAL.target_login).database_name='DEV-RAC1 '</do>
+      <do>OBJECT(GLOBAL.target_login).database_user='perf4_na'</do>
+      <do>OBJECT(GLOBAL.target_login).database_password='perf4_na'</do>
+      <do>OBJECT(GLOBAL.target_login).database_log_level='debug'</do>
+
+      <do>OBJECT(GLOBAL.target_login).database_type='sql'</do>
+      <do>OBJECT(GLOBAL.target_login).database_server='pmnaprddb01'</do>
+      <do>OBJECT(GLOBAL.target_login).database_name='netmeter'</do>
+      <do>OBJECT(GLOBAL.target_login).database_user='sa'</do>
+      <do>OBJECT(GLOBAL.target_login).database_password='MetraTech1'</do>
+
+      <print>'DB SET IN get_metrics'</print>
+
+      <!--<do>OBJECT(GLOBAL.target_login).database_type='sql'</do>
+      <do>OBJECT(GLOBAL.target_login).database_server='VMBAASTEST03'</do>
+      <do>OBJECT(GLOBAL.target_login).database_name='coronetmeter'</do>
+      <do>OBJECT(GLOBAL.target_login).database_user='sa'</do>
+      <do>OBJECT(GLOBAL.target_login).database_password='MetraTech1'</do>-->
+    </initialize>
+    
+    <get_metratech_dir>TEMP.metratech_dir</get_metratech_dir>
+    <if><condition>GLOBAL.project eq ''</condition>
+      <then>
+        <throw>"project must be passed in to generate DB metrics. (add -project='[project]' to the command line)"</throw>
+      </then>
+  </if>
+
+    <do>TEMP.workbook=TEMP.metratech_dir~"\"~GLOBAL.project~".xls"</do>
+
+    <db_execute_dynamic>
+      <login_object>GLOBAL.target_login</login_object>
+      <statement>
+        "begin
+        exec mtsp_snapshot_metrics
+        end"
+      </statement>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute_dynamic>
+    
+    <db_select_dynamic>
+      <login_object>GLOBAL.target_login</login_object>
+      <query>"select * from MT_AGGREGATE_METRICS"</query>
+      <cursor>TEMP.metrics_csr</cursor>
+      <run>
+        <call_proc_for_current_object>
+          <name>'xl_write_cursor_to_worksheet'</name>
+          <param name='cursor'>TEMP.metrics_csr</param>
+          <param name='workbook'>TEMP.workbook</param>
+          <param name='worksheet'>"Metrics"</param>
+        </call_proc_for_current_object>
+      </run>
+    </db_select_dynamic>
+
+    <db_select_dynamic>
+      <login_object>GLOBAL.target_login</login_object>
+      <query>"select * from MT_SPACE_USED"</query>
+      <cursor>TEMP.space_used_csr</cursor>
+      <run>
+        <call_proc_for_current_object>
+          <name>'xl_write_cursor_to_worksheet'</name>
+          <param name='cursor'>TEMP.space_used_csr</param>
+          <param name='workbook'>TEMP.workbook</param>
+          <param name='worksheet'>"Space Used"</param>
+        </call_proc_for_current_object>
+      </run>
+    </db_select_dynamic>
+  </proc>
+
+</procs>

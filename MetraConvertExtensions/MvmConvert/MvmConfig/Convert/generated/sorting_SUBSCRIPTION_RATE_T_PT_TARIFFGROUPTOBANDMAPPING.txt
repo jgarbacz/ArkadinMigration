@@ -1,0 +1,85 @@
+<proc name="sorting_SUBSCRIPTION_RATE_T_PT_TARIFFGROUPTOBANDMAPPING">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="phase" />
+  <param name="stage" />
+  <do>TEMP.counter = 1</do>
+  <do>OBJECT._mc_sort_key = '' ~ OBJECT.parent_nm_login ~ "	`|" ~ OBJECT.parent_nm_space ~ "	`|" ~ OBJECT.id_po ~ "	`|" ~ OBJECT.id_pi_template ~ "	`|" ~ OBJECT.id_paramtable ~ "	`|" ~ lpad(OBJECT._mc_record_offset, 11, "0")</do>
+  <if>
+    <condition>OBJECT.parent_nm_login ne '' and OBJECT.parent_nm_space ne '' and OBJECT.id_po ne ''</condition>
+    <then>
+      <do>TEMP.ccount = index_count('MC_CHILD_PARENT_MAP', child_keys=&gt;OBJECT.parent_nm_login ~ "	`|" ~ OBJECT.parent_nm_space ~ "	`|" ~ OBJECT.id_po ~ "	`|" ~ OBJECT.id_pi_template ~ "	`|" ~ OBJECT.id_paramtable ~ "	`|" ~ lpad(OBJECT._mc_record_offset, 11, "0"), child_namespace=&gt;'SUBSCRIPTION_RATE_T_PT_TARIFFGROUPTOBANDMAPPING')</do>
+      <if>
+        <condition>TEMP.ccount GT 1</condition>
+        <then>
+          <do>OBJECT._mc_error ~= 'Duplicate object found: ' ~ OBJECT.parent_nm_login ~ "	`|" ~ OBJECT.parent_nm_space ~ "	`|" ~ OBJECT.id_po ~ "	`|" ~ OBJECT.id_pi_template ~ "	`|" ~ OBJECT.id_paramtable ~ "	`|" ~ lpad(OBJECT._mc_record_offset, 11, "0") ~ ' for SUBSCRIPTION_RATE_T_PT_TARIFFGROUPTOBANDMAPPING'</do>
+        </then>
+      </if>
+      <do>TEMP.child_keys = OBJECT.parent_nm_login ~ "	`|" ~ OBJECT.parent_nm_space ~ "	`|" ~ OBJECT.id_po</do>
+      <do>TEMP.child_namespace = 'SUBSCRIPTION'</do>
+      <do>OBJECT._mc_parent_key = OBJECT.parent_nm_login ~ "	`|" ~ OBJECT.parent_nm_space ~ "	`|" ~ OBJECT.id_po</do>
+      <do>OBJECT._mc_sort_key = OBJECT.parent_nm_login ~ "	`|" ~ OBJECT.parent_nm_space ~ "	`|" ~ OBJECT.id_po ~ '	`|' ~ OBJECT._mc_sort_key</do>
+      <do>TEMP.continue = '1'</do>
+      <do>TEMP.limit = 1</do>
+      <while>
+        <condition>TEMP.continue ne ''</condition>
+        <loop>
+          <do>TEMP.limit += 1</do>
+          <if>
+            <condition>TEMP.limit GT 20</condition>
+            <then>
+              <fatal>'Circular ancestor chain detected for child: ' ~ TEMP.child_keys</fatal>
+            </then>
+          </if>
+          <!-- FIXME: need to start using MC_CHILD_COUNT in here -->
+          <index_get>
+            <index>'MC_CHILD_PARENT_MAP'</index>
+            <field name="child_keys">TEMP.child_keys</field>
+            <field name="child_namespace">TEMP.child_namespace</field>
+            <field name="child_sort_key">TEMP.child_sort_key</field>
+            <field name="parent_keys">TEMP.parent_keys</field>
+            <field name="parent_namespace">TEMP.parent_namespace</field>
+            <then>
+              <do>TEMP.counter += 1</do>
+              <do>OBJECT._mc_sort_key = TEMP.parent_keys ~ '	`|' ~ TEMP.child_sort_key ~ OBJECT._mc_sort_key</do>
+              <do>TEMP.child_keys = TEMP.parent_keys</do>
+              <do>TEMP.child_namespace = TEMP.parent_namespace</do>
+            </then>
+            <else>
+              <do>TEMP.continue = ''</do>
+              <!-- Need to determine if the parent is present in our files or not -->
+              <index_get>
+                <index>'MC_PARENT_LOOKUP'</index>
+                <field name="parent_keys">TEMP.child_keys</field>
+                <field name="parent_namespace">TEMP.child_namespace</field>
+                <then>
+                  <do>TEMP.counter += 1</do>
+                </then>
+                <else>
+                  <if>
+                    <condition>TEMP.counter eq '1'</condition>
+                    <then>
+                      <do>OBJECT._mc_unknown_parent = '1'</do>
+                    </then>
+                  </if>
+                </else>
+              </index_get>
+              <do>OBJECT._mc_level = TEMP.counter</do>
+            </else>
+          </index_get>
+        </loop>
+      </while>
+    </then>
+    <else>
+      <do>OBJECT._mc_level = 1</do>
+      <do>OBJECT._mc_parent_key = ''</do>
+    </else>
+  </if>
+  <do>OBJECT._mc_chunking_remove_from_end = 13</do>
+  <sorted_object_file_write>
+    <file>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ TEMP.phase ~ '.' ~ TEMP.stage ~ '.' ~ GLOBAL.sort_filename ~ GLOBAL.node_id</file>
+    <object_id>OBJECT.object_id</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+</proc>

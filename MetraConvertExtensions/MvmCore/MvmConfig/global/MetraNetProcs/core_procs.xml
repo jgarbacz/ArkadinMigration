@@ -1,0 +1,1131 @@
+<procs>
+
+  <proc name='filter_by_dbtype'>
+    <param name='name'/>
+    <param name='filter_out' mode='out'/>
+    <do>TEMP.filter_out = '0'</do>
+    <do>TEMP.db_type = OBJECT(GLOBAL.target_login).database_type</do>
+    <match>
+      <input>TEMP.name</input>
+      <regex>'_sql\.'</regex>
+      <success>TEMP.is_sql_only</success>
+    </match>
+    <match>
+      <input>TEMP.name</input>
+      <regex>'_oracle\.'</regex>
+      <success>TEMP.is_oracle_only</success>
+    </match>
+    <if>
+      <condition>TEMP.db_type eq 'sql' and TEMP.is_oracle_only eq '1'</condition>
+      <then>
+        <do>TEMP.filter_out = '1'</do>
+      </then>
+    </if>
+    <if>
+      <condition>TEMP.db_type eq 'oracle' and TEMP.is_sql_only eq '1'</condition>
+      <then>
+        <do>TEMP.filter_out = '1'</do>
+      </then>
+    </if>
+    <!--<debug>'name filter: ['~TEMP.name~'] has db_type of ['~TEMP.db_type~'] and filter out of ['~TEMP.filter_out~']'</debug>-->
+  </proc>
+
+  <proc name='do_md5'>
+    <param name='input'/>
+    <param name='output' mode='out'/>
+    <md5>
+      <input>TEMP.input</input>
+      <output>TEMP.output</output>
+    </md5>
+  </proc>
+
+  <proc name='insert_checksum_log'>
+    <param name='label'/>
+    <param name='name'/>
+    <param name='checksum'/>
+    <!--<db_execute_dynamic>
+      <login_object>GLOBAL.target_login</login_object>
+      <statement>
+        "begin
+        delete MVM_CHECKSUM_LOG where label = '"~TEMP.label~"' and name = '"~TEMP.name~"';
+        insert into MVM_CHECKSUM_LOG(label, name, checksum) values('"~TEMP.label~"', '"~TEMP.name~"', '"~TEMP.checksum~"');
+        end;"
+      </statement>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute_dynamic>-->
+    <db_execute_dynamic>
+      <login_object>GLOBAL.target_login</login_object>
+      <statement>"delete MVM_CHECKSUM_LOG where label = '"~TEMP.label~"' and name = '"~TEMP.name~"'"</statement>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute_dynamic>
+    <db_execute_dynamic>
+      <login_object>GLOBAL.target_login</login_object>
+      <statement>"insert into MVM_CHECKSUM_LOG(label, name, checksum) values('"~TEMP.label~"', '"~TEMP.name~"', '"~TEMP.checksum~"')"</statement>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute_dynamic>
+  </proc>
+
+  <proc name='clear_label_checksum_log'>
+    <param name='label'/>
+    <db_execute_dynamic>
+      <login_object>GLOBAL.target_login</login_object>
+      <statement>"delete MVM_CHECKSUM_LOG where label = '"~TEMP.label~"'"</statement>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute_dynamic>
+  </proc>
+
+  <proc name='add_script_to_db'>
+    <param name='input'/>
+    <param name='name'/>
+    <call_proc_for_current_object>
+      <name>'apply_script_to_db'</name>
+      <param name='input'>TEMP.input</param>
+      <param name='name'>TEMP.name</param>
+      <param name='do_tables'>'1'</param>
+    </call_proc_for_current_object>
+  </proc>
+
+  <proc name='change_script_in_db'>
+    <param name='input'/>
+    <param name='name'/>
+    <call_proc_for_current_object>
+      <name>'apply_script_to_db'</name>
+      <param name='input'>TEMP.input</param>
+      <param name='name'>TEMP.name</param>
+      <param name='do_tables'>'0'</param>
+    </call_proc_for_current_object>
+  </proc>
+
+  <proc name='apply_script_to_db'>
+    <param name='input'/>
+    <param name='name'/>
+    <param name='do_tables'/>
+
+    <to_lower>
+      <input>TEMP.input</input>
+      <output>TEMP.test_input</output>
+    </to_lower>
+    <do>TEMP.object_type = ''</do>
+    <do>TEMP.object_name = ''</do>
+    <do>TEMP.is_object = ''</do>
+
+    <match>
+      <input>TEMP.test_input</input>
+      <regex>'create or replace (\w+) (\w+) '</regex>
+      <success>TEMP.is_object</success>
+      <capture>TEMP.object_type</capture>
+      <capture>TEMP.object_name</capture>
+    </match>
+
+    <if>
+      <condition>TEMP.is_object eq '0'</condition>
+      <then>
+    <match>
+      <input>TEMP.test_input</input>
+      <regex>'create (\w+) (\w+) '</regex>
+      <success>TEMP.is_object</success>
+      <capture>TEMP.object_type</capture>
+      <capture>TEMP.object_name</capture>
+    </match>
+      </then>
+    </if>
+
+    <if>
+      <condition>TEMP.is_object eq '1' and (TEMP.object_type ne 'table' or TEMP.do_tables eq '1')</condition>
+      <then>
+        <info>'Dropping '~TEMP.object_type~' ['~TEMP.object_name~']'</info>
+        <db_execute_dynamic>
+          <login_object>GLOBAL.target_login</login_object>
+          <statement type='sql'>"if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].["~TEMP.object_name~"]'))
+            drop "~TEMP.object_type~" "~TEMP.object_name</statement>
+          <statement type='oracle'>
+            "drop "~TEMP.object_type~" "~TEMP.object_name
+          </statement>
+          <num_rows>TEMP.num_rows</num_rows>
+        </db_execute_dynamic>
+        <info>'Adding '~TEMP.object_type~' ['~TEMP.object_name~']'</info>
+      </then>
+    </if>
+
+    <if>
+      <condition>TEMP.object_type ne 'table' or TEMP.do_tables eq '1'</condition>
+      <then>
+        <if>
+          <condition>TEMP.is_object ne '1'</condition>
+          <then>
+            <info>'Running script ['~TEMP.name~']'</info>
+          </then>
+        </if>
+        <db_execute_dynamic>
+          <login_object>GLOBAL.target_login</login_object>
+          <statement>TEMP.input</statement>
+          <num_rows>TEMP.num_rows</num_rows>
+        </db_execute_dynamic>
+      </then>
+    </if>
+  </proc>
+
+
+  <proc name='synchronize'>
+    <param name='glob' default='""'/>
+    <param name='label' default='""'/>
+    <param name='checksum_proc' default='"do_md5"'/>
+    <param name='clean_label_proc' default='""'/>
+    <param name='add_label_proc' default='""'/>
+    <param name='add_all_proc' default='""'/>
+    <param name='add_changed_proc' default='""'/>
+    <param name='add_new_proc' default='""'/>
+    <param name='clean_changed_proc' default='""'/>
+    <param name='clean_all_proc' default='""'/>
+    <param name='filter_name_proc' default='""'/>
+
+    <info switch='log_sync'>
+      'synchronize: glob=['~TEMP.glob
+      ~'] label=['~TEMP.label
+      ~'] checksum_proc=['~TEMP.checksum_proc
+      ~'] clean_label_proc=['~TEMP.clean_label_proc
+      ~'] add_label_proc=['~TEMP.add_label_proc
+      ~'] add_all_proc=['~TEMP.add_all_proc
+      ~'] add_changed_proc=['~TEMP.add_changed_proc
+      ~'] add_new_proc=['~TEMP.add_new_proc
+      ~'] clean_changed_proc=['~TEMP.clean_changed_proc
+      ~'] clean_all_proc=['~TEMP.clean_all_proc
+      ~'] filter_name_proc=['~TEMP.filter_name_proc
+      ~']'</info>
+
+    <!--<do>TEMP.glob = 'D:\MetraTech\RMP\Extensions\*\MvmConfig\database\*\*.sql'</do>-->
+
+    <do>TEMP.full_checksum_string = ''</do>
+    <glob_select>
+      <glob>TEMP.glob</glob>
+      <cursor_value>'filename'</cursor_value>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <do>TEMP.filter_out = '0'</do>
+        <if>
+          <condition>TEMP.filter_name_proc ne ''</condition>
+          <then>
+            <info switch='log_sync'>'sync calling ['~TEMP.filter_name_proc~'] with name=['~OBJECT(TEMP.csr).filename~'] filter_out=['~TEMP.filter_out~']'</info>
+            <call_dynamic_proc_for_current_object>
+              <name>TEMP.filter_name_proc</name>
+              <param name='name'>OBJECT(TEMP.csr).filename</param>
+              <param name='filter_out'>TEMP.filter_out</param>
+            </call_dynamic_proc_for_current_object>
+          </then>
+        </if>
+        <if>
+          <condition>TEMP.filter_out ne '1'</condition>
+          <then>
+            <!--<info>'filename=['~OBJECT(TEMP.csr).filename~']'</info>-->
+            <read_text_file>
+              <file>OBJECT(TEMP.csr).filename</file>
+              <text>TEMP.filename_txt</text>
+            </read_text_file>
+            <info switch='log_sync'>'sync calling ['~TEMP.checksum_proc~'] with input=['~TEMP.filename_txt~'] output=['~TEMP.checksum~']'</info>
+            <call_proc_for_current_object>
+              <name>TEMP.checksum_proc</name>
+              <param name='input'>TEMP.filename_txt</param>
+              <param name='output'>TEMP.checksum</param>
+            </call_proc_for_current_object>
+            <do>TEMP.full_checksum_string = TEMP.full_checksum_string~'|'~TEMP.checksum</do>
+          </then>
+        </if>
+      </loop>
+    </glob_select>
+    <call_proc_for_current_object>
+      <name>'do_md5'</name>
+      <param name='input'>TEMP.full_checksum_string</param>
+      <param name='output'>TEMP.full_checksum</param>
+    </call_proc_for_current_object>
+
+    <run_once>
+      <define_memory_index>
+        <index>'LABEL_CHECKSUM_CACHE'</index>
+        <key_field>'label'</key_field>
+        <field>'checksum'</field>
+      </define_memory_index>
+
+      <define_memory_index>
+        <index>'LABEL_NAME_CHECKSUM_CACHE'</index>
+        <key_field>'label'</key_field>
+        <key_field>'name'</key_field>
+        <field>'checksum'</field>
+      </define_memory_index>
+
+    </run_once>
+    <run_once>
+      <info switch='log_sync'>'Reading MVM_CHECKSUM_LOG for database_name=['~OBJECT(GLOBAL.target_login).database_name~']'</info>
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query type='oracle'>"select count(*) table_exists from user_tables where table_name = 'MVM_CHECKSUM_LOG'"</query>
+        <query type='sql'>"select count(*) table_exists from sysobjects where name='MVM_CHECKSUM_LOG'"</query>
+        <cursor>TEMP.checksum_tbl_csr</cursor>
+        <then>
+          <if>
+            <condition>OBJECT(TEMP.checksum_tbl_csr).table_exists</condition>
+            <then>
+
+
+              <db_select>
+                <login_object>GLOBAL.target_login</login_object>
+                <query>"select * from MVM_CHECKSUM_LOG a where a.name = 'label_checksum'"</query>
+                <cursor>TEMP.label_checksum_csr</cursor>
+                <loop>
+                  <index_insert>
+                    <index>'LABEL_CHECKSUM_CACHE'</index>
+                    <field name='label'>OBJECT(TEMP.label_checksum_csr).label</field>
+                    <field name='checksum'>OBJECT(TEMP.label_checksum_csr).checksum</field>
+                  </index_insert>
+                </loop>
+              </db_select>
+            </then>
+            <else>
+              <db_execute_dynamic>
+                <login_object>GLOBAL.target_login</login_object>
+                <statement type="oracle">"create table MVM_CHECKSUM_LOG (label VARCHAR2(1000), name VARCHAR2(1000), checksum VARCHAR2(1000))"</statement>
+                <statement type="sql">"create table MVM_CHECKSUM_LOG (label VARCHAR(1000), name VARCHAR(1000), checksum VARCHAR(1000))"</statement>
+                <num_rows>TEMP.num_rows</num_rows>
+              </db_execute_dynamic>
+              <db_execute_dynamic>
+                <login_object>GLOBAL.target_login</login_object>
+                <statement>"create index mvm_checksum_log_ndx1 on MVM_CHECKSUM_LOG(name)"</statement>
+                <num_rows>TEMP.num_rows</num_rows>
+              </db_execute_dynamic>
+              <db_execute_dynamic>
+                <login_object>GLOBAL.target_login</login_object>
+                <statement>"create index mvm_checksum_log_ndx2 on MVM_CHECKSUM_LOG(label, name)"</statement>
+                <num_rows>TEMP.num_rows</num_rows>
+              </db_execute_dynamic>
+            </else>
+          </if>
+        </then>
+      </db_select>
+    </run_once>
+
+
+    <do>TEMP.db_full_checksum = ''</do>
+    <do>TEMP.have_details = '0'</do>
+    <index_select>
+      <index>'LABEL_CHECKSUM_CACHE'</index>
+      <field name='label'>TEMP.label</field>
+      <cursor>TEMP.checksum_csr</cursor>
+      <then>
+        <do>TEMP.db_full_checksum = OBJECT(TEMP.checksum_csr).checksum</do>
+      </then>
+    </index_select>
+
+    <if>
+      <condition>TEMP.db_full_checksum ne TEMP.full_checksum</condition>
+      <then>
+
+        <info switch='log_sync'>'Synchronize detected a changes in the filesystem'</info>
+        <call_proc_for_current_object>
+          <name>'insert_checksum_log'</name>
+          <param name='label'>TEMP.label</param>
+          <param name='name'>'label_checksum'</param>
+          <param name='checksum'>TEMP.full_checksum</param>
+        </call_proc_for_current_object>
+
+        <index_select_keys>
+          <index>'LABEL_NAME_CHECKSUM_CACHE'</index>
+          <cursor>TEMP.label_name</cursor>
+          <loop>
+            <if>
+              <condition>OBJECT(TEMP.label_name).label eq TEMP.label</condition>
+              <then>
+                <index_remove>
+                  <index>'LABEL_NAME_CHECKSUM_CACHE'</index>
+                  <field name='label'>OBJECT(TEMP.label_name).label</field>
+                  <field name='name'>OBJECT(TEMP.label_name).name</field>
+                </index_remove>
+              </then>
+            </if>
+          </loop>
+        </index_select_keys>
+        <db_select>
+          <login_object>GLOBAL.target_login</login_object>
+          <query>"select * from MVM_CHECKSUM_LOG where label = $${TEMP.label} and name != 'label_checksum'"</query>
+          <cursor>TEMP.file_checksum_csr</cursor>
+          <loop>
+            <index_insert>
+              <index>'LABEL_NAME_CHECKSUM_CACHE'</index>
+              <field name='label'>OBJECT(TEMP.file_checksum_csr).label</field>
+              <field name='name'>OBJECT(TEMP.file_checksum_csr).name</field>
+              <field name='checksum'>OBJECT(TEMP.file_checksum_csr).checksum</field>
+            </index_insert>
+          </loop>
+        </db_select>
+
+        <if>
+          <condition>TEMP.clean_label_proc ne ''</condition>
+          <then>
+            <call_dynamic_proc_for_current_object>
+              <name>TEMP.clean_label_proc</name>
+            </call_dynamic_proc_for_current_object>
+          </then>
+        </if>
+
+        <glob_select>
+          <glob>TEMP.glob</glob>
+          <cursor_value>'filename'</cursor_value>
+          <cursor>TEMP.csr</cursor>
+          <loop>
+            <do>TEMP.filter_out = '0'</do>
+            <if>
+              <condition>TEMP.filter_name_proc ne ''</condition>
+              <then>
+                <info switch='log_sync'>'sync calling ['~TEMP.filter_name_proc~'] with name=['~OBJECT(TEMP.csr).filename~'] filter_out=['~TEMP.filter_out~']'</info>
+                <call_dynamic_proc_for_current_object>
+                  <name>TEMP.filter_name_proc</name>
+                  <param name='name'>OBJECT(TEMP.csr).filename</param>
+                  <param name='filter_out'>TEMP.filter_out</param>
+                </call_dynamic_proc_for_current_object>
+              </then>
+            </if>
+            <if>
+              <condition>TEMP.filter_out ne '1'</condition>
+              <then>
+                <!--<info>'filename=['~OBJECT(TEMP.csr).filename~']'</info>-->
+                <do>TEMP.need_to_reapply = '0'</do>
+                <read_text_file>
+                  <file>OBJECT(TEMP.csr).filename</file>
+                  <text>TEMP.filename_txt</text>
+                </read_text_file>
+                
+                <call_dynamic_proc_for_current_object>
+                  <name>TEMP.checksum_proc</name>
+                  <param name='input'>TEMP.filename_txt</param>
+                  <param name='output'>TEMP.checksum</param>
+                </call_dynamic_proc_for_current_object>
+                <index_select>
+                  <index>'LABEL_NAME_CHECKSUM_CACHE'</index>
+                  <field name="name">OBJECT(TEMP.csr).filename</field>
+                  <field name="label">TEMP.label</field>
+                  <cursor>TEMP.checksum_csr</cursor>
+                  <then>
+                    <if>
+                      <condition>TEMP.checksum ne OBJECT(TEMP.checksum_csr).checksum</condition>
+                      <then>
+                        <info>'Detected a change in the file ['~OBJECT(TEMP.csr).filename~']!'</info>
+                        <do>TEMP.need_to_reapply = '1'</do>
+                      </then>
+                    </if>
+                  </then>
+                  <else>
+                    <info>'Detected a new file ['~OBJECT(TEMP.csr).filename~'] not currently applied to the database!'</info>
+                    <do>TEMP.need_to_reapply = '2'</do>
+                  </else>
+                </index_select>
+                <if>
+                  <condition>TEMP.clean_all_proc ne ''</condition>
+                  <then>
+                    <info switch='log_sync'>'sync calling ['~TEMP.clean_all_proc~'] with input=['~TEMP.filename_txt~']'</info>
+                    <call_dynamic_proc_for_current_object>
+                      <name>TEMP.clean_all_proc</name>
+                      <param name='input'>TEMP.filename_txt</param>
+                    </call_dynamic_proc_for_current_object>
+                  </then>
+                </if>
+
+                <if>
+                  <condition>TEMP.need_to_reapply eq '1'</condition>
+                  <then>
+                    <call_proc_for_current_object>
+                      <name>'insert_checksum_log'</name>
+                      <param name='label'>TEMP.label</param>
+                      <param name='name'>OBJECT(TEMP.csr).filename</param>
+                      <param name='checksum'>TEMP.checksum</param>
+                    </call_proc_for_current_object>
+                    <if>
+                      <condition>TEMP.clean_changed_proc ne ''</condition>
+                      <then>
+                        <info switch='log_sync'>'sync calling ['~TEMP.clean_changed_proc~'] with input=['~TEMP.filename_txt~'] name=['~OBJECT(TEMP.csr).filename~']'</info>
+                        <call_dynamic_proc_for_current_object>
+                          <name>TEMP.clean_changed_proc</name>
+                          <param name='input'>TEMP.filename_txt</param>
+                          <param name='name'>OBJECT(TEMP.csr).filename</param>
+                        </call_dynamic_proc_for_current_object>
+                      </then>
+                    </if>
+                    <if>
+                      <condition>TEMP.add_changed_proc ne ''</condition>
+                      <then>
+                        <info switch='log_sync'>'sync calling ['~TEMP.add_changed_proc~'] with input=['~TEMP.filename_txt~'] name=['~OBJECT(TEMP.csr).filename~']'</info>
+                        <call_dynamic_proc_for_current_object>
+                          <name>TEMP.add_changed_proc</name>
+                          <param name='input'>TEMP.filename_txt</param>
+                          <param name='name'>OBJECT(TEMP.csr).filename</param>
+                        </call_dynamic_proc_for_current_object>
+                      </then>
+                    </if>
+                  </then>
+                </if>
+                <if>
+                  <condition>TEMP.need_to_reapply eq '2'</condition>
+                  <then>
+                    <call_proc_for_current_object>
+                      <name>'insert_checksum_log'</name>
+                      <param name='label'>TEMP.label</param>
+                      <param name='name'>OBJECT(TEMP.csr).filename</param>
+                      <param name='checksum'>TEMP.checksum</param>
+                    </call_proc_for_current_object>
+                    <if>
+                      <condition>TEMP.add_new_proc ne ''</condition>
+                      <then>
+                        <info switch='log_sync'>'sync calling ['~TEMP.add_new_proc~'] with input=['~TEMP.filename_txt~'] name=['~OBJECT(TEMP.csr).filename~']'</info>
+                        <call_dynamic_proc_for_current_object>
+                          <name>TEMP.add_new_proc</name>
+                          <param name='input'>TEMP.filename_txt</param>
+                          <param name='name'>OBJECT(TEMP.csr).filename</param>
+                        </call_dynamic_proc_for_current_object>
+                      </then>
+                    </if>
+                  </then>
+                </if>
+                <if>
+                  <condition>TEMP.add_all_proc ne ''</condition>
+                  <then>
+                    <info switch='log_sync'>'sync calling ['~TEMP.add_all_proc~'] with input=['~TEMP.filename_txt~']'</info>
+                    <call_dynamic_proc_for_current_object>
+                      <name>TEMP.add_all_proc</name>
+                      <param name='input'>TEMP.filename_txt</param>
+                    </call_dynamic_proc_for_current_object>
+                  </then>
+                </if>
+              </then>
+            </if>
+          </loop>
+        </glob_select>
+
+        <if>
+          <condition>TEMP.add_label_proc ne ''</condition>
+          <then>
+            <info switch='log_sync'>'sync calling ['~TEMP.add_label_proc~']'</info>
+            <call_dynamic_proc_for_current_object>
+              <name>TEMP.add_label_proc</name>
+            </call_dynamic_proc_for_current_object>
+          </then>
+        </if>
+
+      </then>
+    </if>
+  </proc>
+
+  <proc name='synchronize_db_first'>
+    <print>'IN sychronize_db_first top....'</print>
+    <initialize namespace='global' priority='999999'>
+      <print>'IN sychronize_db_first init block....'</print>
+      <if>
+        <condition>OBJECT(GLOBAL.target_login).database_type ne ''</condition>
+        <then>
+          <info switch='log_sync'>'Calling synchronize for server='~OBJECT(GLOBAL.target_login).database_server~',database='~OBJECT(GLOBAL.target_login).database_name</info>
+          <get_rmp_dir>TEMP.rmp_dir</get_rmp_dir>
+          <!--<call_proc_for_current_object>
+            <name>'synchronize'</name>
+            <param name='label'>'DB'</param>
+            <param name='glob'>TEMP.rmp_dir~'\Extensions\*\MvmConfig\Database\tables\*.sql'</param>
+            <param name='add_changed_proc'>'change_script_in_db'</param>
+            <param name='add_new_proc'>'add_script_to_db'</param>
+            <param name='filter_name_proc'>'filter_by_dbtype'</param>
+          </call_proc_for_current_object>
+          <call_proc_for_current_object>
+            <name>'synchronize'</name>
+            <param name='label'>'DB'</param>
+            <param name='glob'>TEMP.rmp_dir~'\Extensions\*\MvmConfig\Database\views\*.sql'</param>
+            <param name='add_changed_proc'>'change_script_in_db'</param>
+            <param name='add_new_proc'>'add_script_to_db'</param>
+            <param name='filter_name_proc'>'filter_by_dbtype'</param>
+          </call_proc_for_current_object>
+          <call_proc_for_current_object>
+            <name>'synchronize'</name>
+            <param name='label'>'DB'</param>
+            <param name='glob'>TEMP.rmp_dir~'\Extensions\*\MvmConfig\Database\*\*.sql'</param>
+            <param name='add_changed_proc'>'change_script_in_db'</param>
+            <param name='add_new_proc'>'add_script_to_db'</param>
+            <param name='filter_name_proc'>'filter_by_dbtype'</param>
+          </call_proc_for_current_object>-->
+        </then>
+        <else>
+          <info switch='log_sync'>'Skipping synchronize for database_name='~OBJECT(GLOBAL.target_login).database_name</info>
+        </else>
+      </if>
+    </initialize>
+  </proc>
+
+  <proc name='bound_dates_by_account_dates'>
+    <param name='id_acc'/>
+    <param name='start_date' mode='in out'/>
+    <param name='end_date' mode='in out'/>
+    <initialize priority='100'>
+      <print>'init bound_dates_by_account_dates'</print>
+      <define_memory_index>
+        <index>'ACCOUNT_MIN_MAX_DATES'</index>
+        <key_field>'id_acc'</key_field>
+        <key_field>'start_date'</key_field>
+        <key_field>'end_date'</key_field>
+      </define_memory_index>
+    </initialize>
+
+    <if>
+      <condition>TEMP.id_acc ne ''</condition>
+      <then>
+
+
+        <do>TEMP.cached_account_dates = '0'</do>
+        <do>TEMP.account_start_date = ''</do>
+        <do>TEMP.account_end_date = ''</do>
+        <index_select_keys>
+          <index>'ACCOUNT_MIN_MAX_DATES'</index>
+          <cursor>TEMP.acc_date_csr</cursor>
+          <loop>
+            <if>
+              <condition>OBJECT(TEMP.acc_date_csr).id_acc eq TEMP.id_acc</condition>
+              <then>
+                <do>TEMP.cached_account_dates = '1'</do>
+                <do>TEMP.account_start_date = OBJECT(TEMP.acc_date_csr).start_date</do>
+                <do>TEMP.account_end_date = OBJECT(TEMP.acc_date_csr).end_date</do>
+              </then>
+            </if>
+          </loop>
+        </index_select_keys>
+
+        <if>
+          <condition>TEMP.cached_account_dates eq '0'</condition>
+          <then>
+            <index_clear>
+              <index>'ACCOUNT_MIN_MAX_DATES'</index>
+            </index_clear>
+            <db_select>
+              <login_object>GLOBAL.target_login</login_object>
+              <query type='oracle'>"select dt_crt start_date, mtmaxdate() end_date from t_account a where a.id_acc = $${TEMP.id_acc}"</query>
+              <query type='sql'>"select dt_crt start_date, dbo.MTMaxDate() end_date from t_account a where a.id_acc = $${TEMP.id_acc}"</query>
+              <cursor>TEMP.acc_date_csr</cursor>
+              <then>
+                <index_insert>
+                  <index>'ACCOUNT_MIN_MAX_DATES'</index>
+                  <field name="id_acc">OBJECT.id_acc</field>
+                  <field name="start_date">OBJECT(TEMP.acc_date_csr).start_date</field>
+                  <field name="end_date">OBJECT(TEMP.acc_date_csr).end_date</field>
+                </index_insert>
+                <do>TEMP.account_start_date = OBJECT(TEMP.acc_date_csr).start_date</do>
+                <do>TEMP.account_end_date = OBJECT(TEMP.acc_date_csr).end_date</do>
+              </then>
+            </db_select>
+          </then>
+        </if>
+
+        <if>
+          <condition>TEMP.account_start_date gt TEMP.start_date or TEMP.start_date eq ''</condition>
+          <then>
+            <do>TEMP.start_date = TEMP.account_start_date</do>
+          </then>
+        </if>
+
+
+        <if>
+          <condition>TEMP.account_end_date lt TEMP.end_date or TEMP.end_date eq ''</condition>
+          <then>
+            <do>TEMP.end_date = TEMP.account_end_date</do>
+          </then>
+        </if>
+
+      </then>
+    </if>
+  </proc>
+
+  <proc name='handle_null_dates'>
+    <param name='start_date' mode='in out'/>
+    <param name='end_date' mode='in out'/>
+
+    <initialize>
+      <print>'init handle_null_dates'</print>
+      <define_memory_index>
+        <index>'MY_MINMAX_DATES'</index>
+        <key_field>'dummy'</key_field>
+        <field>'min_date'</field>
+        <field>'max_date'</field>
+      </define_memory_index>
+    </initialize>
+
+    <if>
+      <condition>TEMP.start_date eq '' or TEMP.end_date eq ''</condition>
+      <then>
+        <do>TEMP.min_date = ''</do>
+        <do>TEMP.max_date = ''</do>
+        <index_select>
+          <index>'MY_MINMAX_DATES'</index>
+          <field name="dummy">'1'</field>
+          <cursor>TEMP.minmax_csr</cursor>
+          <then>
+            <do>TEMP.min_date = OBJECT(TEMP.minmax_csr).min_date</do>
+            <do>TEMP.max_date = OBJECT(TEMP.minmax_csr).max_date</do>
+          </then>
+          <else>
+            <db_select>
+              <login_object>GLOBAL.target_login</login_object>
+              <query type="oracle">"select mtmindate() min_date, mtmaxdate() max_date from dual"</query>
+              <query type="sql">"select dbo.MTMinDate() min_date, dbo.MTMaxDate() max_date"</query>
+              <cursor>TEMP.minmax_dates_csr</cursor>
+              <then>
+                <index_insert>
+                  <index>'MY_MINMAX_DATES'</index>
+                  <field name="dummy">'1'</field>
+                  <field name="min_date">OBJECT(TEMP.minmax_dates_csr).min_date</field>
+                  <field name="max_date">OBJECT(TEMP.minmax_dates_csr).max_date</field>
+                </index_insert>
+                <do>TEMP.min_date = OBJECT(TEMP.minmax_dates_csr).min_date</do>
+                <do>TEMP.max_date = OBJECT(TEMP.minmax_dates_csr).max_date</do>
+              </then>
+            </db_select>
+          </else>
+        </index_select>
+        <if>
+          <condition>TEMP.start_date eq ''</condition>
+          <then>
+            <do>TEMP.start_date = TEMP.min_date</do>
+          </then>
+        </if>
+        <if>
+          <condition>TEMP.end_date eq ''</condition>
+          <then>
+            <do>TEMP.end_date = TEMP.max_date</do>
+          </then>
+        </if>
+      </then>
+    </if>
+
+  </proc>
+
+  <proc name="initialize_core_procs"></proc>
+  
+  <proc name='determine_id_paramtable'>
+    <param name='id_paramtable' mode='in out'/>
+    <param name='id_template' mode='in out'/>
+    <param name='paramtable_name' mode='in out'/>
+    <param name='template_name' mode='in'/>
+    <to_lower>
+      <input>TEMP.paramtable_name</input>
+      <output>TEMP.paramtable_name</output>
+    </to_lower>
+    <to_lower>
+      <input>TEMP.template_name</input>
+      <output>TEMP.template_name</output>
+    </to_lower>
+    <initialize priority="100">
+      <print>'wrong init initialize_core_procs'</print>
+      <define_memory_index>
+        <index>'MY_PT_NAMES'</index>
+        <key_field>'id_paramtable'</key_field>
+        <field>'paramtable_name'</field>
+      </define_memory_index>
+      <define_memory_index>
+        <index>'MY_PT_LOOKUP'</index>
+        <key_field>'paramtable_name'</key_field>
+        <field>'id_paramtable'</field>
+        <field>'full_paramtable_name'</field>
+      </define_memory_index>
+
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query type='oracle'>"select id_paramtable, substr(lower(nm_instance_tablename),6,100) paramtable_name, lower(nm_instance_tablename) nm_instance_tablename  from t_rulesetdefinition"</query>
+        <query type='sql'>"select id_paramtable, substring(lower(nm_instance_tablename),6,100) paramtable_name, lower(nm_instance_tablename) nm_instance_tablename  from t_rulesetdefinition"</query>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <index_insert>
+            <index>'MY_PT_NAMES'</index>
+            <field name="id_paramtable">OBJECT(TEMP.csr).id_paramtable</field>
+            <field name="paramtable_name">OBJECT(TEMP.csr).nm_instance_tablename</field>
+          </index_insert>
+          <index_insert>
+            <index>'MY_PT_LOOKUP'</index>
+            <field name="id_paramtable">OBJECT(TEMP.csr).id_paramtable</field>
+            <field name="paramtable_name">OBJECT(TEMP.csr).nm_instance_tablename</field>
+            <field name="full_paramtable_name">OBJECT(TEMP.csr).nm_instance_tablename</field>
+          </index_insert>
+          <index_insert>
+            <index>'MY_PT_LOOKUP'</index>
+            <field name="id_paramtable">OBJECT(TEMP.csr).id_paramtable</field>
+            <field name="paramtable_name">OBJECT(TEMP.csr).paramtable_name</field>
+            <field name="full_paramtable_name">OBJECT(TEMP.csr).nm_instance_tablename</field>
+          </index_insert>
+        </loop>
+      </db_select>
+
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query>
+          "select d.id_pt id_paramtable, c.id_template from (select a.id_pt, count(*) my_count from t_pi_rulesetdef_map a
+          inner join t_pi b on a.id_pi = b.id_pi and (b.nm_productview not like 'intercall.com/pc%' or b.nm_productview='intercall.com/pc54')
+          inner join t_pi_template c on b.id_pi = c.id_pi
+          group by a.id_pt having count(*) = 1) d
+          inner join t_pi_rulesetdef_map a on d.id_pt = a.id_pt
+          inner join t_pi b on a.id_pi = b.id_pi and (b.nm_productview not like 'intercall.com/pc%' or b.nm_productview='intercall.com/pc54')
+          inner join t_pi_template c on b.id_pi = c.id_pi"
+        </query>
+        <cursor>TEMP.csr</cursor>
+        <run>
+          <create_memory_index_from_cursor>
+            <index>'MY_SINGLE_TEMPLATE_PTS'</index>
+            <cursor>TEMP.csr</cursor>
+            <key_field>'id_paramtable'</key_field>
+          </create_memory_index_from_cursor>
+        </run>
+      </db_select>
+
+      <define_memory_index>
+        <index>'MY_PI_TEMPLATE_IDS'</index>
+        <key_field>'template_name'</key_field>
+        <field>'id_template'</field>
+      </define_memory_index>
+      <define_memory_index>
+        <index>'MY_PI_TEMPLATE_NAMES'</index>
+        <key_field>'id_template'</key_field>
+        <field>'template_name'</field>
+      </define_memory_index>
+
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query>
+          "select lower(b.nm_name) template_name, a.id_template
+          from t_pi_template a
+          inner join t_base_props b on a.id_template = b.id_prop
+          where b.nm_name IS NOT NULL"
+        </query>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <index_insert>
+            <index>'MY_PI_TEMPLATE_IDS'</index>
+            <field name="template_name">OBJECT(TEMP.csr).template_name</field>
+            <field name="id_template">OBJECT(TEMP.csr).id_template</field>
+          </index_insert>
+          <index_insert>
+            <index>'MY_PI_TEMPLATE_NAMES'</index>
+            <field name="template_name">OBJECT(TEMP.csr).template_name</field>
+            <field name="id_template">OBJECT(TEMP.csr).id_template</field>
+          </index_insert>
+        </loop>
+      </db_select>
+
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <!--<query type="oracle">
+          "select decode(b_required,'Y','0','1') is_key, lower(nm_column_name) column_name, lower(nm_name) field_name, decode(nm_space,NULL,'',lower(nm_space||'/'||nm_enum)) namespace, display_name,
+          is_condition, column_operator, is_operator, has_operator_name, is_action, column_type, column_length, is_required, default_value from mvm_param_table_prop a"</query>-->
+        <query type="oracle">"select case b_required when 'Y' then '0' else '1' end is_key, lower(nm_column_name) column_name, lower(nm_name) field_name, decode(nm_space,NULL,'',lower(nm_space||'/'||nm_enum)) namespace, a.* from t_param_table_prop a"</query>
+        <!--<query type="sql">
+          "select case b_required when 'N' then '1' else '0' end is_key, lower(b.name) column_name, lower(substring(b.name,3,100)) field_name, 
+          case nm_space when NULL then '' else lower(nm_space+'/'+nm_enum) end namespace, d.id_param_table_prop, 
+          c.id_paramtable id_param_table, d.nm_name, d.nm_data_type, d.nm_column_name, d.b_required, 
+          d.b_composite_idx, d.b_single_idx, d.b_part_of_key, d.b_exportable, d.b_filterable, d.b_user_visible,
+          d.nm_default_value, d.n_prop_type, d.nm_space, d.nm_enum, d.b_core, d.b_columnoperator, d.nm_operatorval
+          from t_rulesetdefinition c
+          inner join sysobjects a on UPPER(a.name) = UPPER(c.nm_instance_tablename)
+          inner join syscolumns b on a.id = b.id
+          left outer join t_param_Table_prop d on LOWER(b.name) = LOWER(d.nm_column_name) and c.id_paramtable = d.id_param_table
+          where lower(b.name) not in('id_sched','n_order','tt_start','tt_end','id_audit')"</query>-->
+        <!--<query type="sql">
+          "select b.id_paramtable id_param_table, case lower(a.is_condition) when 'y' then 1 else 0 end is_key, 'c_'+lower(a.column_name) column_name, lower(a.column_name) field_name,
+          case a.column_type when 'enum' then lower(a.enum_namespace + '/' + a.enum_type) end namespace, display_name,
+          is_condition, column_operator, is_operator, has_operator_name, is_action, column_type, column_length, is_required, default_value
+          from mvm_param_table_props a
+          inner join t_rulesetdefinition b on ('t_pt_'+ LOWER(a.paramtable_name)) = LOWER(nm_instance_tablename)
+          where a.is_condition = 'Y' or a.is_action = 'Y'"
+        </query>-->
+        <query type="sql">
+          "select b.id_paramtable id_param_table, case lower(a.is_condition) when 'y' then 1 else CASE LOWER(is_operator) WHEN 'y' THEN 1 ELSE 0 end end is_key, 'c_'+lower(a.column_name) column_name, lower(a.column_name) field_name,
+          case a.column_type when 'enum' then lower(a.enum_namespace + '/' + a.enum_type) end namespace, display_name,
+          is_condition, column_operator, is_operator, has_operator_name, is_action, column_type, column_length, is_required, default_value
+          from mvm_param_table_props a
+          inner join t_rulesetdefinition b
+          on ('t_pt_'+ LOWER(a.paramtable_name)) = LOWER(nm_instance_tablename)
+          where a.is_condition = 'Y' or a.is_action = 'Y' OR a.is_operator = 'Y'"
+        </query>
+        <cursor>TEMP.csr</cursor>
+        <run>
+          <create_memory_index_from_cursor>
+            <index>'MY_PT_FIELDS'</index>
+            <cursor>TEMP.csr</cursor>
+            <key_field>'id_param_table'</key_field>
+            <key_field>'is_key'</key_field>
+          </create_memory_index_from_cursor>
+        </run>
+      </db_select>
+    </initialize>
+
+    <do>TEMP.found_template eq '0'</do>
+    <do>TEMP.found_pt='0'</do>
+    <index_select>
+      <index>'MY_PT_LOOKUP'</index>
+      <field name="paramtable_name">TEMP.paramtable_name</field>
+      <cursor>TEMP.pt_id_csr</cursor>
+      <then>
+        <do>TEMP.id_paramtable = OBJECT(TEMP.pt_id_csr).id_paramtable</do>
+        <do>TEMP.paramtable_name = OBJECT(TEMP.pt_id_csr).full_paramtable_name</do>
+        <do>TEMP.found_pt='1'</do>
+      </then>
+
+    </index_select>
+
+    <if>
+      <condition>TEMP.found_pt eq '0'</condition>
+      <then>
+        <index_select>
+          <index>'MY_PT_NAMES'</index>
+          <field name="id_paramtable">TEMP.id_paramtable</field>
+          <cursor>TEMP.pt_name_csr</cursor>
+          <then>
+            <do>TEMP.paramtable_name = OBJECT(TEMP.pt_name_csr).paramtable_name</do>
+            <do>TEMP.found_pt='1'</do>
+          </then>
+          <else>
+            <info>'Cannot find paramtable for given id['~TEMP.id_paramtable~'] and name['~TEMP.paramtable_name~']'</info>
+          </else>
+        </index_select>
+      </then>
+    </if>
+
+    <index_select>
+      <index>'MY_SINGLE_TEMPLATE_PTS'</index>
+      <field name="id_paramtable">TEMP.id_paramtable</field>
+      <cursor>TEMP.pi_template_csr</cursor>
+      <then>
+        <do>TEMP.id_template = OBJECT(TEMP.pi_template_csr).id_template</do>
+        <do>TEMP.found_template='1'</do>
+      </then>
+    </index_select>
+
+    <!-- Put this second so that we match the template to the paramtable if there's only 1 possible match. I.e. avoid incorrect info passed in.
+              The index_select above will set the id_template before we look up the name to ensure consistenct.                                -->
+    <index_select>
+      <index>'MY_PI_TEMPLATE_NAMES'</index>
+      <field name="id_template">TEMP.id_template</field>
+      <cursor>TEMP.template_name_csr</cursor>
+      <then>
+        <do>TEMP.template_name = OBJECT(TEMP.template_name_csr).template_name</do>
+        <do>TEMP.found_template='1'</do>
+      </then>
+    </index_select>
+
+    <if>
+      <condition>TEMP.found_template eq '0'</condition>
+      <then>
+        <index_select>
+          <index>'MY_PI_TEMPLATE_IDS'</index>
+          <field name="template_name">TEMP.template_name</field>
+          <cursor>TEMP.pi_template_id_csr</cursor>
+          <then>
+            <do>TEMP.id_template = OBJECT(TEMP.pi_template_id_csr).id_template</do>
+            <do>TEMP.found_template='1'</do>
+          </then>
+          <else>
+            <info>'Cannot find pi_template for given id['~TEMP.id_paramtable~'], name['~TEMP.paramtable_name~'] and template_name['~TEMP.template_name~']'</info>
+          </else>
+        </index_select>
+      </then>
+    </if>
+  </proc>
+
+  <proc name='determine_date_overlaps'>
+    <param name='main_start_date'/>
+    <param name='main_end_date'/>
+    <param name='other_start_date'/>
+    <param name='other_end_date'/>
+    <param name='overlap_type' mode='out'/>
+    <if>
+      <condition>(TEMP.main_start_date lt TEMP.other_end_date or TEMP.other_end_date eq '' or TEMP.main_start_date eq '') and (TEMP.main_end_date gt TEMP.other_start_date or TEMP.other_start_date eq '' or TEMP.main_end_date eq '')</condition>
+      <!-- We have an overlaps! -->
+      <then>
+        <if>
+          <condition>TEMP.other_start_date gte TEMP.main_start_date or TEMP.main_start_date eq ''</condition>
+          <then>
+            <!-- new range starts after main range -->
+            <if>
+              <condition>TEMP.other_end_date lte TEMP.main_end_date or TEMP.main_end_date eq ''</condition>
+              <then>
+                <!-- print>'Found a range that is fully contained by the main range'</print -->
+                <do>TEMP.overlap_type='fully_contained'</do>
+              </then>
+              <else>
+                <!-- print>'Found a range that ends after the main range'</print -->
+                <do>TEMP.overlap_type='start_contained'</do>
+              </else>
+            </if>
+          </then>
+          <else>
+            <!-- new range starts before main range -->
+            <if>
+              <condition>TEMP.other_end_date lte TEMP.main_end_date or TEMP.main_end_date eq ''</condition>
+              <then>
+                <!-- print>'Found a range that starts before the main range and ends before the main range'</print -->
+                <do>TEMP.overlap_type='end_contained'</do>
+              </then>
+              <else>
+                <!-- print>'Found a range fully contains by the main range'</print -->
+                <do>TEMP.overlap_type='not_contained'</do>
+              </else>
+            </if>
+          </else>
+        </if>
+      </then>
+      <else>
+        <do>TEMP.overlap_type='no_overlap'</do>
+      </else>
+    </if>
+  </proc>
+  <proc name='convert_to_enum'>
+    <param name='value' mode='in out'/>
+    <param name='namespace'/>
+    <param name='default_enum' default='0'/>
+    <param name='success' mode='out'/>
+    <run_once>
+      <define_memory_index>
+        <index>'ENUMS_BY_ID'</index>
+        <key_field>'id_enum_data'</key_field>
+        <field>'namespace'</field>
+        <field>'enum_value'</field>
+      </define_memory_index>
+
+      <define_memory_index>
+        <index>'ENUMS_BY_NAME'</index>
+        <key_field>'namespace'</key_field>
+        <key_field>'enum_value'</key_field>
+        <field>'id_enum_data'</field>
+      </define_memory_index>
+
+      <define_memory_index>
+        <index>'ENUMS_BY_NAMESPACE'</index>
+        <key_field>'namespace'</key_field>
+        <field>'id_enum_data'</field>
+        <field>'enum_value'</field>
+      </define_memory_index>
+
+
+      <debug>'Building the list of enums!'</debug>
+      <time ms='TEMP.t'>
+        <db_select>
+          <login_object>GLOBAL.target_login</login_object>
+          <query type='oracle'>
+            "select lower(regexp_substr(nm_enum_data,'[^/]*$')) enum_value,
+            lower(trim(TRAILING '/' from regexp_substr(nm_enum_data,'.*/'))) namespace,
+            id_enum_data from t_enum_data a"
+          </query>
+          <query type='sql'>
+            "select
+            lower(case CHARINDEX ('/' ,reverse(nm_enum_data),0 ) when 0 then nm_enum_data else SUBSTRING(nm_enum_data,len(nm_enum_data) - CHARINDEX ('/' ,reverse(nm_enum_data),0 ) + 2,CHARINDEX ('/' ,reverse(nm_enum_data),0)) end) enum_value,
+            lower(case CHARINDEX ('/' ,reverse(nm_enum_data),0 ) when 0 then '' else substring(nm_enum_data,1,len(nm_enum_data) - CHARINDEX ('/' ,reverse(nm_enum_data),0 )) end) namespace,
+            id_enum_data
+            from t_enum_data"
+          </query>
+          <cursor>TEMP.csr</cursor>
+          <loop>
+            <index_insert>
+              <index>'ENUMS_BY_ID'</index>
+              <field name="id_enum_data">OBJECT(TEMP.csr).id_enum_data</field>
+              <field name="namespace">OBJECT(TEMP.csr).namespace</field>
+              <field name="enum_value">OBJECT(TEMP.csr).enum_value</field>
+            </index_insert>
+            <index_insert>
+              <index>'ENUMS_BY_NAME'</index>
+              <field name="id_enum_data">OBJECT(TEMP.csr).id_enum_data</field>
+              <field name="namespace">OBJECT(TEMP.csr).namespace</field>
+              <field name="enum_value">OBJECT(TEMP.csr).enum_value</field>
+            </index_insert>
+            <index_insert>
+              <index>'ENUMS_BY_NAMESPACE'</index>
+              <field name="id_enum_data">OBJECT(TEMP.csr).id_enum_data</field>
+              <field name="namespace">OBJECT(TEMP.csr).namespace</field>
+              <field name="enum_value">OBJECT(TEMP.csr).enum_value</field>
+            </index_insert>
+          </loop>
+        </db_select>
+      </time>
+      <debug>'Enums TEMP.t='~TEMP.t~' ms'</debug>
+    </run_once>
+
+
+    <do>TEMP.success=1</do>
+    <to_lower>
+      <input>TEMP.value</input>
+      <output>TEMP.value</output>
+    </to_lower>
+
+    <if>
+      <condition>TEMP.namespace ne ''</condition>
+      <then>
+        <to_lower>
+          <input>TEMP.namespace</input>
+          <output>TEMP.namespace</output>
+        </to_lower>
+        <index_select>
+          <index>'ENUMS_BY_ID'</index>
+          <field name="id_enum_data">TEMP.value</field>
+          <cursor>TEMP.id_enum_csr</cursor>
+          <run>
+            <cursor_next>TEMP.id_enum_csr</cursor_next>
+            <if>
+              <condition>OBJECT(TEMP.id_enum_csr).namespace ne TEMP.namespace</condition>
+              <then>
+                <index_select>
+                  <index>'ENUMS_BY_NAME'</index>
+                  <field name="namespace">TEMP.namespace</field>
+                  <field name="enum_value">TEMP.value</field>
+                  <cursor>TEMP.nm_enum_csr</cursor>
+                  <loop>
+                    <debug switch='log_enums'>'Found an enum of ['~OBJECT(TEMP.nm_enum_csr).id_enum_data~'] for same namespace for value ['~TEMP.value~']'</debug>
+                    <do>TEMP.value=OBJECT(TEMP.nm_enum_csr).id_enum_data</do>
+                  </loop>
+                  <else>
+                    <index_select>
+                      <index>'ENUMS_BY_NAME'</index>
+                      <field name="namespace">TEMP.namespace</field>
+                      <field name="enum_value">OBJECT(TEMP.id_enum_csr).enum_value</field>
+                      <cursor>TEMP.nm_enum_csr2</cursor>
+                      <loop>
+                        <debug switch='log_enums'>'Found an enum of ['~OBJECT(TEMP.nm_enum_csr2).id_enum_data~'] for a different namespace for value ['~TEMP.value~']'</debug>
+                        <do>TEMP.value=OBJECT(TEMP.nm_enum_csr2).id_enum_data</do>
+                      </loop>
+                      <else>
+                        <do>TEMP.success=0</do>
+                        <debug>'I cant find any enum for value ['~TEMP.value~']'</debug>
+                        <if>
+                          <condition>TEMP.default_enum eq '1'</condition>
+                          <then>
+                            <index_select>
+                              <index>'ENUMS_BY_NAMESPACE'</index>
+                              <field name="namespace">TEMP.namespace</field>
+                              <cursor>TEMP.default_id_enum_csr</cursor>
+                              <then>
+                                <debug>'Defaulting enum to ['~OBJECT(TEMP.default_id_enum_csr).id_enum_data~']['~OBJECT(TEMP.default_id_enum_csr).enum_value~'] because default_enum = 1'</debug>
+                                <do>TEMP.value=OBJECT(TEMP.default_id_enum_csr).id_enum_data</do>
+                              </then>
+                            </index_select>
+                          </then>
+                        </if>
+                      </else>
+                    </index_select>
+                  </else>
+                </index_select>
+              </then>
+              <else>
+                <debug switch='log_enums'>'Found a valid enum of ['~OBJECT(TEMP.id_enum_csr).id_enum_data~'] for same namespace for value ['~TEMP.value~']'</debug>
+              </else>
+            </if>
+          </run>
+        </index_select>
+      </then>
+      <else>
+        <index_select>
+          <index>'ENUMS_BY_ID'</index>
+          <field name="id_enum_data">TEMP.value</field>
+          <cursor>TEMP.id_enum_csr</cursor>
+          <loop>
+            <do>TEMP.value=OBJECT(TEMP.id_enum_csr).enum_value</do>
+          </loop>
+          <else>
+            <do>TEMP.success=0</do>
+          </else>
+        </index_select>
+      </else>
+    </if>
+  </proc>
+</procs>

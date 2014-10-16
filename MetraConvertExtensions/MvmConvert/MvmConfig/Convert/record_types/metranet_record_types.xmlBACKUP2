@@ -1,0 +1,981 @@
+<proc name="setup_metranet_record_types">
+  <record_type name="ACCOUNT">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>ACCOUNT</namespace>
+    <primary_key>
+      <field name="nm_login">OBJECT.nm_login</field>
+      <field name="nm_space">OBJECT.nm_space</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events>
+      <field_mapping>
+        <!-- FIXME: Arkadin-specific fields -->
+        <def>OBJECT.c_createdby = 'MIG'</def>
+        <def>OBJECT.c_createddate = MC_SYSDATE</def>
+        <def>OBJECT.c_modifiedby = 'MIG'</def>
+        <def>OBJECT.c_modifieddate = MC_SYSDATE</def>
+        <def>OBJECT.c_migrationdate = MC_SYSDATE</def>
+        <def>OBJECT.c_legacystartdate = OBJECT.vt_start</def>
+        <def>OBJECT.c_legacyenddate = OBJECT.vt_end</def>
+        <def>OBJECT.c_legacyaccountidentifier = OBJECT.nm_login</def>
+        <def>OBJECT.day_of_month = 31</def>
+      </field_mapping>
+      <field_mapping>
+        <def>OBJECT.id_acc = MC_SEQUENCE(id_acc)</def>
+        <def>OBJECT.id_dm_acc = MC_SEQUENCE(id_dm_acc)</def>
+        <def>OBJECT.id_profile = MC_SEQUENCE(id_profile)</def>
+        <def>OBJECT.id_acc_ext = MC_GUID</def>
+        <def>OBJECT.tx_lang_code = 'US'</def>
+        <def>OBJECT.nm_space = 'mt'</def>
+        <def>OBJECT.parent_nm_space = OBJECT.nm_space</def>
+        <def>OBJECT.id_site = OBJECT.nm_space ~ '/' ~ OBJECT.tx_lang_code</def>
+        <def>OBJECT.c_billable = MC_MAPPING('mc/payer_account_types', OBJECT.id_type)</def>
+        <def>OBJECT.id_payee = OBJECT.id_acc</def>
+        <def>OBJECT.id_payer = MC_PROC(lookup_nearest_payer)</def>
+        <def>OBJECT.status = 'AC'</def>
+        <def>OBJECT.dt_crt = MC_SYSDAY</def>
+        <def>OBJECT.vt_start = OBJECT.dt_crt</def>
+        <def>OBJECT.vt_end = MC_MAXDATE</def>
+        <def>OBJECT.tt_start = OBJECT.vt_start</def>
+        <def>OBJECT.tt_end = MC_MAXDATE</def>
+        <def>OBJECT.nm_tag = 'timeZoneID'</def>
+        <def>OBJECT.val_tag = 22</def>
+        <def>OBJECT.id_audit = 0</def>
+        <def>OBJECT.id_usage_cycle = MC_PROC(lookup_usage_cycle)</def>
+        <def>OBJECT.c_usagecycletype = 'Monthly'</def>
+        <def>OBJECT.c_currency = 'USD'</def>
+        <def>OBJECT.c_folder = 1</def>
+        <def>OBJECT.c_invoicemethod = 'Other'</def>
+        <def>OBJECT.c_language = OBJECT.tx_lang_code</def>
+        <def>OBJECT.c_statusreason = 'None'</def>
+        <def>OBJECT.c_statusreasonother = 'No other reason'</def>
+        <def>OBJECT.c_securityanswer = 'None'</def>
+        <def>OBJECT.c_securityquestion = 'None'</def>
+        <def>OBJECT.c_paymentmethod = 'Cheque'</def>
+        <def>OBJECT.c_timezoneid = '(GMT-05:00) Eastern Time (US &amp;amp; Canada)'</def>
+        <map>OBJECT.tx_password = MC_PROC(set_tx_password)</map>
+        <def>OBJECT.id_policy = MC_SEQUENCE(id_policy)</def>
+        <def>OBJECT.policy_type = 'A'</def>
+        <def>OBJECT.t_policy_role__id_role = 'subscriber (metraview)'</def>
+        <def>OBJECT.b_children = 'N'</def>
+        <def>OBJECT.full_tx_path = MC_PROC(get_full_tx_path)</def>
+        <map>PARENT.b_children = 'Y'</map>
+        <map>OBJECT.nm_login_check = MC_PROC(check_nm_login_uniqueness)</map>
+      </field_mapping>
+      <create_record type="PARENT_CAPABILITY_INSTANCE">
+        <inherit_fields>account_segment[0-9]+</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.id_acc = OBJECT.id_acc</def>
+          <def>CHILD.id_policy = OBJECT.id_policy</def>
+          <def>CHILD.full_tx_path = OBJECT.full_tx_path</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record database="NetMeter" table="t_acc_usage_interval" selected="false">
+        <inherit_fields>false</inherit_fields>
+        <from_cursor>
+          <index_select>
+            <index>'MC_T_USAGE_INTERVAL'</index>
+            <field name="id_usage_cycle">OBJECT.id_usage_cycle</field>
+          </index_select>
+        </from_cursor>
+        <child_field_mapping>
+          <def>CHILD.id_acc = OBJECT.id_acc</def>
+          <def>CHILD.id_usage_interval = CHILD.id_interval</def>
+          <def>CHILD.tx_status = CHILD.tx_interval_status</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record database="NetMeter" table="t_account">
+        <enum name="id_type">mc/id_type</enum>
+      </create_record>
+      <create_record database="NetMeter" table="t_account_mapper">
+        <enum name="nm_space">mc/nm_space</enum>
+      </create_record>
+      <create_record database="NetMeter" table="t_account_state">
+        <enum name="status">mc/account_states</enum>
+      </create_record>
+      <create_record database="NetMeter" table="t_acc_usage_cycle"/>
+      <create_record database="NetMeter" table="t_dm_account"/>
+      <create_record database="NetMeter" table="t_profile"/>
+      <create_record database="NetMeter" table="t_site_user">
+        <enum name="id_site">mc/t_localized_site</enum>
+      </create_record>
+      <create_record database="NetMeter" table="t_user_credentials">
+        <enum name="nm_space">mc/nm_space</enum>
+      </create_record>
+      <create_record database="NetMeter" table="t_payment_redirection"/>
+      <create_record database="NetMeter" table="t_principal_policy" selected="false"/>
+      <create_record database="NetMeter" table="t_account_state_history" selected="false">
+        <enum name="status">mc/account_states</enum>
+      </create_record>
+      <create_record database="NetMeter" table="t_payment_redir_history" selected="false"/>
+      <create_record database="NetMeter" table="t_policy_role" selected="false">
+        <alias name="id_role">t_policy_role__id_role</alias>
+        <enum name="id_role">mc/id_role_names</enum>
+      </create_record>
+      <create_record type="ACC_ANCESTOR" pass="2">
+        <inherit_fields>false</inherit_fields>
+        <from_cursor>
+          <proc_select>
+            <name>'get_account_ancestors'</name>
+          </proc_select>
+        </from_cursor>
+        <child_field_mapping>
+          <!-- These mappings simply let the tool recognize that these fields were set so they won't be marked as missing+required -->
+          <def>CHILD.id_ancestor = CHILD.id_ancestor</def>
+          <def>CHILD.id_descendent = CHILD.id_descendent</def>
+          <def>CHILD.num_generations = CHILD.num_generations</def>
+          <def>CHILD.tx_path = CHILD.tx_path</def>
+        </child_field_mapping>
+      </create_record>
+    </events>
+    <database_lookup>
+      <select_fields>mm.nm_login as parent_nm_login, mm.nm_space as parent_nm_space, case when mm.id_acc = 1 then '1' else '' end as parent_final</select_fields>
+      <from>
+        from t_account
+        inner join t_account_mapper on t_account.id_acc = t_account_mapper.id_acc
+        left join t_account_state on t_account.id_acc = t_account_state.id_acc
+        left join t_av_internal on t_account.id_acc = t_av_internal.id_acc
+        left join t_acc_usage_cycle on t_account.id_acc = t_acc_usage_cycle.id_acc
+        left join t_dm_account on t_account.id_acc = t_dm_account.id_acc
+        left join t_site_user on t_account_mapper.nm_login = t_site_user.nm_login
+        left join t_localized_site on t_site_user.id_site = t_localized_site.id_site and t_localized_site.nm_space = t_account_mapper.nm_space
+        left join t_profile on t_site_user.id_profile = t_profile.id_profile
+        left join t_user_credentials on t_account_mapper.nm_login = t_user_credentials.nm_login and t_account_mapper.nm_space = t_user_credentials.nm_space
+        left join t_payment_redirection on t_account.id_acc = t_payment_redirection.id_payee
+        left join t_account_ancestor on t_account.id_acc = t_account_ancestor.id_descendent
+        and t_account_ancestor.num_generations = 1
+        and t_account_ancestor.id_descendent != 1
+        and t_account_ancestor.vt_start &amp;lt;= $${GLOBAL.mvm_startup_date}
+        and t_account_ancestor.vt_end &amp;gt;= $${GLOBAL.mvm_startup_date}
+        left join t_account_mapper mm on t_account_ancestor.id_ancestor = mm.id_acc
+        where lower(t_account_mapper.nm_login) = lower($${OBJECT.parent_nm_login}) and lower(t_account_mapper.nm_space) = lower($${OBJECT.parent_nm_space})
+      </from>
+    </database_lookup>
+  </record_type>
+
+  <!-- Generate a record type for each account type, based on ACCOUNT -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>"select upper(name) as name, name as id_type_name, id_type from t_account_type"</query>
+    <cursor>TEMP.tcsr</cursor>
+    <loop>
+      <do>TEMP.procname = 'mc_create_record_type_at_' ~ OBJECT(TEMP.tcsr).name</do>
+      <do>TEMP.account_type = OBJECT(TEMP.tcsr).name</do>
+      <do>TEMP.av_tables = ''</do>
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query type='sql'>
+          "select lower(tavl.nm_table_name) as table_name
+          from t_account_type tat
+          inner join t_account_type_view_map tatvm on tat.id_type = tatvm.id_type
+          inner join t_enum_data ted on tatvm.id_account_view = ted.id_enum_data
+          inner join t_account_view_log tavl on ted.nm_enum_data = tavl.nm_account_view and tavl.nm_table_name not like '%t_av_contact'
+          where tat.name = $${TEMP.account_type}"
+        </query>
+        <query type='oracle'>
+          "select lower(tavl.nm_table_name) as table_name
+          from t_account_type tat
+          inner join t_account_type_view_map tatvm on tat.id_type = tatvm.id_type
+          inner join t_enum_data ted on tatvm.id_account_view = ted.id_enum_data
+          inner join t_account_view_log tavl on lower(ted.nm_enum_data) = lower(tavl.nm_account_view) and lower(tavl.nm_table_name) not like '%t_av_contact'
+          where upper(tat.name) = $${TEMP.account_type}"
+        </query>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <do>TEMP.selected = 'false'</do>
+          <if>
+            <condition>OBJECT(TEMP.csr).table_name eq 't_av_internal'</condition>
+            <then>
+              <do>TEMP.selected = 'true'</do>
+            </then>
+          </if>
+          <do>
+            TEMP.av_tables ~= "<![CDATA[
+              <create_record database='NetMeter' table='" ~ OBJECT(TEMP.csr).table_name ~ "' selected='" ~ TEMP.selected ~ "'/>
+            ]]>"
+          </do>
+        </loop>
+      </db_select>
+      <if>
+        <condition>TEMP.av_tables ne ''</condition>
+        <then>
+          <do>
+            TEMP.av_tables = "<![CDATA[
+              <events>
+                <field_mapping before_parent='true'>
+                  <def>OBJECT.id_type = '" ~ OBJECT(TEMP.tcsr).id_type_name ~ "'</def>
+                </field_mapping>
+            ]]>" ~ TEMP.av_tables ~ "<![CDATA[ </events> ]]>"
+          </do>
+        </then>
+      </if>
+      <do>
+        TEMP.proctext = "<![CDATA[
+          <proc name='" ~ TEMP.procname ~ "'>
+            <record_type name='ACCOUNT_" ~ OBJECT(TEMP.tcsr).name ~ "'>
+              <base_record_type>ACCOUNT</base_record_type>
+        ]]>" ~ TEMP.av_tables ~ "<![CDATA[ </record_type></proc> ]]>"
+      </do>
+      <execute_immediate>TEMP.proctext</execute_immediate>
+      <call_dynamic_proc_for_current_object>
+        <name>TEMP.procname</name>
+      </call_dynamic_proc_for_current_object>
+    </loop>
+  </db_select>
+
+  <record_type name="ACC_USAGE_INTERVAL">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="id_acc">OBJECT.id_acc</field>
+      <field name="id_usage_interval">OBJECT.id_usage_interval</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="id_acc">OBJECT.id_acc</field>
+    </parent_key>
+    <events>
+      <create_record database="NetMeter" table="t_acc_usage_interval"/>
+    </events>
+  </record_type>
+
+  <record_type name="ACC_ANCESTOR" visibility="private">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="id_ancestor">OBJECT.id_ancestor</field>
+      <field name="id_descendent">OBJECT.id_descendent</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="id_descendent">OBJECT.id_descendent</field>
+    </parent_key>
+    <events>
+      <create_record database="NetMeter" table="t_account_ancestor"/>
+      <create_record database="NetMeter" table="t_dm_account_ancestor"/>
+    </events>
+  </record_type>
+
+  <record_type name="PARENT_CAPABILITY_INSTANCE">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="id_cap_instance">OBJECT.id_cap_instance</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="id_acc">OBJECT.id_acc</field>
+    </parent_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.id_cap_instance = MC_SEQUENCE(id_cap_instance)</def>
+        <def>OBJECT.tx_guid = decode(OBJECT(GLOBAL.target_login).database_type, 'sql', '41424344', 'ABCD')</def>
+        <def>OBJECT.id_cap_type = 'manage account hierarchies'</def>
+      </field_mapping>
+      <create_record type="PATH_CAPABILITY_INSTANCE">
+        <inherit_fields>true</inherit_fields>
+          <from_cursor>
+          <proc_select>
+            <name>'select_numbered_fields'</name>
+            <param name='field_name'>'account_segment'</param>
+            <param name='proc_name'>'account_segment_value'</param>
+            <param name='pipe_if_no_matches'>1</param>
+          </proc_select>
+        </from_cursor>
+        <child_field_mapping>
+          <def>CHILD.id_parent_cap_instance = OBJECT.id_cap_instance</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record type="ENUM_CAPABILITY_INSTANCE">
+        <inherit_fields>true</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.id_parent_cap_instance = OBJECT.id_cap_instance</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record database="NetMeter" table="t_capability_instance">
+        <enum name="id_cap_type">mc/id_cap_type_names</enum>
+      </create_record>
+    </events>
+  </record_type>
+
+  <record_type name="PATH_CAPABILITY_INSTANCE">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="id_cap_instance">OBJECT.id_cap_instance</field>
+    </primary_key>
+    <parent_key namespace="PARENT_CAPABILITY_INSTANCE">
+      <field name="id_cap_instance">OBJECT.id_parent_cap_instance</field>
+    </parent_key>
+    <events>
+      <field_mapping>
+        <map>OBJECT.id_cap_instance = MC_SEQUENCE(id_cap_instance)</map>
+        <def>OBJECT.param_value = OBJECT.full_tx_path ~ '/-'</def>
+      </field_mapping>
+      <create_record database="NetMeter" table="t_capability_instance">
+        <enum name="id_cap_type">mc/id_cap_type_names</enum>
+      </create_record>
+      <create_record database="NetMeter" table="t_path_capability"/>
+    </events>
+  </record_type>
+
+  <record_type name="ENUM_CAPABILITY_INSTANCE">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="id_cap_instance">OBJECT.id_cap_instance</field>
+    </primary_key>
+    <parent_key namespace="PARENT_CAPABILITY_INSTANCE">
+      <field name="id_cap_instance">OBJECT.id_parent_cap_instance</field>
+    </parent_key>
+    <events>
+      <field_mapping>
+        <map>OBJECT.id_cap_instance = MC_SEQUENCE(id_cap_instance)</map>
+        <map>OBJECT.id_cap_type = 'unlimited capability'</map>
+        <def>OBJECT.tx_op = '='</def>
+        <def>OBJECT.param_value = 'WRITE'</def>
+      </field_mapping>
+      <create_record database="NetMeter" table="t_capability_instance">
+        <enum name="id_cap_type">mc/id_cap_type_names</enum>
+      </create_record>
+      <create_record database="NetMeter" table="t_enum_capability">
+        <enum name="param_value">Global/AccessLevel</enum>
+      </create_record>
+    </events>
+  </record_type>
+
+  <record_type name="ROLE">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+      <field name="id_role">OBJECT.id_role</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.id_policy = PARENT.id_policy</def>
+      </field_mapping>
+      <create_record database="NetMeter" table="t_policy_role">
+        <enum name="id_role">mc/id_role_names</enum>
+      </create_record>
+    </events>
+  </record_type>
+
+  <record_type name="MAPPER">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="nm_login">OBJECT.nm_login</field>
+      <field name="nm_space">OBJECT.nm_space</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.nm_space = 'mt'</def>
+        <def>OBJECT.id_acc = PARENT.id_acc</def>
+        <map>OBJECT.nm_login_check = MC_PROC(check_nm_login_uniqueness)</map>
+      </field_mapping>
+      <create_record database="NetMeter" table="t_account_mapper">
+        <enum name="nm_space">mc/nm_space</enum>
+      </create_record>
+    </events>
+  </record_type>
+
+  <record_type name="CONTACT">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+      <field name="c_contacttype">OBJECT.c_contacttype</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.id_acc = PARENT.id_acc</def>
+      </field_mapping>
+      <create_record database="NetMeter" table="t_av_contact"/>
+    </events>
+  </record_type>
+
+  <record_type name="SUBSCRIPTION">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+      <field name="id_po">OBJECT.id_po</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.id_acc = PARENT.id_acc</def>
+        <def>OBJECT.id_sub = MC_SEQUENCE(id_sub)</def>
+        <def>OBJECT.id_sub_ext = MC_GUID</def>
+        <def>OBJECT.dt_crt = PARENT.dt_crt</def>
+        <def>OBJECT.vt_start = OBJECT.dt_crt</def>
+        <def>OBJECT.vt_end = PARENT.vt_end</def>
+        <def>OBJECT.tt_start = PARENT.tt_start</def>
+        <def>OBJECT.tt_start = MC_SYSDAY</def>
+        <def>OBJECT.tt_end = PARENT.tt_end</def>
+        <def>OBJECT.tt_end = MC_MAXDATE</def>
+        <def>OBJECT.nm_currency_code = PARENT.c_currency</def>
+        <def>OBJECT.nm_currency_code = 'USD'</def>
+      </field_mapping>
+      <create_record database="NetMeter" table="t_sub">
+        <enum name="id_po">mc/id_po_names</enum>
+      </create_record>
+      <create_record database="NetMeter" table="t_sub_history" selected="false">
+        <enum name="id_po">mc/id_po_names</enum>
+      </create_record>
+    </events>
+    <database_lookup>
+      <select_fields>
+        t_account_mapper.nm_login as parent_nm_login, t_account_mapper.nm_space as parent_nm_space,
+        t_av_internal.c_currency as nm_currency_code, t_sub.id_sub as id_sub, t_sub.id_sub_ext as id_sub_ext, t_sub.id_acc as id_acc
+      </select_fields>
+      <from>
+        from t_sub
+        inner join t_account_mapper on t_sub.id_acc = t_account_mapper.id_acc
+        inner join t_av_internal on t_av_internal.id_acc = t_account_mapper.id_acc
+        inner join t_base_props on t_sub.id_po = t_base_props.id_prop and t_base_props.n_kind = 100 and lower(t_base_props.nm_name) = lower($${OBJECT.id_po})
+        where lower(t_account_mapper.nm_login) = lower($${OBJECT.parent_nm_login}) and lower(t_account_mapper.nm_space) = lower($${OBJECT.parent_nm_space})
+      </from>
+    </database_lookup>
+  </record_type>
+  <!--
+  inner join t_pl_map on t_pl_map.id_acc = t_sub.id_acc and t_pl_map.id_sub = t_sub.id_sub and t_pl_map.id_po = t_sub.id_po and t_pl_map.id_paramtable = $${OBJECT.id_paramtable}
+  inner join t_base_props as t_base_props2 on t_base_props2.id_prop = t_pl_map.id_pi_template and lower(t_base_props2.nm_name) = lower($${OBJECT.id_pi_template})
+  inner join t_pricelist on t_pricelist.id_pricelist = t_pl_map.id_pricelist and t_pricelist.n_type = 0
+  inner join t_rsched on t_rsched.id_pricelist = t_pricelist.id_pricelist and t_rsched.id_pt = t_pl_map.id_paramtable and t_rsched.id_pi_template = t_pl_map.id_pi_template
+  -->
+
+  <record_type name="SUBSCRIPTION_RATE">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+      <field name="id_po">OBJECT.id_po</field>
+      <field name="id_pi_template">OBJECT.id_pi_template</field>
+      <field name="id_paramtable">OBJECT.id_paramtable</field>
+    </primary_key>
+    <parent_key namespace="SUBSCRIPTION">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+      <field name="id_po">OBJECT.id_po</field>
+    </parent_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.id_audit = 0</def>
+        <def>OBJECT.id_acc = PARENT.id_acc</def>
+        <def>OBJECT.id_sub = PARENT.id_sub</def>
+        <def>OBJECT.nm_currency_code = PARENT.nm_currency_code</def>
+        <def>OBJECT.tt_start = PARENT.tt_start</def>
+        <def>OBJECT.tt_end = PARENT.tt_end</def>
+        <def>OBJECT.tt_start = PARENT.vt_start</def>
+        <def>OBJECT.tt_end = PARENT.vt_end</def>
+        <map>OBJECT.rate_schedule_key = OBJECT.id_acc ~ '|' ~ OBJECT.id_sub ~ '|' ~ OBJECT.id_paramtable ~ '|' ~ OBJECT.id_pi_template ~ '|' ~ OBJECT.tt_start ~ '|' ~ OBJECT.tt_end</map>
+        <map>OBJECT.rate_schedule = MC_PROC(store_rate_schedule)</map>
+      </field_mapping>
+      <field_mapping pass="2">
+        <def>OBJECT.n_order = MC_PROC(get_rate_schedule_order)</def>
+      </field_mapping>
+      <create_record type="PRICELIST" pass="2" selected="false">
+        <condition>OBJECT.rate_schedule eq '1'</condition>
+        <inherit_fields>false</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.n_type = 0</def>
+          <def>CHILD.nm_name = 'ICB rate for id_sub=' ~ PARENT.id_sub</def>
+          <def>CHILD.nm_desc = 'ICB rate for id_sub=' ~ PARENT.id_sub</def>
+          <def>CHILD.id_pricelist = MC_SEQUENCE(id_base_props)</def>
+          <def>OBJECT.id_pricelist = CHILD.id_pricelist</def>
+          <def>CHILD.nm_currency_code = OBJECT.nm_currency_code</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record type="RATE_SCHEDULE" pass="2" selected="false">
+        <condition>OBJECT.rate_schedule eq '1'</condition>
+        <inherit_fields>false</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.id_pricelist = OBJECT.id_pricelist</def>
+          <def>CHILD.id_sched = OBJECT.id_sched</def>
+          <def>CHILD.id_pt = OBJECT.id_paramtable</def>
+          <def>CHILD.id_pi_template = OBJECT.id_pi_template</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record type="PRICELIST_MAP" pass="2" selected="false">
+        <condition>OBJECT.rate_schedule eq '1'</condition>
+        <inherit_fields>false</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.id_acc = PARENT.id_acc</def>
+          <def>CHILD.id_sub = PARENT.id_sub</def>
+          <def>CHILD.id_po = OBJECT.id_po</def>
+          <def>CHILD.id_pricelist = OBJECT.id_pricelist</def>
+          <def>CHILD.id_paramtable = OBJECT.id_paramtable</def>
+          <def>CHILD.id_pi_template = OBJECT.id_pi_template</def>
+          <def>CHILD.id_pi_type = MC_MAPPING('mc/id_pi_names', OBJECT.id_pi_template)</def>
+          <def>CHILD.id_pi_instance = MC_MAPPING('mc/id_pi_instances', OBJECT.id_po ~ '||' ~ OBJECT.id_pi_template)</def>
+        </child_field_mapping>
+      </create_record>
+    </events>
+    <stable_sort>1</stable_sort>
+  </record_type>
+
+  <record_type name="GROUP_SUBSCRIPTION">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="tx_name">OBJECT.tx_name</field>
+      <field name="id_po">OBJECT.id_po</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.id_acc = PARENT.id_acc</def>
+        <def>OBJECT.id_sub = MC_SEQUENCE(id_sub)</def>
+        <def>OBJECT.id_sub_ext = MC_GUID</def>
+        <def>OBJECT.dt_crt = PARENT.dt_crt</def>
+          <!--<def>OBJECT.dt_crt = OBJECT.tt_start</def>-->
+        <def>OBJECT.vt_start = OBJECT.dt_crt</def>
+        <def>OBJECT.vt_end = PARENT.vt_end</def>
+        <def>OBJECT.tt_start = OBJECT.tt_start</def>
+        <def>OBJECT.tt_start = MC_SYSDAY</def>
+        <def>OBJECT.tt_end = OBJECT.tt_end</def>
+        <def>OBJECT.tt_end = MC_MAXDATE</def>
+        <def>OBJECT.id_group = MC_SEQUENCE(id_group)</def>
+        <def>OBJECT.id_group_ext = OBJECT.id_sub_ext</def>
+        <def>OBJECT.b_visable = 'N'</def>
+        <def>OBJECT.b_supportgroupops = 'Y'</def>
+        <def>OBJECT.b_proportional = 'Y'</def>
+        <def>OBJECT.id_usage_cycle = PARENT.id_usage_cycle</def>
+        <def>OBJECT.id_corporate_account = PARENT.id_acc</def>
+        <def>OBJECT.nm_currency_code = PARENT.c_currency</def>
+        <def>OBJECT.nm_currency_code = 'USD'</def>
+        <def>OBJECT.n_value = OBJECT.n_value</def>
+        <map>OBJECT.group_sub = MC_PROC(store_hierarchy_reference, record_type=&gt;'GROUP_SUBSCRIPTION', key=&gt;OBJECT.tx_name, object=&gt;OBJECT.object_id)</map>
+      </field_mapping>
+      <create_record database="NetMeter" table="t_group_sub"/>
+      <create_record database="NetMeter" table="t_sub">
+        <enum name="id_po">mc/id_po_names</enum>
+        <child_field_mapping>
+          <map>CHILD.id_acc = ''</map>
+        </child_field_mapping>
+      </create_record>
+      <create_record database="NetMeter" table="t_sub_history" selected="false">
+        <enum name="id_po">mc/id_po_names</enum>
+        <child_field_mapping>
+          <map>CHILD.id_acc = ''</map>
+        </child_field_mapping>
+      </create_record>
+      <create_record database="NetMeter" table="t_gsub_recur_map" selected="false">
+        <condition>OBJECT.n_value ne ''</condition>
+        <inherit_fields>false</inherit_fields>
+        <from_cursor>
+          <index_select>
+            <!-- Changed to new index by TCF August 2014. -->
+            <!--<index>'MC_PO_TO_PI_RECUR_MAPPING'</index>
+            <field name="id_po">lc(OBJECT.id_po)</field>-->
+            <index>'MC_TBASEPROPS_TO_GSUB_MAPPING'</index>
+            <field name="id_po">lc(OBJECT.id_po)</field>
+          </index_select>
+        </from_cursor>
+        <child_field_mapping>
+          <def>CHILD.id_acc = PARENT.id_acc</def>
+          <def>CHILD.id_group = PARENT.id_group</def>
+          <def>CHILD.id_prop = CHILD.id_pi_instance</def>
+          <def>CHILD.vt_start = PARENT.vt_start</def>
+          <def>CHILD.vt_end = PARENT.vt_end</def>
+          <def>CHILD.tt_start = PARENT.tt_start</def>
+          <def>CHILD.tt_end = PARENT.tt_end</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record database="NetMeter" table="t_recur_value" selected="false">
+        <condition>OBJECT.n_value ne ''</condition>
+        <inherit_fields>false</inherit_fields>
+        <from_cursor>
+          <index_select>
+            <!-- Changed to new index by TCF August 2014. -->
+            <!--<index>'MC_PO_TO_PI_UDRC_MAPPING'</index>
+            <field name="id_po">lc(OBJECT.id_po)</field>-->
+            <index>'MC_TBASEPROPS_TO_GSUB_MAPPING'</index>
+            <field name="id_po">lc(OBJECT.id_po)</field>
+          </index_select>
+        </from_cursor>
+        <child_field_mapping>
+          <def>CHILD.id_sub = PARENT.id_sub</def>
+          <def>CHILD.id_prop = CHILD.id_pi_instance</def>
+          <!--<def>CHILD.n_value = PARENT.num_licenses</def>-->
+          <!--<def>CHILD.n_value = PARENT.numoflicenses</def>-->
+          <def>CHILD.n_value = PARENT.n_values</def>
+          <def>CHILD.vt_start = PARENT.vt_start</def>
+          <def>CHILD.vt_end = PARENT.vt_end</def>
+          <def>CHILD.tt_start = PARENT.tt_start</def>
+          <def>CHILD.tt_end = PARENT.tt_end</def>
+        </child_field_mapping>
+      </create_record>
+    </events>
+    <database_lookup>
+      <select_fields>
+          t_av_internal.c_currency as nm_currency_code, t_sub.id_sub as id_sub, t_group_sub.id_corporate_account as id_acc,
+          t_sub.id_sub_ext as id_sub_ext, t_group_sub.id_group as id_group, t_group_sub.id_group_ext as id_group_ext
+      </select_fields>
+      <from>
+        from t_group_sub
+        inner join t_sub on t_group_sub.id_group = t_sub.id_group
+        inner join t_av_internal on t_av_internal.id_acc = t_group_sub.id_corporate_account
+        inner join t_base_props on t_sub.id_po = t_base_props.id_prop and t_base_props.n_kind = 100 and lower(t_base_props.nm_name) = lower($${OBJECT.id_po})
+        where t_group_sub.tx_name = $${OBJECT.tx_name}
+      </from>
+    </database_lookup>
+    <sort_key>!</sort_key>
+  </record_type>
+
+  <record_type name="GROUP_SUBSCRIPTION_MEMBER">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+      <field name="tx_name">OBJECT.tx_name</field>
+      <field name="id_po">OBJECT.id_po</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.id_acc = PARENT.id_acc</def>
+        <map>OBJECT.group_sub = MC_PROC(lookup_hierarchy_reference, record_type=&gt;'GROUP_SUBSCRIPTION', key=&gt;OBJECT.tx_name)</map>
+        <def>OBJECT.id_group = OBJECT(OBJECT.group_sub).id_group</def>
+        <def>OBJECT.vt_start = PARENT.vt_start</def>
+        <def>OBJECT.vt_end = PARENT.vt_end</def>
+        <def>OBJECT.tt_start = OBJECT.vt_start</def>
+        <def>OBJECT.tt_end = OBJECT.vt_end</def>
+      </field_mapping>
+      <create_record database="NetMeter" table="t_gsubmember"/>
+      <create_record database="NetMeter" table="t_gsubmember_historical"/>
+    </events>
+  </record_type>
+
+  <record_type name="GROUP_SUBSCRIPTION_RATE">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="tx_name">OBJECT.tx_name</field>
+      <field name="id_po">OBJECT.id_po</field>
+      <field name="id_pi_template">OBJECT.id_pi_template</field>
+      <field name="id_paramtable">OBJECT.id_paramtable</field>
+    </primary_key>
+    <parent_key namespace="GROUP_SUBSCRIPTION">
+      <field name="tx_name">OBJECT.tx_name</field>
+      <field name="id_po">OBJECT.id_po</field>
+    </parent_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.id_audit = 0</def>
+        <def>OBJECT.id_acc = PARENT.id_acc</def>
+        <def>OBJECT.id_sub = PARENT.id_sub</def>
+        <def>OBJECT.nm_currency_code = PARENT.nm_currency_code</def>
+        <def>OBJECT.tt_start = PARENT.tt_start</def>
+        <def>OBJECT.tt_end = PARENT.tt_end</def>
+        <def>OBJECT.tt_start = PARENT.vt_start</def>
+        <def>OBJECT.tt_end = PARENT.vt_end</def>
+        <map>OBJECT.group_sub = MC_PROC(lookup_hierarchy_reference, record_type=&gt;'GROUP_SUBSCRIPTION', key=&gt;OBJECT.tx_name)</map>
+        <def>OBJECT.id_group = OBJECT(OBJECT.group_sub).id_group</def>
+        <map>OBJECT.rate_schedule_key = PARENT.id_acc ~ '|' ~ OBJECT.id_group ~ '|' ~ OBJECT.id_paramtable ~ '|' ~ OBJECT.id_pi_template ~ '|' ~ OBJECT.tt_start ~ '|' ~ OBJECT.tt_end</map>
+        <map>OBJECT.rate_schedule = MC_PROC(store_rate_schedule)</map>
+      </field_mapping>
+      <field_mapping pass="2">
+        <def>OBJECT.n_order = MC_PROC(get_rate_schedule_order)</def>
+      </field_mapping>
+      <create_record type="PRICELIST" pass="2" selected="false">
+        <condition>OBJECT.rate_schedule eq '1'</condition>
+        <inherit_fields>false</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.n_type = 0</def>
+          <def>CHILD.nm_name = 'ICB rate for id_sub=' ~ PARENT.id_sub</def>
+          <def>CHILD.nm_desc = 'ICB rate for id_sub=' ~ PARENT.id_sub</def>
+          <def>CHILD.id_pricelist = MC_SEQUENCE(id_base_props)</def>
+          <def>OBJECT.id_pricelist = CHILD.id_pricelist</def>
+          <def>CHILD.nm_currency_code = OBJECT.nm_currency_code</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record type="RATE_SCHEDULE" pass="2" selected="false">
+        <condition>OBJECT.rate_schedule eq '1'</condition>
+        <inherit_fields>false</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.id_pricelist = OBJECT.id_pricelist</def>
+          <def>CHILD.id_sched = OBJECT.id_sched</def>
+          <def>CHILD.id_pt = OBJECT.id_paramtable</def>
+          <def>CHILD.id_pi_template = OBJECT.id_pi_template</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record type="PRICELIST_MAP" pass="2" selected="false">
+        <condition>OBJECT.rate_schedule eq '1'</condition>
+        <inherit_fields>false</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.id_acc = PARENT.id_acc</def>
+          <def>CHILD.id_sub = PARENT.id_sub</def>
+          <def>CHILD.id_po = OBJECT.id_po</def>
+          <def>CHILD.id_pricelist = OBJECT.id_pricelist</def>
+          <def>CHILD.id_paramtable = OBJECT.id_paramtable</def>
+          <def>CHILD.id_pi_template = OBJECT.id_pi_template</def>
+          <def>CHILD.id_pi_type = MC_MAPPING('mc/id_pi_names', OBJECT.id_pi_template)</def>
+          <def>CHILD.id_pi_instance = MC_MAPPING('mc/id_pi_instances', OBJECT.id_po ~ '||' ~ OBJECT.id_pi_template)</def>
+        </child_field_mapping>
+      </create_record>
+    </events>
+    <stable_sort>1</stable_sort>
+  </record_type>
+
+  <record_type name="PRICELIST_MAP">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="id_sub">OBJECT.id_sub</field>
+      <field name="id_po">OBJECT.id_po</field>
+    </primary_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.dt_modified = MC_SYSDATE</def>
+        <def>OBJECT.b_canicb = 'Y'</def>
+      </field_mapping>
+      <create_record database="NetMeter" table="t_pl_map">
+        <enum name="id_pi_template">mc/id_pi_template_names</enum>
+        <enum name="id_po">mc/id_po_names</enum>
+      </create_record>
+    </events>
+  </record_type>
+
+  <record_type name="RATE_SCHEDULE">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="id_sched">OBJECT.id_sched</field>
+    </primary_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.nm_desc = OBJECT.nm_name</def>
+        <def>OBJECT.dt_mod = MC_SYSDATE</def>
+      </field_mapping>
+      <create_record type="BASE_PROPERTY">
+        <inherit_fields>false</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.n_kind = 130</def>
+          <def>CHILD.nm_name = OBJECT.nm_name</def>
+          <def>CHILD.id_prop = OBJECT.id_sched</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record type="EFFECTIVE_DATE">
+        <inherit_fields>false</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.id_eff_date = MC_SEQUENCE(id_base_props)</def>
+          <def>OBJECT.id_eff_date = CHILD.id_eff_date</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record database="NetMeter" table="t_rsched">
+        <enum name="id_pi_template">mc/id_pi_template_names</enum>
+      </create_record>
+    </events>
+  </record_type>
+
+  <!--
+    Possible values of t_pricelist.n_type:
+    0 = ICB Price List
+    1 = Regular (Non-ICB) Price List
+    2 = Product Offering non-shared Price List
+  -->
+  <record_type name="PRICELIST">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="id_eff_date">OBJECT.id_eff_date</field>
+    </primary_key>
+    <events>
+      <create_record type="BASE_PROPERTY">
+        <inherit_fields>false</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.n_kind = 150</def>
+          <def>CHILD.nm_name = OBJECT.nm_name</def>
+          <def>CHILD.nm_desc = OBJECT.nm_name</def>
+          <def>CHILD.id_prop = OBJECT.id_pricelist</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record database="NetMeter" table="t_pricelist"/>
+    </events>
+  </record_type>
+
+  <record_type name="EFFECTIVE_DATE">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="id_eff_date">OBJECT.id_eff_date</field>
+    </primary_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.dt_start = GLOBAL.earlydate</def>
+        <def>OBJECT.n_begintype = 1</def>
+        <def>OBJECT.n_endtype = 4</def>
+        <def>OBJECT.n_beginoffset = 0</def>
+        <def>OBJECT.n_endoffset = 0</def>
+      </field_mapping>
+      <create_record type="BASE_PROPERTY">
+        <inherit_fields>false</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.n_kind = 160</def>
+          <def>CHILD.id_prop = OBJECT.id_eff_date</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record database="NetMeter" table="t_effectivedate"/>
+    </events>
+  </record_type>
+
+  <record_type name="BASE_PROPERTY">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="id_prop">OBJECT.id_prop</field>
+    </primary_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.n_name = 0</def>
+        <def>OBJECT.n_desc = 0</def>
+        <def>OBJECT.n_display_name = 0</def>
+        <def>OBJECT.b_approved = 'N'</def>
+        <def>OBJECT.b_archive = 'N'</def>
+      </field_mapping>
+      <create_record type="DESCRIPTION">
+        <condition>OBJECT.nm_name ne ''</condition>
+        <inherit_fields>false</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.tx_desc = OBJECT.nm_name</def>
+          <def>CHILD.id_mt = MC_SEQUENCE(id_mt)</def>
+          <def>OBJECT.n_name = CHILD.id_mt</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record type="DESCRIPTION">
+        <condition>OBJECT.nm_desc ne ''</condition>
+        <inherit_fields>false</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.tx_desc = OBJECT.nm_desc</def>
+          <def>CHILD.id_mt = MC_SEQUENCE(id_mt)</def>
+          <def>OBJECT.n_desc = CHILD.id_mt</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record type="DESCRIPTION">
+        <condition>OBJECT.nm_display_name ne ''</condition>
+        <inherit_fields>false</inherit_fields>
+        <child_field_mapping>
+          <def>CHILD.tx_desc = OBJECT.nm_display_name</def>
+          <def>CHILD.id_mt = MC_SEQUENCE(id_mt)</def>
+          <def>OBJECT.n_display_name = CHILD.id_mt</def>
+        </child_field_mapping>
+      </create_record>
+      <create_record database="NetMeter" table="t_base_props"/>
+    </events>
+  </record_type>
+
+  <record_type name="DESCRIPTION">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="id_desc">OBJECT.id_desc</field>
+    </primary_key>
+    <events>
+      <field_mapping>
+        <def>OBJECT.id_desc = OBJECT.id_mt</def>
+        <def>OBJECT.id_lang_code = GLOBAL.default_id_lang_code</def>
+      </field_mapping>
+      <create_record database="NetMeter" table="t_mt_id"/>
+      <create_record database="NetMeter" table="t_description"/>
+    </events>
+  </record_type>
+
+  <!-- Generate a record type for each parameter table, based on SUBSCRIPTION_RATE/GROUP_SUBSCRIPTION_RATE -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query type='sql'>
+      "select id_paramtable, lower(nm_instance_tablename) as ltable, upper(nm_instance_tablename) as utable,
+      case when lower(nm_instance_tablename) like 't_pt_%' then substring(lower(nm_instance_tablename), 6, 9999) else lower(nm_instance_tablename) end as id_pt_name
+      from t_rulesetdefinition"
+    </query>
+    <query type='oracle'>
+      "select id_paramtable, lower(nm_instance_tablename) as ltable, upper(nm_instance_tablename) as utable,
+      case when lower(nm_instance_tablename) like 't_pt_%' then substr(lower(nm_instance_tablename), 6, 9999) else lower(nm_instance_tablename) end as id_pt_name
+      from t_rulesetdefinition"
+    </query>
+    <cursor>TEMP.tcsr</cursor>
+    <loop>
+      <do>TEMP.procname = 'mc_create_record_type_pt_' ~ OBJECT(TEMP.tcsr).id_pt_name</do>
+      <do>
+        TEMP.pt_tables = "<![CDATA[
+          <events>
+            <create_record database='NetMeter' table='" ~ OBJECT(TEMP.tcsr).ltable ~ "' selected='false' pass='2'/>
+          </events>
+        ]]>"
+      </do>
+      <do>
+        TEMP.proctext = "<![CDATA[
+          <proc name='" ~ TEMP.procname ~ "'>
+            <record_type name='SUBSCRIPTION_RATE_" ~ OBJECT(TEMP.tcsr).utable ~ "'>
+              <base_record_type>SUBSCRIPTION_RATE</base_record_type>
+              ]]>" ~ TEMP.pt_tables ~ "<![CDATA[
+            </record_type>
+            <record_type name='GROUP_SUBSCRIPTION_RATE_" ~ OBJECT(TEMP.tcsr).utable ~ "'>
+              <base_record_type>GROUP_SUBSCRIPTION_RATE</base_record_type>
+              ]]>" ~ TEMP.pt_tables ~ "<![CDATA[
+            </record_type>
+          </proc>
+        ]]>"
+      </do>
+      <execute_immediate>TEMP.proctext</execute_immediate>
+      <call_dynamic_proc_for_current_object>
+        <name>TEMP.procname</name>
+      </call_dynamic_proc_for_current_object>
+    </loop>
+  </db_select>
+
+  <record_type name="INVOICE">
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <primary_key>
+      <field name="id_invoice">OBJECT.id_invoice</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events>
+      <create_record database="NetMeter" table="t_invoice"/>
+    </events>
+  </record_type>
+
+  <!-- Mark all record types in this file as "core" types -->
+  <do>GLOBAL.mc_done_core_record_types = '1'</do>
+  <index_select_keys>
+    <index>'MC_RECORD_TYPES'</index>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <do>TEMP.update = index_update('MC_RECORD_TYPES', record_type=>OBJECT(TEMP.csr).record_type, core=>'1')</do>
+    </loop>
+  </index_select_keys>
+</proc>

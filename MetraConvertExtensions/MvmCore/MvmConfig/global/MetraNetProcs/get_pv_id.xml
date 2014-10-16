@@ -1,0 +1,49 @@
+<proc name='get_pv_id'>
+  <param name='id_view' mode='out'/>
+  <param name='table_name'/>
+  <run_once>
+
+    <define_memory_index>
+      <index>'PV_TABLE_ID_VIEW_MAP'</index>
+      <key_field>'table_name'</key_field>
+      <field>'id_view'</field>
+    </define_memory_index>
+    
+    <db_select>
+      <login_object>GLOBAL.target_login</login_object>
+      <query type ='sql'>
+        "SELECT id_view, LOWER(nm_table_name) table_name, LOWER(SUBSTRING(nm_table_name,6,99)) view_name FROM t_prod_view"
+      </query>
+      <query type ='oracle'>
+        "SELECT id_view, LOWER(nm_table_name) table_name, LOWER(SUBSTR(nm_table_name,6,99)) view_name FROM t_prod_view"
+      </query>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <index_insert>
+          <index>'PV_TABLE_ID_VIEW_MAP'</index>
+          <field name='table_name'>OBJECT(TEMP.csr).table_name</field>
+          <field name='id_view'>OBJECT(TEMP.csr).id_view</field>
+        </index_insert>
+        <index_insert>
+          <index>'PV_TABLE_ID_VIEW_MAP'</index>
+          <field name='table_name'>OBJECT(TEMP.csr).view_name</field>
+          <field name='id_view'>OBJECT(TEMP.csr).id_view</field>
+        </index_insert>
+      </loop>
+    </db_select>
+  </run_once>
+
+  <to_lower>
+    <input>TEMP.table_name</input>
+    <output>TEMP.table_name</output>
+  </to_lower>
+  
+  <index_select>
+    <index>'PV_TABLE_ID_VIEW_MAP'</index>
+    <field name='table_name'>TEMP.table_name</field>
+    <cursor>TEMP.csr</cursor>
+    <then>
+      <do>TEMP.id_view=OBJECT(TEMP.csr).id_view</do>
+    </then>
+  </index_select>
+</proc>

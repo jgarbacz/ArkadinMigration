@@ -1,0 +1,42 @@
+<proc name="pass_write_20">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'c_orderstatus'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumaccount/omlockstatus'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_effectivemgmtsubsidiary'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumglobal/subsidiaryname'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_av_common.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_acc">OBJECT.id_acc</field>
+      <field name="c_createdby">OBJECT.c_createdby</field>
+      <field name="c_createddate">OBJECT.c_createddate</field>
+      <field name="c_modifiedby">OBJECT.c_modifiedby</field>
+      <field name="c_modifieddate">OBJECT.c_modifieddate</field>
+      <field name="c_orderstatus">OBJECT.c_orderstatus</field>
+      <field name="c_custpartnerextid">OBJECT.c_custpartnerextid</field>
+      <field name="c_customernodename">OBJECT.c_customernodename</field>
+      <field name="c_commentc">OBJECT.c_commentc</field>
+      <field name="c_logousername">OBJECT.c_logousername</field>
+      <field name="c_effectivemgmtsubsidiary">OBJECT.c_effectivemgmtsubsidiary</field>
+    </data>
+  </print_record>
+</proc>

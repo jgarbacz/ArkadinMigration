@@ -1,0 +1,20 @@
+<proc name="sorting_consumer_kv_core_group_subscription_rate_t_pt_tariffgrouptobandmapping">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="phase" />
+  <param name="stage" />
+  <proc_select>
+    <name>'read_kv_return_all_core_group_subscription_rate_t_pt_tariffgrouptobandmapping'</name>
+    <param name="filename">OBJECT.filename</param>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <call_proc_for_object>
+        <name>'sorting_core_group_subscription_rate_t_pt_tariffgrouptobandmapping'</name>
+        <object_id>TEMP.csr</object_id>
+        <param name="phase">TEMP.phase</param>
+        <param name="stage">TEMP.stage</param>
+      </call_proc_for_object>
+    </loop>
+  </proc_select>
+</proc>

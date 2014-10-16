@@ -1,0 +1,8 @@
+<procs>
+
+<!-- This proc defines the way objects flow through the system -->
+<proc name='setup_processing'>
+</proc>
+
+</procs>
+

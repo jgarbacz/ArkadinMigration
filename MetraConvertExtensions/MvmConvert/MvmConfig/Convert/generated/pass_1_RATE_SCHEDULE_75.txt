@@ -1,0 +1,189 @@
+<proc name="pass_1_75">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <if>
+    <condition>OBJECT.nm_desc eq ''</condition>
+    <then>
+      <do>OBJECT.nm_desc = OBJECT.nm_name</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.dt_mod eq ''</condition>
+    <then>
+      <do>OBJECT.dt_mod = GLOBAL.mvm_startup_date</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'dt_mod'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'datetime'</datatype>
+        <format>'yyyy-MM-dd HH:mm:ss'</format>
+        <nullable>'1'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT._mc_error ne ''</condition>
+    <then>
+      <return />
+    </then>
+  </if>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'81'</feedback_name>
+    <object_type>'BASE_PROPERTY'</object_type>
+    <object_id>TEMP.GeNsYm740__mc</object_id>
+    <inherit_parent>0</inherit_parent>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <do>OBJECT(TEMP.GeNsYm740__mc).object_type = 'BASE_PROPERTY'</do>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm740__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm740__mc).n_kind eq ''</condition>
+    <then>
+      <do>OBJECT(TEMP.GeNsYm740__mc).n_kind = 130</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm740__mc).nm_name eq ''</condition>
+    <then>
+      <do>OBJECT(TEMP.GeNsYm740__mc).nm_name = OBJECT.nm_name</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm740__mc).id_prop eq ''</condition>
+    <then>
+      <do>OBJECT(TEMP.GeNsYm740__mc).id_prop = OBJECT.id_sched</do>
+    </then>
+  </if>
+  <do>OBJECT(TEMP.GeNsYm740__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm740__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm740__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm740__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm740__mc)._mc_record_type_id = 81</do>
+  <do>OBJECT(TEMP.GeNsYm740__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm740__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm740__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm740__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm740__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 'BASE_PROPERTY' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm740__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm740__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm740__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm740__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'79'</feedback_name>
+    <object_type>'EFFECTIVE_DATE'</object_type>
+    <object_id>TEMP.GeNsYm741__mc</object_id>
+    <inherit_parent>0</inherit_parent>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <do>OBJECT(TEMP.GeNsYm741__mc).object_type = 'EFFECTIVE_DATE'</do>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm741__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm741__mc).id_eff_date eq ''</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'sequence_get_next_id_base_props'</name>
+        <param name="value">TEMP.GeNsYm742__MC_SEQUENCE</param>
+      </call_proc_for_current_object>
+      <do>OBJECT(TEMP.GeNsYm741__mc).id_eff_date = TEMP.GeNsYm742__MC_SEQUENCE</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_eff_date'</field>
+        <object_id>TEMP.GeNsYm741__mc</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.id_eff_date eq ''</condition>
+    <then>
+      <do>OBJECT.id_eff_date = OBJECT(TEMP.GeNsYm741__mc).id_eff_date</do>
+    </then>
+  </if>
+  <do>OBJECT(TEMP.GeNsYm741__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm741__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm741__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm741__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm741__mc)._mc_record_type_id = 79</do>
+  <do>OBJECT(TEMP.GeNsYm741__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm741__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm741__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm741__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm741__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 'EFFECTIVE_DATE' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm741__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm741__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm741__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm741__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'76'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_RSCHED'</object_type>
+    <object_id>TEMP.GeNsYm743__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm743__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm743__mc).id_sched = OBJECT.id_sched</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc).id_pt = OBJECT.id_pt</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc).id_eff_date = OBJECT.id_eff_date</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc).id_pricelist = OBJECT.id_pricelist</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc).dt_mod = OBJECT.dt_mod</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc).id_pi_template = OBJECT.id_pi_template</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc)._mc_record_type_id = 76</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_rsched' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm743__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm743__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm743__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm743__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+</proc>

@@ -1,0 +1,8 @@
+<proc name="to_lower">
+  <param name="input"/>
+  <param name="return_value" mode="out"/>
+  <to_lower>
+    <input>TEMP.input</input>
+    <output>TEMP.return_value</output>
+  </to_lower>
+</proc>

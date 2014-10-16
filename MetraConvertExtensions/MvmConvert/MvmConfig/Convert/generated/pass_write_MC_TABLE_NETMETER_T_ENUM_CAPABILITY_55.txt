@@ -1,0 +1,27 @@
+<proc name="pass_write_55">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'param_value'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'Global/AccessLevel'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_enum_capability.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_cap_instance">OBJECT.id_cap_instance</field>
+      <field name="tx_param_name">OBJECT.tx_param_name</field>
+      <field name="tx_op">OBJECT.tx_op</field>
+      <field name="param_value">OBJECT.param_value</field>
+    </data>
+  </print_record>
+</proc>

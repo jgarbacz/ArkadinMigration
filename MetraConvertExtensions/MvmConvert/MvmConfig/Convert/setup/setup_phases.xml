@@ -1,0 +1,127 @@
+<proc name="setup_phases">
+
+  <!--
+  Phases define dependencies between migration object types.  All objects in phase N will
+  be processed (and visible to other child processes) before any objects in phase N+1.
+  -->
+
+  <if>
+    <condition>GLOBAL.phase eq ''</condition>
+    <then>
+      <do>GLOBAL.phase = 'AccountPhase'</do>
+    </then>
+  </if>
+
+  <do>TEMP.phase_id = 1</do>
+
+  <!-- PRODUCT CATALOG PHASE -->
+  <do>TEMP.phase_name = 'ProductCatalogPhase'</do>
+  <index_insert>
+    <index>'MC_PHASES'</index>
+    <field name='phase'>TEMP.phase_name</field>
+    <field name='phase_id'>TEMP.phase_id</field>
+  </index_insert>
+  <do>TEMP.phase_id += 1</do>
+
+  <do>TEMP.stage_id = 1</do>
+  <do>TEMP.stage_name = 'LegacyStage'</do>
+  <index_insert>
+    <index>'MC_STAGES'</index>
+    <field name='phase'>TEMP.phase_name</field>
+    <field name='stage'>TEMP.stage_name</field>
+    <field name='stage_id'>TEMP.stage_id</field>
+    <field name='next_stage'>'MetraNetStage'</field>
+  </index_insert>
+  <do>TEMP.stage_id += 1</do>
+  <do>TEMP.stage_name = 'MetraNetStage'</do>
+  <index_insert>
+    <index>'MC_STAGES'</index>
+    <field name='phase'>TEMP.phase_name</field>
+    <field name='stage'>TEMP.stage_name</field>
+    <field name='stage_id'>TEMP.stage_id</field>
+  </index_insert>
+  <do>TEMP.stage_id += 1</do>
+
+  <!-- GROUP SUBSCRIPTION PHASE -->
+  <do>TEMP.phase_name = 'GroupSubscriptionPhase'</do>
+  <index_insert>
+    <index>'MC_PHASES'</index>
+    <field name='phase'>TEMP.phase_name</field>
+    <field name='phase_id'>TEMP.phase_id</field>
+  </index_insert>
+  <do>TEMP.phase_id += 1</do>
+
+  <do>TEMP.stage_id = 1</do>
+  <do>TEMP.stage_name = 'LegacyStage'</do>
+  <index_insert>
+    <index>'MC_STAGES'</index>
+    <field name='phase'>TEMP.phase_name</field>
+    <field name='stage'>TEMP.stage_name</field>
+    <field name='stage_id'>TEMP.stage_id</field>
+    <field name='next_stage'>'MetraNetStage'</field>
+  </index_insert>
+  <do>TEMP.stage_id += 1</do>
+  <do>TEMP.stage_name = 'MetraNetStage'</do>
+  <index_insert>
+    <index>'MC_STAGES'</index>
+    <field name='phase'>TEMP.phase_name</field>
+    <field name='stage'>TEMP.stage_name</field>
+    <field name='stage_id'>TEMP.stage_id</field>
+  </index_insert>
+  <do>TEMP.stage_id += 1</do>
+
+  <!-- ACCOUNT PHASE -->
+  <do>TEMP.phase_name = 'AccountPhase'</do>
+  <index_insert>
+    <index>'MC_PHASES'</index>
+    <field name='phase'>TEMP.phase_name</field>
+    <field name='phase_id'>TEMP.phase_id</field>
+  </index_insert>
+  <do>TEMP.phase_id += 1</do>
+
+  <do>TEMP.stage_id = 1</do>
+  <do>TEMP.stage_name = 'LegacyStage'</do>
+  <index_insert>
+    <index>'MC_STAGES'</index>
+    <field name='phase'>TEMP.phase_name</field>
+    <field name='stage'>TEMP.stage_name</field>
+    <field name='stage_id'>TEMP.stage_id</field>
+    <field name='next_stage'>'MetraNetStage'</field>
+  </index_insert>
+  <do>TEMP.stage_id += 1</do>
+  <do>TEMP.stage_name = 'MetraNetStage'</do>
+  <index_insert>
+    <index>'MC_STAGES'</index>
+    <field name='phase'>TEMP.phase_name</field>
+    <field name='stage'>TEMP.stage_name</field>
+    <field name='stage_id'>TEMP.stage_id</field>
+  </index_insert>
+  <do>TEMP.stage_id += 1</do>
+
+  <initialize namespace="global">
+    <define_memory_index>
+      <index>'MC_PHASES'</index>
+      <unique>'1'</unique>
+      <key_field>'phase'</key_field>
+      <field>'phase_id'</field>
+    </define_memory_index>
+
+    <define_memory_index>
+      <index>'MC_STAGES'</index>
+      <use_nested_keys>'1'</use_nested_keys>
+      <unique>'1'</unique>
+      <key_field>'phase'</key_field>
+      <key_field>'stage'</key_field>
+      <field>'stage_id'</field>
+      <field>'next_stage'</field>
+    </define_memory_index>
+
+    <define_memory_index>
+      <index>'MC_STAGE_INPUT_RECORDS'</index>
+      <key_field>'phase'</key_field>
+      <key_field>'stage'</key_field>
+      <field>'record_type'</field>
+    </define_memory_index>
+  </initialize>
+
+</proc>

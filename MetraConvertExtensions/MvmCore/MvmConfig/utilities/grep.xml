@@ -1,0 +1,122 @@
+<procs>
+
+<proc_info>
+  <category>Search</category>
+  <description>
+    Searches through a set of files (specified by a glob pattern) for lines matching a regular expression.
+    Roughly equivalent to the unix grep command.
+  </description>
+</proc_info>
+<proc name='grep'>
+  <param name='regex' default='""' datatype='string' description='regular expression to search for'/>
+  <param name='files' default='""' datatype='string' description='glob pattern of files to search'/>
+  <param name='i' default='""' datatype='boolean' description='ignore case'/>
+  <param name='c' default='""' datatype='boolean' description='print count of matching lines per file'/>
+  <param name='n' default='""' datatype='boolean' description='print line numbers'/>
+  <param name='vv' default='""' datatype='boolean' description='search for non-matching lines'/>
+
+  <if>
+    <condition>TEMP.regex eq ''</condition>
+    <then>
+      <do>TEMP.regex = GLOBAL.regex</do>
+    </then>
+  </if>
+  <if>
+    <condition>TEMP.files eq ''</condition>
+    <then>
+      <do>TEMP.files = GLOBAL.files</do>
+    </then>
+  </if>
+  <if>
+    <condition>TEMP.i eq ''</condition>
+    <then>
+      <do>TEMP.i = GLOBAL.i</do>
+    </then>
+  </if>
+  <if>
+    <condition>TEMP.c eq ''</condition>
+    <then>
+      <do>TEMP.c = GLOBAL.c</do>
+    </then>
+  </if>
+  <if>
+    <condition>TEMP.n eq ''</condition>
+    <then>
+      <do>TEMP.n = GLOBAL.n</do>
+    </then>
+  </if>
+  <if>
+    <condition>TEMP.vv eq ''</condition>
+    <then>
+      <do>TEMP.vv = GLOBAL.vv</do>
+    </then>
+  </if>
+
+  <if>
+    <condition>TEMP.regex eq ''</condition>
+    <then>
+      <console>'Warning: mvm grep cannot work without a regular expression!'</console>
+    </then>
+    <else>
+      <if>
+        <condition>TEMP.open eq '' or (TEMP.open GTE 0 or TEMP.open LTE 0)</condition>
+        <else>
+          <do>TEMP.open = 999999</do>
+        </else>
+      </if>
+      <glob_select>
+        <glob>TEMP.files</glob>
+        <cursor_value>'glob'</cursor_value>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <do>TEMP.lctr = 1</do>
+          <do>TEMP.mctr = 0</do>
+          <do>TEMP.case = ''</do>
+          <if>
+            <condition>TEMP.i ne ''</condition>
+            <then>
+              <do>TEMP.case = '1'</do>
+            </then>
+          </if>
+          <file_select>
+            <input_file>OBJECT(TEMP.csr).glob</input_file>
+            <cursor>TEMP.filecsr</cursor>
+            <loop>
+              <match_static>
+                <input>OBJECT(TEMP.filecsr).value</input>
+                <regex>TEMP.regex</regex>
+                <ignore_case>TEMP.case</ignore_case>
+                <success>TEMP.matched</success>
+              </match_static>
+              <if>
+                <condition>(TEMP.matched eq '1' and TEMP.vv eq '') or (TEMP.matched ne '1' and TEMP.vv ne '')</condition>
+                <then>
+                  <do>TEMP.mctr += 1</do>
+                  <if>
+                    <condition>TEMP.c eq '' and TEMP.n eq ''</condition>
+                    <then>
+                      <console>OBJECT(TEMP.filecsr).value</console>
+                    </then>
+                    <condition>TEMP.c eq '' and TEMP.n ne ''</condition>
+                    <then>
+                      <console>TEMP.lctr ~ ': ' ~ OBJECT(TEMP.filecsr).value</console>
+                    </then>
+                  </if>
+                </then>
+              </if>
+              <do>TEMP.lctr += 1</do>
+            </loop>
+          </file_select>
+          <if>
+            <condition>TEMP.c ne ''</condition>
+            <then>
+              <console>OBJECT(TEMP.csr).glob ~ ': ' ~ TEMP.mctr</console>
+            </then>
+          </if>
+        </loop>
+      </glob_select>
+    </else>
+  </if>
+</proc>
+
+</procs>

@@ -1,0 +1,1025 @@
+<procs>
+<proc name="setup_records">
+  <c>Configure the built-in record types</c>
+
+  <do>GLOBAL.record_type_id = 1</do>
+
+  <define_memory_index>
+    <index>'MC_RECORD_TYPES'</index>
+    <use_nested_keys>'1'</use_nested_keys>
+    <unique>'1'</unique>
+    <key_field>'record_type'</key_field>
+    <field>'record_type_id'</field>
+    <field>'namespace'</field>
+    <field>'parent_namespace'</field>
+    <field>'base_record_type'</field>
+    <field>'phase'</field>
+    <field>'stage'</field>
+    <field>'file_regex'</field>
+    <field>'select_clause'</field>
+    <field>'from_clause'</field>
+    <field>'parent_inclusion'</field>
+    <field>'sort_key'</field>
+    <field>'stable_sort'</field>
+    <field>'database'</field>
+    <field>'table'</field>
+    <field>'printed'</field>
+    <field>'full_query'</field>
+    <field>'core'</field>
+    <field>'display_record_type'</field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_RECORD_TYPES_BY_ID'</index>
+    <use_nested_keys>'1'</use_nested_keys>
+    <unique>'1'</unique>
+    <key_field>'record_type_id'</key_field>
+    <field>'record_type'</field>
+  </define_memory_index>
+
+  <!-- FIXME: need to detect different t_av tables with overlapping field names to automatically set up aliases -->
+  <define_memory_index>
+    <index>'MC_RECORD_FIELDS'</index>
+    <use_nested_keys>'1'</use_nested_keys>
+    <unique>'1'</unique>
+    <key_field>'record_type'</key_field>
+    <key_field>'identifier'</key_field>
+    <field>'type'</field>    <!-- this is the db datatype -->
+    <field>'length'</field>
+    <field>'scale'</field>
+    <field>'nullable'</field>
+    <field>'format'</field>
+    <field>'enum'</field>
+    <field>'regex'</field>
+    <field>'default'</field>
+    <field>'override'</field>
+    <field>'alias'</field>
+    <field>'selected'</field>
+    <field>'ignored'</field>
+    <field>'missing'</field>
+    <field>'target'</field>
+    <field>'required'</field>
+    <field>'data_type'</field>    <!-- this is what is displayed to the user -->
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_RECORD_PARENT_KEYS'</index>
+    <key_field>'record_type'</key_field>
+    <field>'field'</field>
+    <field>'expression'</field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_RECORD_CHILD_KEYS'</index>
+    <key_field>'record_type'</key_field>
+    <field>'field'</field>
+    <field>'expression'</field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_RECORD_ALL_KEYS'</index>
+    <key_field>'record_type'</key_field>
+    <key_field>'field'</key_field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_RECORD_TEMP_FIELDS'</index>
+    <key_field>'field'</key_field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_RECORD_EVENTS'</index>
+    <use_nested_keys>'1'</use_nested_keys>
+    <unique>'1'</unique>
+    <key_field>'record_type'</key_field>
+    <key_field>'pass'</key_field>
+    <key_field>'event_id'</key_field>
+    <field>'event_type'</field>
+    <field>'spawn_type'</field>
+    <field>'spawn_database'</field>
+    <field>'spawn_table'</field>
+    <field>'inherit'</field>
+    <field>'from_cursor'</field>
+    <field>'cursor_variable'</field>
+    <field>'condition'</field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_RECORD_EVENT_MAPPINGS'</index>
+    <use_nested_keys>'1'</use_nested_keys>
+    <unique>'1'</unique>
+    <key_field>'record_type'</key_field>
+    <key_field>'event_id'</key_field>
+    <key_field>'mapping_id'</key_field>
+    <field>'expression'</field>
+    <field>'override'</field>
+    <field>'condition'</field>
+    <field>'assigned_variable'</field>
+    <field>'assigned_object_id'</field>
+    <field>'assigned_field'</field>
+    <field>'assigned_constant'</field>
+    <field>'validate'</field>
+    <field>'validate_db'</field>
+    <field>'validate_table'</field>
+    <field>'validate_field'</field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_RECORD_VALIDATION'</index>
+    <use_nested_keys>'1'</use_nested_keys>
+    <key_field>'record_type'</key_field>
+    <key_field>'identifier'</key_field>
+    <field>'validate_db'</field>
+    <field>'validate_table'</field>
+    <field>'validate_field'</field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_RECORD_CHILDREN'</index>
+    <key_field>'record_type'</key_field>
+    <field>'child_record_type'</field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_RECORD_TABLES'</index>
+    <use_nested_keys>'1'</use_nested_keys>
+    <key_field>'record_type'</key_field>
+    <key_field>'table'</key_field>
+    <key_field>'database'</key_field>
+    <field>'selected'</field>
+    <field>'join_field'</field>
+    <field>'join_table'</field>
+  </define_memory_index>
+
+  <call_proc_for_current_object>
+    <name>'setup_metranet_record_types'</name>
+  </call_proc_for_current_object>
+
+  <!-- Populate MC_TABLE_FIELDS for each table we know about -->
+  <call_proc_for_current_object>
+    <name>'table_fields'</name>
+    <param name='database'>''</param>
+    <param name='table'>''</param>
+    <param name='field'>''</param>
+    <param name='pipe_cursor'>''</param>
+  </call_proc_for_current_object>
+  <index_select>
+    <index>'MC_RECORD_TABLES'</index>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <proc_select>
+        <name>'table_fields'</name>
+        <param name='database'>OBJECT(TEMP.csr).database</param>
+        <param name='table'>OBJECT(TEMP.csr).table</param>
+        <param name='field'>''</param>
+        <cursor>TEMP.csr</cursor>
+        <then/>
+      </proc_select>
+    </loop>
+  </index_select>
+
+  <!-- Create the bulk loader interface for all core record types -->
+  <index_select>
+    <index>'MC_RECORD_TYPES'</index>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <if>
+        <condition>OBJECT(TEMP.csr).core eq '1' and OBJECT(TEMP.csr).table eq ''</condition>
+        <then>
+          <to_lower>
+            <input>'core_' ~ OBJECT(TEMP.csr).record_type</input>
+            <output>TEMP.record_type</output>
+          </to_lower>
+          <do>TEMP.procname = 'mc_create_stub_record_type_' ~ TEMP.record_type</do>
+
+          <!-- Pre-populate the fields element with parent/child key fields -->
+          <index_clear>
+            <index>'MC_RECORD_ALL_KEYS'</index>
+          </index_clear>
+          <index_select>
+            <index>'MC_RECORD_PARENT_KEYS'</index>
+            <field name='record_type'>OBJECT(TEMP.csr).record_type</field>
+            <cursor>TEMP.pcsr</cursor>
+            <loop>
+              <index_insert>
+                <index>'MC_RECORD_ALL_KEYS'</index>
+                <field name="record_type">OBJECT(TEMP.pcsr).record_type</field>
+                <field name="field">OBJECT(TEMP.pcsr).field</field>
+              </index_insert>
+            </loop>
+          </index_select>
+          <index_select>
+            <index>'MC_RECORD_CHILD_KEYS'</index>
+            <field name='record_type'>OBJECT(TEMP.csr).record_type</field>
+            <cursor>TEMP.ccsr</cursor>
+            <loop>
+              <index_insert>
+                <index>'MC_RECORD_ALL_KEYS'</index>
+                <field name="record_type">OBJECT(TEMP.ccsr).record_type</field>
+                <field name="field">OBJECT(TEMP.ccsr).field</field>
+              </index_insert>
+            </loop>
+          </index_select>
+          <do>TEMP.keys = "<![CDATA[ <fields> ]]>"</do>
+          <index_select_keys>
+            <index>'MC_RECORD_ALL_KEYS'</index>
+            <cursor>TEMP.kcsr</cursor>
+            <loop>
+              <do>
+                TEMP.keys ~= "<![CDATA[
+                  <field name='" ~ OBJECT(TEMP.kcsr).field ~ "'></field>
+                ]]>"
+              </do>
+            </loop>
+          </index_select_keys>
+          <do>TEMP.keys ~= "<![CDATA[ </fields> ]]>"</do>
+          <do>
+            TEMP.proctext = "<![CDATA[
+              <proc name='" ~ TEMP.procname ~ "'>
+                <record_type name='" ~ TEMP.record_type ~ "' exists='return' display='" ~ OBJECT(TEMP.csr).record_type ~ "'>
+                  <base_record_type>" ~ OBJECT(TEMP.csr).record_type ~ "</base_record_type>
+                  <namespace>" ~ OBJECT(TEMP.csr).namespace ~ "</namespace>
+                  <file_regex>\b" ~ OBJECT(TEMP.csr).record_type ~ "\..*data$</file_regex>
+                  " ~ TEMP.keys ~ "
+                  <events override='true'>
+                    <create_record type='" ~ OBJECT(TEMP.csr).record_type ~ "'>
+                      <inherit_fields>true</inherit_fields>
+                    </create_record>
+                  </events>
+                </record_type>
+              </proc>
+            ]]>"
+          </do>
+          <execute_immediate>TEMP.proctext</execute_immediate>
+          <call_dynamic_proc_for_current_object>
+            <name>TEMP.procname</name>
+          </call_dynamic_proc_for_current_object>
+        </then>
+      </if>
+    </loop>
+  </index_select>
+
+  <analyze_record_types/>
+
+  <call_proc_for_current_object>
+    <name>'setup_record_type_procs'</name>
+  </call_proc_for_current_object>
+
+  <!--
+  <index_select>
+    <index>'MC_TABLE_FIELDS'</index>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <print_record>
+        <file>'C:\table_fields.txt'</file>
+        <field_delim>'`|'</field_delim>
+        <record_delim>'||\r\n'</record_delim>
+        <data>
+          <field>OBJECT(TEMP.csr).record_type</field>
+          <field>OBJECT(TEMP.csr).identifier</field>
+          <field>OBJECT(TEMP.csr).type</field>
+          <field>OBJECT(TEMP.csr).format</field>
+          <field>OBJECT(TEMP.csr).table</field>
+          <field>OBJECT(TEMP.csr).field</field>
+          <field>OBJECT(TEMP.csr).nullable</field>
+          <field>OBJECT(TEMP.csr).required</field>
+        </data>
+      </print_record>
+    </loop>
+  </index_select>
+  -->
+
+</proc>
+
+<!-- TODO: support multiple logical databases in here -->
+<proc name="table_fields">
+  <param name='database' />
+  <param name='table' />
+  <param name='field' />
+  <param name='pipe_cursor' />
+
+  <initialize>
+    <define_memory_index>
+      <index>'MC_TABLE_FIELDS'</index>
+      <use_nested_keys>'1'</use_nested_keys>
+      <unique>'1'</unique>
+      <key_field>'database'</key_field>
+      <key_field>'table'</key_field>
+      <key_field>'field'</key_field>
+      <field>'type'</field>
+      <field>'length'</field>
+      <field>'scale'</field>
+      <field>'nullable'</field>
+      <field>'default'</field>
+      <field>'enum'</field>
+      <field>'regex'</field>
+      <field>'alias'</field>
+    </define_memory_index>
+    <define_memory_index>
+      <index>'MC_TABLE_FIELD_ATTRIBUTES'</index>
+      <use_nested_keys>'1'</use_nested_keys>
+      <key_field>'database'</key_field>
+      <key_field>'table'</key_field>
+      <key_field>'field'</key_field>
+      <field>'ignore'</field>
+      <field>'enum'</field>
+      <field>'alias'</field>
+    </define_memory_index>
+  </initialize>
+
+  <if>
+    <condition>TEMP.database eq ''</condition>
+    <then>
+      <return/>
+    </then>
+  </if>
+
+  <do>TEMP.realdatabase = ''</do>
+  <if>
+    <condition>OBJECT(GLOBAL.target_login).database_logical_name Eq TEMP.database</condition>
+    <then>
+      <do>TEMP.realdatabase = OBJECT(GLOBAL.target_login).database_name</do>
+    </then>
+    <else>
+      <fatal>'Unknown logical database: ' ~ TEMP.database</fatal>
+    </else>
+  </if>
+  <!-- TODO: could be more efficient by having two index_select calls based on whether field is set or not -->
+  <index_select>
+    <index>'MC_TABLE_FIELDS'</index>
+    <field name='database'>TEMP.database</field>
+    <field name='table'>TEMP.table</field>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <if>
+        <condition>TEMP.field eq '' or TEMP.field eq OBJECT(TEMP.csr).field</condition>
+        <then>
+          <pipe_row>TEMP.csr</pipe_row>
+        </then>
+      </if>
+    </loop>
+    <else>
+      <match>
+        <input>TEMP.table</input>
+        <regex>'^t_av_.*'</regex>
+        <ignore_case>'1'</ignore_case>
+        <success>TEMP.av_matched</success>
+      </match>
+      <match>
+        <input>TEMP.table</input>
+        <regex>'^t_pt_.*'</regex>
+        <ignore_case>'1'</ignore_case>
+        <success>TEMP.pt_matched</success>
+      </match>
+      <do>TEMP.sqlquery = ''</do>
+      <do>TEMP.oraquery = ''</do>
+      <if>
+        <condition>TEMP.av_matched eq '1'</condition>
+        <then>
+          <!-- Special enum stuff for t_av_* -->
+          <!--
+          TCF: optimizations for SQL Server
+          <do>
+            TEMP.sqlquery =
+            "select upper(col.table_catalog) as dbname, lower(tavl.nm_table_name) as table_name,
+            isnull(lower(tavp.nm_column_name), lower(col.column_name)) as column_name, lower(col.data_type) as data_type,
+            case when col.data_type like '%char%' then col.character_maximum_length else col.numeric_precision end as length,
+            col.numeric_scale, col.is_nullable,
+            case when tavp.nm_default_value = 'T' then '1' when tavp.nm_default_value = 'F' then '0' else tavp.nm_default_value end as column_default,
+            case when len(rtrim(tavp.nm_enum)) > 0 then lower(tavp.nm_space + '/' + tavp.nm_enum) else null end as enum
+            from t_account_view_log tavl
+            inner join INFORMATION_SCHEMA.COLUMNS col on tavl.nm_table_name = col.table_name and upper(col.table_catalog) = $${TEMP.realdatabase} and lower(col.table_name) = $${TEMP.table}
+            left outer join t_account_view_prop tavp on tavl.id_account_view = tavp.id_account_view and tavp.nm_column_name = col.column_name
+            order by ordinal_position asc"
+          </do>-->
+           <do>
+                TEMP.sqlquery =
+                "select upper(col.table_catalog) as dbname, lower(tavl.nm_table_name) as table_name,
+                isnull(lower(tavp.nm_column_name), lower(col.column_name)) as column_name, lower(col.data_type) as data_type,
+                case when col.data_type like '%char%' then col.character_maximum_length else col.numeric_precision end as length,
+                col.numeric_scale, col.is_nullable,
+                case when tavp.nm_default_value = 'T' then '1' when tavp.nm_default_value = 'F' then '0' else tavp.nm_default_value end as column_default,
+                case when len(rtrim(tavp.nm_enum)) > 0 then lower(tavp.nm_space + '/' + tavp.nm_enum) else null end as enum
+                from t_account_view_log tavl
+                inner join INFORMATION_SCHEMA.COLUMNS col on tavl.nm_table_name = col.table_name and col.table_catalog = $${TEMP.realdatabase} and col.table_name = $${TEMP.table}
+                left outer join t_account_view_prop tavp on tavl.id_account_view = tavp.id_account_view and tavp.nm_column_name = col.column_name
+                order by ordinal_position asc"
+           </do>
+          <do>
+            TEMP.oraquery =
+            "select 'NETMETER' as dbname, lower(tavl.nm_table_name) as table_name,
+            nvl(lower(tavp.nm_column_name), lower(col.column_name)) as column_name, lower(col.data_type) as data_type,
+            case when lower(col.data_type) like '%char%' then col.char_length else col.data_precision end as length,
+            col.data_scale as numeric_scale, col.nullable as is_nullable,
+            case when tavp.nm_default_value = 'T' then to_nchar('1') when tavp.nm_default_value = 'F' then to_nchar('0') else tavp.nm_default_value end as column_default,
+            case when length(trim(tavp.nm_enum)) > 0 then lower(tavp.nm_space || '/' || tavp.nm_enum) else null end as enum
+            from t_account_view_log tavl
+            inner join USER_TAB_COLUMNS col on upper(tavl.nm_table_name) = col.table_name and lower(col.table_name) = $${TEMP.table}
+            left outer join t_account_view_prop tavp on tavl.id_account_view = tavp.id_account_view and upper(tavp.nm_column_name) = col.column_name
+            order by column_id asc"
+          </do>
+        </then>
+        <condition>TEMP.pt_matched eq '1'</condition>
+        <then>
+          <!-- Special enum stuff for t_pt_* -->
+          <!-- 
+          TCF: optimizations for SQL Server
+          <do>
+            TEMP.sqlquery =
+            "select upper(col.table_catalog) as dbname, lower(rs.nm_instance_tablename) as table_name,
+            isnull(lower(ptp.nm_column_name), lower(col.column_name)) as column_name, lower(col.data_type) as data_type,
+            case when col.data_type like '%char%' then col.character_maximum_length else col.numeric_precision end as length,
+            col.numeric_scale, col.is_nullable,
+            case when ptp.nm_default_value = 'T' then '1' when ptp.nm_default_value = 'F' then '0' else ptp.nm_default_value end as column_default,
+            case when len(rtrim(ptp.nm_enum)) > 0 then lower(ptp.nm_space + '/' + ptp.nm_enum) else null end as enum
+            from t_rulesetdefinition rs
+            inner join INFORMATION_SCHEMA.COLUMNS col on rs.nm_instance_tablename = col.table_name and upper(col.table_catalog) = $${TEMP.realdatabase} and lower(col.table_name) = $${TEMP.table}
+            left outer join t_param_table_prop ptp on rs.id_paramtable = ptp.id_param_table and ptp.nm_column_name = col.column_name
+            order by ordinal_position asc"
+          </do>
+          -->
+          <do>
+                TEMP.sqlquery =
+                "select upper(col.table_catalog) as dbname, lower(rs.nm_instance_tablename) as table_name,
+                isnull(lower(ptp.nm_column_name), lower(col.column_name)) as column_name, lower(col.data_type) as data_type,
+                case when col.data_type like '%char%' then col.character_maximum_length else col.numeric_precision end as length,
+                col.numeric_scale, col.is_nullable,
+                case when ptp.nm_default_value = 'T' then '1' when ptp.nm_default_value = 'F' then '0' else ptp.nm_default_value end as column_default,
+                case when len(rtrim(ptp.nm_enum)) > 0 then lower(ptp.nm_space + '/' + ptp.nm_enum) else null end as enum
+                from t_rulesetdefinition rs
+                inner join INFORMATION_SCHEMA.COLUMNS col on rs.nm_instance_tablename = col.table_name and col.table_catalog = $${TEMP.realdatabase} and col.table_name = $${TEMP.table}
+                left outer join t_param_table_prop ptp on rs.id_paramtable = ptp.id_param_table and ptp.nm_column_name = col.column_name
+                order by ordinal_position asc"
+          </do>
+          <do>
+            TEMP.oraquery =
+            "select 'NETMETER' as dbname, lower(rs.nm_instance_tablename) as table_name,
+            nvl(lower(ptp.nm_column_name), lower(col.column_name)) as column_name, lower(col.data_type) as data_type,
+            case when lower(col.data_type) like '%char%' then col.char_length else col.data_precision end as length,
+            col.data_scale as numeric_scale, col.nullable as is_nullable,
+            case when ptp.nm_default_value = 'T' then to_nchar('1') when ptp.nm_default_value = 'F' then to_nchar('0') else ptp.nm_default_value end as column_default,
+            case when length(trim(ptp.nm_enum)) > 0 then lower(ptp.nm_space || '/' || ptp.nm_enum) else null end as enum
+            from t_rulesetdefinition rs
+            inner join USER_TAB_COLUMNS col on upper(rs.nm_instance_tablename) = col.table_name and lower(col.table_name) = $${TEMP.table}
+            left outer join t_param_table_prop ptp on rs.id_paramtable = ptp.id_param_table and upper(ptp.nm_column_name) = col.column_name
+            order by column_id asc"
+          </do>
+        </then>
+        <else>
+          <!-- 
+          TCF: optimizations for SQL Server
+          <do>
+            TEMP.sqlquery =
+            "select upper(table_catalog) as dbname, lower(table_name) as table_name, lower(column_name) as column_name, data_type,
+            case when data_type like '%char%' then character_maximum_length else numeric_precision end as length,
+            numeric_scale, is_nullable, column_default, null as enum
+            from INFORMATION_SCHEMA.COLUMNS
+            where lower(table_name) = $${TEMP.table} and upper(table_catalog) = $${TEMP.realdatabase}
+            order by ordinal_position asc"
+          </do>-->
+          <do>
+                TEMP.sqlquery =
+                "select upper(table_catalog) as dbname, lower(table_name) as table_name, lower(column_name) as column_name, data_type,
+                case when data_type like '%char%' then character_maximum_length else numeric_precision end as length,
+                numeric_scale, is_nullable, column_default, null as enum
+                from INFORMATION_SCHEMA.COLUMNS
+                where table_name = $${TEMP.table} and table_catalog = $${TEMP.realdatabase}
+                order by ordinal_position asc"
+          </do>
+          <do>
+            TEMP.oraquery =
+            "select 'NETMETER' as dbname, lower(table_name) as table_name, lower(column_name) as column_name, data_type,
+            case when lower(data_type) like '%char%' then char_length else data_precision end as length,
+            data_scale as numeric_scale, nullable as is_nullable, data_default as column_default, null as enum
+            from USER_TAB_COLUMNS
+            where lower(table_name) = $${TEMP.table}
+            order by column_id asc"
+          </do>
+        </else>
+      </if>
+      <db_select_dynamic>
+        <login_object>GLOBAL.target_login</login_object>
+        <query type='sql'>TEMP.sqlquery</query>
+        <query type='oracle'>TEMP.oraquery</query>
+        <cursor>TEMP.dbcsr</cursor>
+        <loop>
+          <do>TEMP.alias = ''</do>
+          <index_get>
+            <index>'MC_TABLE_FIELD_ATTRIBUTES'</index>
+            <field name='database'>TEMP.database</field>
+            <field name='table'>TEMP.table</field>
+            <field name='field'>OBJECT(TEMP.dbcsr).column_name</field>
+            <field name='enum'>TEMP.enum</field>
+            <field name='alias'>TEMP.alias</field>
+            <then>
+              <if>
+                <condition>TEMP.enum ne ''</condition>
+                <then>
+                  <do>OBJECT(TEMP.dbcsr).enum = TEMP.enum</do>
+                </then>
+              </if>
+            </then>
+          </index_get>
+          <match_static>
+            <input>OBJECT(TEMP.dbcsr).column_default</input>
+            <regex>'^\s*' ~ '("[^"]*")' ~ '|' ~ "('[^']*')" ~ '\s*$'</regex>
+            <ignore_case>'1'</ignore_case>
+            <success>TEMP.ismatch</success>
+          </match_static>
+          <match_static>
+            <input>OBJECT(TEMP.dbcsr).column_default</input>
+            <regex>"'"</regex>
+            <ignore_case>'1'</ignore_case>
+            <success>TEMP.ismatchq</success>
+          </match_static>
+          <if>
+            <condition>TEMP.ismatch ne '1' and TEMP.ismatchq ne '1' and OBJECT(TEMP.dbcsr).column_default ne ''</condition>
+            <then>
+              <do>OBJECT(TEMP.dbcsr).column_default = "'" ~ OBJECT(TEMP.dbcsr).column_default ~ "'"</do>
+            </then>
+            <condition>TEMP.ismatch ne '1' and TEMP.ismatchq eq '1' and OBJECT(TEMP.dbcsr).column_default ne ''</condition>
+            <then>
+              <do>OBJECT(TEMP.dbcsr).column_default = '"' ~ OBJECT(TEMP.dbcsr).column_default ~ '"'</do>
+            </then>
+          </if>
+          <call_proc_for_current_object>
+            <name>'boolean'</name>
+            <param name='input'>OBJECT(TEMP.dbcsr).is_nullable</param>
+            <param name='output'>OBJECT(TEMP.dbcsr).is_nullable</param>
+          </call_proc_for_current_object>
+          <index_insert>
+            <index>'MC_TABLE_FIELDS'</index>
+            <field name='database'>uc(TEMP.database)</field>
+            <field name='table'>OBJECT(TEMP.dbcsr).table_name</field>
+            <field name='field'>OBJECT(TEMP.dbcsr).column_name</field>
+            <field name='type'>OBJECT(TEMP.dbcsr).data_type</field>
+            <field name='length'>OBJECT(TEMP.dbcsr).length</field>
+            <field name='scale'>OBJECT(TEMP.dbcsr).numeric_scale</field>
+            <field name='nullable'>OBJECT(TEMP.dbcsr).is_nullable</field>
+            <field name='default'>OBJECT(TEMP.dbcsr).column_default</field>
+            <field name='enum'>OBJECT(TEMP.dbcsr).enum</field>
+            <field name='alias'>TEMP.alias</field>
+          </index_insert>
+        </loop>
+        <else>
+          <warning>'Could not find table ' ~ TEMP.table ~ ' in the database!'</warning>
+        </else>
+      </db_select_dynamic>
+      <index_select>
+        <index>'MC_TABLE_FIELDS'</index>
+        <field name='database'>TEMP.database</field>
+        <field name='table'>TEMP.table</field>
+        <cursor>TEMP.dbcsr</cursor>
+        <loop>
+          <if>
+            <condition>TEMP.field eq '' or TEMP.field eq OBJECT(TEMP.dbcsr).field</condition>
+            <then>
+              <pipe_row>TEMP.dbcsr</pipe_row>
+            </then>
+          </if>
+        </loop>
+      </index_select>
+    </else>
+  </index_select>
+</proc>
+
+<proc name='validate_field'>
+  <param name='identifier' />
+  <param name='cursor' />
+  <param name='output' mode='out' />
+  <param name='replace_enum' default='"0"' />
+
+  <do>TEMP.output = ''</do>
+  <do>TEMP.objectid = ''</do>
+  <if>
+    <condition>TEMP.cursor ne ''</condition>
+    <then>
+      <do>
+        TEMP.objectid = "<![CDATA[
+          <object_id>" ~ TEMP.cursor ~ "</object_id>
+        ]]>"
+      </do>
+    </then>
+  </if>
+
+  <!-- Validate enums -->
+  <if>
+    <condition>OBJECT.enum ne ''</condition>
+    <then>
+      <do>
+        TEMP.output ~= "<![CDATA[
+          <validate_field>
+            <field>'" ~ TEMP.identifier ~ "'</field>
+            " ~ TEMP.objectid ~ "
+            <datatype>'enum'</datatype>
+            <namespace>'" ~ OBJECT.enum ~ "'</namespace>
+            <nullable>'" ~ OBJECT.nullable ~ "'</nullable>
+            <output_field>'_mc_error'</output_field>
+            <replace>" ~ TEMP.replace_enum ~ "</replace>
+          </validate_field>
+        ]]>"
+      </do>
+    </then>
+    <else>
+      <!-- Validate char/varchar fields -->
+      <match>
+        <input>OBJECT.type</input>
+        <regex>'char'</regex>
+        <ignore_case>'1'</ignore_case>
+        <success>TEMP.matched</success>
+      </match>
+      <if>
+        <condition>TEMP.matched eq '1'</condition>
+        <then>
+          <do>
+            TEMP.output ~= "<![CDATA[
+              <validate_field>
+                <field>'" ~ TEMP.identifier ~ "'</field>
+                " ~ TEMP.objectid ~ "
+                <datatype>'" ~ OBJECT.type ~ "'</datatype>
+                <length>'" ~ OBJECT.length ~ "'</length>
+                <nullable>'" ~ OBJECT.nullable ~ "'</nullable>
+                <default>" ~ OBJECT.default ~ "</default>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            ]]>"
+          </do>
+        </then>
+      </if>
+
+      <!-- Validate numeric fields -->
+      <match>
+        <input>OBJECT.type</input>
+        <regex>'num|int|decimal|real|bit|bool'</regex>
+        <ignore_case>'1'</ignore_case>
+        <success>TEMP.matched</success>
+      </match>
+      <if>
+        <condition>TEMP.matched eq '1'</condition>
+        <then>
+          <do>
+            TEMP.output ~= "<![CDATA[
+              <validate_field>
+                <field>'" ~ TEMP.identifier ~ "'</field>
+                " ~ TEMP.objectid ~ "
+                <datatype>'" ~ OBJECT.type ~ "'</datatype>
+                <length>'" ~ OBJECT.length ~ "'</length>
+                <scale>'" ~ OBJECT.scale ~ "'</scale>
+                <nullable>'" ~ OBJECT.nullable ~ "'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            ]]>"
+          </do>
+        </then>
+      </if>
+
+      <!-- Validate date fields -->
+      <match>
+        <input>OBJECT.type</input>
+        <regex>'date'</regex>
+        <ignore_case>'1'</ignore_case>
+        <success>TEMP.matched</success>
+      </match>
+      <if>
+        <condition>TEMP.matched eq '1'</condition>
+        <then>
+          <do>
+            TEMP.output ~= "<![CDATA[
+              <validate_field>
+                <field>'" ~ TEMP.identifier ~ "'</field>
+                " ~ TEMP.objectid ~ "
+                <datatype>'" ~ OBJECT.type ~ "'</datatype>
+                <format>'" ~ GLOBAL.dotnet_date_format ~ "'</format>
+                <nullable>'" ~ OBJECT.nullable ~ "'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            ]]>"
+          </do>
+        </then>
+      </if>
+    </else>
+  </if>
+</proc>
+
+<proc name='generate_find_ancestors'>
+  <index_select>
+    <index>'MC_RECORD_TYPES'</index>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <if>
+        <condition>OBJECT(TEMP.csr).table eq ''</condition>
+        <then>
+          <call_proc_for_current_object>
+            <name>'get_parent_fields_check'</name>
+            <param name='record_type'>OBJECT(TEMP.csr).record_type</param>
+            <param name='parents'>TEMP.parents</param>
+            <param name='parents_check'>TEMP.parent_fields_check</param>
+          </call_proc_for_current_object>
+
+          <index_clear>
+            <index>'MC_RECORD_TEMP_FIELDS'</index>
+          </index_clear>
+
+          <do>TEMP.table_record_type = OBJECT(TEMP.csr).parent_namespace</do>
+
+          <do>TEMP.query = ''</do>
+          <do>TEMP.select = ''</do>
+          <do>TEMP.clauses = index_get('MC_RECORD_TYPES', record_type=>TEMP.table_record_type, select_clause=>TEMP.select, from_clause=>TEMP.from)</do>
+          <index_select>
+            <index>'MC_RECORD_TABLES'</index>
+            <field name='record_type'>TEMP.table_record_type</field>
+            <cursor>TEMP.rcsr</cursor>
+            <loop>
+              <if>
+                <condition>OBJECT(TEMP.rcsr).selected eq '1'</condition>
+                <then>
+                  <proc_select>
+                    <name>'table_fields'</name>
+                    <param name='database'>OBJECT(TEMP.rcsr).database</param>
+                    <param name='table'>OBJECT(TEMP.rcsr).table</param>
+                    <param name='field'>''</param>
+                    <cursor>TEMP.fcsr</cursor>
+                    <loop>
+                      <do>TEMP.alias = OBJECT(TEMP.fcsr).alias</do>
+                      <if>
+                        <condition>TEMP.alias eq ''</condition>
+                        <then>
+                          <do>TEMP.alias = OBJECT(TEMP.fcsr).field</do>
+                        </then>
+                      </if>
+                      <index_insert_if_none>
+                        <index>'MC_RECORD_TEMP_FIELDS'</index>
+                        <field name='field'>TEMP.alias</field>
+                        <result>TEMP.result</result>
+                      </index_insert_if_none>
+                      <if>
+                        <condition>TEMP.result eq '1'</condition>
+                        <then>
+                          <if>
+                            <condition>TEMP.select ne ''</condition>
+                            <then>
+                              <do>TEMP.select ~= ', '</do>
+                            </then>
+                          </if>
+                          <do>TEMP.select ~= OBJECT(TEMP.fcsr).table ~ '.' ~ OBJECT(TEMP.fcsr).field ~ ' as ' ~ TEMP.alias</do>
+                        </then>
+                      </if>
+                    </loop>
+                  </proc_select>
+                </then>
+              </if>
+            </loop>
+          </index_select>
+
+          <do>TEMP.callproc = ''</do>
+          <index_get>
+            <index>'MC_RECORD_TYPES'</index>
+            <field name='record_type'>OBJECT(TEMP.csr).parent_namespace</field>
+            <field name='record_type_id'>TEMP.record_type_id</field>
+            <then>
+              <!-- 
+              Change ny TCF July 2014.
+              Workaround for arkadin account name load. This had issues for group subs in arkadin's environment.
+              Adding a flag to determine whether or not to query the entire hierarchy.
+              -->
+              <if>
+                  <condition>GLOBAL.qckhier Eq 'y'</condition>
+                  <then>
+                      <do>
+                          TEMP.callproc = "<![CDATA[
+                          <if>
+                            <condition>OBJECT(TEMP.dbcsr).parent_final eq '1' or TEMP.mytypetocheck Ne 'ACCOUNT'</condition>
+                            <then>
+                              <return/>
+                            </then>
+                          </if>
+                          <call_proc_for_object>
+                            <name>'find_ancestor_" ~ TEMP.record_type_id ~ "'</name>
+                            <object_id>TEMP.dbcsr</object_id>
+                            <param name='error'>TEMP.error</param>
+                          </call_proc_for_object>
+                        ]]>"
+                      </do>
+                      <!--<print>'Adding flag to stop query iterations.'</print>-->
+                  </then>
+                  <else>
+                      <do>
+                          TEMP.callproc = "<![CDATA[
+                          <if>
+                            <condition>OBJECT(TEMP.dbcsr).parent_final eq '1'</condition>
+                            <then>
+                              <return/>
+                            </then>
+                          </if>
+                          <call_proc_for_object>
+                            <name>'find_ancestor_" ~ TEMP.record_type_id ~ "'</name>
+                            <object_id>TEMP.dbcsr</object_id>
+                            <param name='error'>TEMP.error</param>
+                          </call_proc_for_object>
+                        ]]>"
+                      </do>
+                  </else>
+              </if>
+              <!--<do>
+                TEMP.callproc = "<![CDATA[
+                  <if>
+                    <condition>OBJECT(TEMP.dbcsr).parent_final eq '1'</condition>
+                    <then>
+                      <return/>
+                    </then>
+                  </if>
+                  <call_proc_for_object>
+                    <name>'find_ancestor_" ~ TEMP.record_type_id ~ "'</name>
+                    <object_id>TEMP.dbcsr</object_id>
+                    <param name='error'>TEMP.error</param>
+                  </call_proc_for_object>
+                ]]>"
+              </do>-->
+            </then>
+          </index_get>
+
+          <do>TEMP.query = 'select ' ~ TEMP.select ~ ' ' ~ TEMP.from ~ ' ' ~ TEMP.joins ~ ' ' ~ TEMP.where</do>
+          <!--<print>'MY TABLE RECORD TYPE IS ' ~ TEMP.table_record_type</print>-->
+
+          <!-- 
+          Modification by TCF May 2014.
+          This was creating duplicate indexes (see commented code below), causing errors in more
+          recent versions of MVM. Checking to see if the index exists now before trying to create it.
+          -->
+          <!--FOO<do>TEMP.doNeedIndexInsert = 'N'</do>
+          <index_get>
+              <index>'MC_PARENT_QUERIES'</index>
+              <field name='record_type'>TEMP.table_record_type</field>
+              <then>
+                  <do>TEMP.doNeedIndexInsert = 'Y'</do>
+              </then>
+          </index_get>
+          <if>
+              <condition>TEMP.doNeedIndexInsert eq 'Y'</condition>
+              <then>FOO-->
+                  <index_insert_if_none>
+                      <index>'MC_PARENT_QUERIES'</index>
+                      <field name='record_type'>TEMP.table_record_type</field>
+                      <field name='query'>TEMP.query</field>
+                  </index_insert_if_none>
+              <!--FOO</then>
+          </if>FOO-->            
+          <!--<index_insert_if_none>
+            <index>'MC_PARENT_QUERIES'</index>
+            <field name='record_type'>TEMP.table_record_type</field>
+            <field name='query'>TEMP.query</field>
+          </index_insert_if_none>-->
+  
+          <do>TEMP.query = '"' ~ TEMP.query ~ '"'</do>
+          <do>TEMP.procname = 'find_ancestor_' ~ OBJECT(TEMP.csr).record_type_id</do>
+          <do>TEMP.altprocname = 'find_ancestor_' ~ OBJECT(TEMP.csr).record_type ~ '_' ~ OBJECT(TEMP.csr).record_type_id</do>
+          <!-- 
+          Modified by TCF June 2014.
+          For non-accounts, we only need the immediate ancestor...we do not need to traverse the entire hierarchy.
+          So this will call it once but will not recurse through the entire hierarchy for non-accounts.
+          Modifed again by TCF July 2014
+          Added the if statements below to re-format the date values; MVM does not recognize the native SQL date format (e.g. 
+          "2014-02-21 00:00:00.000") as a valid date (which is why I am using a string operation and not date_convert). One drawback 
+          to this approach, if the GLOBAL.dotnet_date_format is ever changed, this will likely fail. Also, I have not tested this
+          with Oracle, so I am limiting the fix to SQL Server, although the problem may very well apply to Oracle as well.
+          -->
+          <do>
+              TEMP.myproc = "<![CDATA[
+                <proc name='" ~ TEMP.procname ~ "'>
+                <param name='error' mode='in out' />
+              <!-- Find ancestors for record type " ~ OBJECT(TEMP.csr).record_type ~ " -->
+                <do>TEMP.mytypetocheck = '" ~ OBJECT(TEMP.csr).record_type ~ "'</do>
+                <if>
+                    <condition>" ~ TEMP.parent_fields_check ~ TEMP.newcheck ~ "</condition>
+                    <then>
+                    <db_select>
+                        <login_object>GLOBAL.target_login</login_object>
+                        <query>" ~ TEMP.query ~ "</query>
+                        <cursor>TEMP.dbcsr</cursor>
+                        <then>
+                        <do>OBJECT(TEMP.dbcsr)._mc_from_db = '1'</do>
+                        <do>OBJECT(TEMP.dbcsr)._mc_base_key = OBJECT._mc_parent_key</do>
+                        <do>OBJECT(TEMP.dbcsr)._mc_level = OBJECT._mc_level - 1</do>
+                        <do>OBJECT._mc_parent = TEMP.dbcsr</do>
+                        <if>
+                            <condition>OBJECT(TEMP.dbcsr).vt_start Ne '' and OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+                            <then>
+                                <substring>
+                                    <input>OBJECT(TEMP.dbcsr).vt_start</input>
+                                    <offset>0</offset>
+                                    <length>19</length>
+                                    <output>OBJECT(TEMP.dbcsr).vt_start</output>
+                                </substring>
+                            </then>
+                        </if>
+                        <if>
+                            <condition>OBJECT(TEMP.dbcsr).vt_end Ne '' and OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+                            <then>
+                                <substring>
+                                    <input>OBJECT(TEMP.dbcsr).vt_end</input>
+                                    <offset>0</offset>
+                                    <length>19</length>
+                                    <output>OBJECT(TEMP.dbcsr).vt_end</output>
+                                </substring>
+                            </then>
+                        </if>
+                        <if>
+                            <condition>OBJECT(TEMP.dbcsr).dt_crt Ne '' and OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+                            <then>
+                                <substring>
+                                    <input>OBJECT(TEMP.dbcsr).dt_crt</input>
+                                    <offset>0</offset>
+                                    <length>19</length>
+                                    <output>OBJECT(TEMP.dbcsr).dt_crt</output>
+                                </substring>
+                            </then>
+                        </if>
+                        <index_insert_if_none>
+                            <index>'MC_OBJECT_ANCESTORS_BY_OID'</index>
+                            <field name='object_id'>TEMP.dbcsr</field>
+                        </index_insert_if_none>
+                        <call_proc_for_object>
+                            <name>'replace_ancestor'</name>
+                            <object_id>TEMP.dbcsr</object_id>
+                        </call_proc_for_object>
+                        " ~ TEMP.callproc ~ "
+                        </then>
+                        <else>
+                        <do>TEMP.error ~= 'Could not find ancestor(s) in database: [' ~ OBJECT._mc_parent_key ~ ']. '</do>
+                        <return/>
+                        </else>
+                    </db_select>
+            ]]>"
+          </do>
+            <!-- " ~ TEMP.query ~ "
+            <condition>OBJECT(TEMP.dbcsr).parent_final eq '1' or TEMP.mytypetocheck Ne 'ACCOUNT'</condition>-->
+
+            <!--<do>
+                TEMP.myproc = "<![CDATA[
+                <proc name='" ~ TEMP.procname ~ "'>
+                <param name='error' mode='in out' />
+                <if>
+                    <condition>" ~ TEMP.parent_fields_check ~ TEMP.newcheck ~ "</condition>
+                    <then>
+                    <db_select>
+                        <login_object>GLOBAL.target_login</login_object>
+                        <query>&quot;select mm.nm_login as parent_nm_login, mm.nm_space as parent_nm_space, case when mm.id_acc = 1 then '1' else '' end as parent_final, 
+t_account.id_acc as id_acc,t_account.id_type as id_type, t_account.dt_crt as dt_crt, 
+t_account_mapper.nm_login as nm_login, t_account_mapper.nm_space as nm_space, t_account_state.status as status, 
+t_account_state.vt_start as vt_start, t_account_state.vt_end as vt_end, 
+t_dm_account.id_dm_acc as id_dm_acc, 
+t_payment_redirection.id_payer as id_payer, t_payment_redirection.id_payee as id_payee 
+            from t_account
+            inner join t_account_mapper on t_account.id_acc = t_account_mapper.id_acc
+            inner join t_account_state on t_account.id_acc = t_account_state.id_acc
+            inner join t_dm_account on t_account.id_acc = t_dm_account.id_acc
+            inner join t_account_ancestor on t_account.id_acc = t_account_ancestor.id_descendent
+            left join t_payment_redirection on t_account.id_acc = t_payment_redirection.id_payee
+            and t_account_ancestor.num_generations > 0
+            and t_account_ancestor.id_descendent != 1
+            and t_account_ancestor.vt_start &lt;= $${GLOBAL.mvm_startup_date}
+            and t_account_ancestor.vt_end &gt;= $${GLOBAL.mvm_startup_date}
+            left join t_account_mapper mm on t_account_ancestor.id_ancestor = mm.id_acc
+            where t_account_mapper.nm_login = $${OBJECT.parent_nm_login} and t_account_mapper.nm_space = $${OBJECT.parent_nm_space}&quot;</query>
+                        <cursor>TEMP.dbcsr</cursor>
+                                <loop>
+                                    <do>OBJECT(TEMP.dbcsr)._mc_from_db = '1'</do>
+                                    <do>OBJECT(TEMP.dbcsr)._mc_base_key = OBJECT._mc_parent_key</do>
+                                    <do>OBJECT(TEMP.dbcsr)._mc_level = OBJECT._mc_level - 1</do>
+                                    <index_insert_if_none>
+                                        <index>'MC_OBJECT_ANCESTORS_BY_OID'</index>
+                                        <field name='object_id'>TEMP.dbcsr</field>
+                                    </index_insert_if_none>
+                                    <call_proc_for_object>
+                                        <name>'replace_ancestor'</name>
+                                        <object_id>TEMP.dbcsr</object_id>
+                                    </call_proc_for_object>
+                                </loop>
+                            ***<else>
+                                <do>TEMP.error ~= 'Could not find ancestor(s) in database: [' ~ OBJECT._mc_parent_key ~ ']. '</do>
+                                <return/>
+                            </else>***
+                    </db_select>
+            ]]>"
+            </do>-->
+
+          <do>
+            TEMP.myproc ~= "<![CDATA[
+                  </then>
+                </if>
+              </proc>
+            ]]>"
+          </do>
+          <call_proc_for_current_object>
+            <name>'generate_print_proc'</name>
+            <param name='procname'>TEMP.procname</param>
+            <param name='proc'>TEMP.myproc</param>
+            <param name='altprocname'>TEMP.altprocname</param>
+          </call_proc_for_current_object>
+        </then>
+      </if>
+    </loop>
+  </index_select>
+</proc>
+
+</procs>

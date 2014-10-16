@@ -1,0 +1,28 @@
+<proc name="sequence_get_next_id_sess">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="value" mode="out" />
+  <if>
+    <condition>GLOBAL.sequence_current_id_sess eq '' or GLOBAL.sequence_current_id_sess GTE GLOBAL.sequence_max_id_sess</condition>
+    <then>
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query type="sql">"update t_current_long_id set id_current = id_current + 1000 output inserted.id_current as id_max, inserted.id_current - 1000 as id_current where nm_current = 'id_sess'"</query>
+        <timeout>'0'</timeout>
+        <num_retries>0</num_retries>
+        <retry_sleep>0</retry_sleep>
+        <cursor>TEMP.csr</cursor>
+        <then>
+          <do>GLOBAL.sequence_current_id_sess = OBJECT(TEMP.csr).id_current</do>
+          <do>GLOBAL.sequence_max_id_sess = OBJECT(TEMP.csr).id_max</do>
+        </then>
+        <else>
+          <fatal>'Error: cannot query the next sequence value for id_sess'</fatal>
+        </else>
+      </db_select>
+    </then>
+  </if>
+  <do>TEMP.value = GLOBAL.sequence_current_id_sess</do>
+  <do>GLOBAL.sequence_current_id_sess += 1</do>
+</proc>

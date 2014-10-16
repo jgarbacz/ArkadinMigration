@@ -1,0 +1,28 @@
+<proc name="read_validate_one_core_subscription_rate_t_pt_eventcancellationrates">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="filename" />
+  <do>TEMP.linecount = 0</do>
+  <sorted_object_file_select>
+    <name>TEMP.filename</name>
+    <input_file_match>TEMP.filename ~ '*'</input_file_match>
+    <cursor>TEMP.dfcsr</cursor>
+    <loop>
+      <do>TEMP.linecount += 1</do>
+      <do>OBJECT(TEMP.dfcsr)._mc_record_type_id = 288</do>
+      <do>OBJECT(TEMP.dfcsr)._mc_line_no = TEMP.linecount</do>
+      <call_proc_for_object>
+        <name>'validate_row_core_subscription_rate_t_pt_eventcancellationrates'</name>
+        <object_id>TEMP.dfcsr</object_id>
+        <param name="errors">OBJECT(TEMP.dfcsr)._mc_error</param>
+      </call_proc_for_object>
+      <if>
+        <condition>TEMP.linecount GTE 1</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).eof = 1</do>
+        </then>
+      </if>
+    </loop>
+  </sorted_object_file_select>
+</proc>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension>
+    <author></author>
+    <description></description>
+    <type>Pipeline</type>
+    <DefaultNamespace>metratech.com</DefaultNamespace>
+</extension>

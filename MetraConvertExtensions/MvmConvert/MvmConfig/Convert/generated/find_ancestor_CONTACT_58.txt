@@ -1,0 +1,99 @@
+<proc name="find_ancestor_58">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="error" mode="in out" />
+  <!-- Find ancestors for record type CONTACT -->
+  <do>TEMP.mytypetocheck = 'CONTACT'</do>
+  <if>
+    <condition>OBJECT.parent_nm_login ne '' and OBJECT.parent_nm_space ne ''</condition>
+    <then>
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query>"select mm.nm_login as parent_nm_login, mm.nm_space as parent_nm_space, case when mm.id_acc = 1 then '1' else '' end as parent_final, t_account.id_acc as id_acc, t_account.id_acc_ext as id_acc_ext, t_account.id_type as id_type, t_account.dt_crt as dt_crt, t_account_mapper.nm_login as nm_login, t_account_mapper.nm_space as nm_space, t_account_state.status as status, t_account_state.vt_start as vt_start, t_account_state.vt_end as vt_end, t_acc_usage_cycle.id_usage_cycle as id_usage_cycle, t_dm_account.id_dm_acc as id_dm_acc, t_profile.id_profile as id_profile, t_profile.nm_tag as nm_tag, t_profile.val_tag as val_tag, t_profile.tx_desc as tx_desc, t_site_user.id_site as id_site, t_user_credentials.tx_password as tx_password, t_user_credentials.dt_expire as dt_expire, t_user_credentials.dt_last_login as dt_last_login, t_user_credentials.dt_last_logout as dt_last_logout, t_user_credentials.num_failures_since_login as num_failures_since_login, t_user_credentials.dt_auto_reset_failures as dt_auto_reset_failures, t_user_credentials.b_enabled as b_enabled, t_payment_redirection.id_payer as id_payer, t_payment_redirection.id_payee as id_payee 
+        from t_account
+        inner join t_account_mapper on t_account.id_acc = t_account_mapper.id_acc
+        left join t_account_state on t_account.id_acc = t_account_state.id_acc
+        left join t_av_internal on t_account.id_acc = t_av_internal.id_acc
+        left join t_acc_usage_cycle on t_account.id_acc = t_acc_usage_cycle.id_acc
+        left join t_dm_account on t_account.id_acc = t_dm_account.id_acc
+        left join t_site_user on t_account_mapper.nm_login = t_site_user.nm_login
+        left join t_localized_site on t_site_user.id_site = t_localized_site.id_site and t_localized_site.nm_space = t_account_mapper.nm_space
+        left join t_profile on t_site_user.id_profile = t_profile.id_profile
+        left join t_user_credentials on t_account_mapper.nm_login = t_user_credentials.nm_login and t_account_mapper.nm_space = t_user_credentials.nm_space
+        left join t_payment_redirection on t_account.id_acc = t_payment_redirection.id_payee
+        left join t_account_ancestor on t_account.id_acc = t_account_ancestor.id_descendent
+        and t_account_ancestor.num_generations = 1
+        and t_account_ancestor.id_descendent != 1
+        and t_account_ancestor.vt_start &lt;= $${GLOBAL.mvm_startup_date}
+        and t_account_ancestor.vt_end &gt;= $${GLOBAL.mvm_startup_date}
+        left join t_account_mapper mm on t_account_ancestor.id_ancestor = mm.id_acc
+        where lower(t_account_mapper.nm_login) = lower($${OBJECT.parent_nm_login}) and lower(t_account_mapper.nm_space) = lower($${OBJECT.parent_nm_space})
+        "</query>
+        <cursor>TEMP.dbcsr</cursor>
+        <then>
+          <do>OBJECT(TEMP.dbcsr)._mc_from_db = '1'</do>
+          <do>OBJECT(TEMP.dbcsr)._mc_base_key = OBJECT._mc_parent_key</do>
+          <do>OBJECT(TEMP.dbcsr)._mc_level = OBJECT._mc_level - 1</do>
+          <do>OBJECT._mc_parent = TEMP.dbcsr</do>
+          <if>
+            <condition>OBJECT(TEMP.dbcsr).vt_start Ne '' and OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+            <then>
+              <substring>
+                <input>OBJECT(TEMP.dbcsr).vt_start</input>
+                <offset>0</offset>
+                <length>19</length>
+                <output>OBJECT(TEMP.dbcsr).vt_start</output>
+              </substring>
+            </then>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.dbcsr).vt_end Ne '' and OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+            <then>
+              <substring>
+                <input>OBJECT(TEMP.dbcsr).vt_end</input>
+                <offset>0</offset>
+                <length>19</length>
+                <output>OBJECT(TEMP.dbcsr).vt_end</output>
+              </substring>
+            </then>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.dbcsr).dt_crt Ne '' and OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+            <then>
+              <substring>
+                <input>OBJECT(TEMP.dbcsr).dt_crt</input>
+                <offset>0</offset>
+                <length>19</length>
+                <output>OBJECT(TEMP.dbcsr).dt_crt</output>
+              </substring>
+            </then>
+          </if>
+          <index_insert_if_none>
+            <index>'MC_OBJECT_ANCESTORS_BY_OID'</index>
+            <field name="object_id">TEMP.dbcsr</field>
+          </index_insert_if_none>
+          <call_proc_for_object>
+            <name>'replace_ancestor'</name>
+            <object_id>TEMP.dbcsr</object_id>
+          </call_proc_for_object>
+          <if>
+            <condition>OBJECT(TEMP.dbcsr).parent_final eq '1' or TEMP.mytypetocheck Ne 'ACCOUNT'</condition>
+            <then>
+              <return />
+            </then>
+          </if>
+          <call_proc_for_object>
+            <name>'find_ancestor_1'</name>
+            <object_id>TEMP.dbcsr</object_id>
+            <param name="error">TEMP.error</param>
+          </call_proc_for_object>
+        </then>
+        <else>
+          <do>TEMP.error ~= 'Could not find ancestor(s) in database: [' ~ OBJECT._mc_parent_key ~ ']. '</do>
+          <return />
+        </else>
+      </db_select>
+    </then>
+  </if>
+</proc>

@@ -1,0 +1,77 @@
+<proc name="pass_write_59">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'c_contacttype'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/accountcreation/contacttype'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_country'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'global/countryname'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_communicationlanguage'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumaccount/customlanguagecode'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_timezoneidc'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'global/timezoneid'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_av_contact.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_acc">OBJECT.id_acc</field>
+      <field name="c_contacttype">OBJECT.c_contacttype</field>
+      <field name="c_firstname">OBJECT.c_firstname</field>
+      <field name="c_middleinitial">OBJECT.c_middleinitial</field>
+      <field name="c_lastname">OBJECT.c_lastname</field>
+      <field name="c_email">OBJECT.c_email</field>
+      <field name="c_phonenumber">OBJECT.c_phonenumber</field>
+      <field name="c_company">OBJECT.c_company</field>
+      <field name="c_address1">OBJECT.c_address1</field>
+      <field name="c_address2">OBJECT.c_address2</field>
+      <field name="c_address3">OBJECT.c_address3</field>
+      <field name="c_city">OBJECT.c_city</field>
+      <field name="c_state">OBJECT.c_state</field>
+      <field name="c_zip">OBJECT.c_zip</field>
+      <field name="c_country">OBJECT.c_country</field>
+      <field name="c_facsimiletelephonenumber">OBJECT.c_facsimiletelephonenumber</field>
+      <field name="c_communicationlanguage">OBJECT.c_communicationlanguage</field>
+      <field name="c_timezoneidc">OBJECT.c_timezoneidc</field>
+      <field name="c_salutation">OBJECT.c_salutation</field>
+      <field name="c_name1">OBJECT.c_name1</field>
+      <field name="c_name2">OBJECT.c_name2</field>
+      <field name="c_localsalutation">OBJECT.c_localsalutation</field>
+      <field name="c_localfirstname">OBJECT.c_localfirstname</field>
+      <field name="c_localmiddleinitial">OBJECT.c_localmiddleinitial</field>
+      <field name="c_locallastname">OBJECT.c_locallastname</field>
+      <field name="c_localaddress1">OBJECT.c_localaddress1</field>
+      <field name="c_localaddress2">OBJECT.c_localaddress2</field>
+      <field name="c_localaddress3">OBJECT.c_localaddress3</field>
+      <field name="c_localcity">OBJECT.c_localcity</field>
+      <field name="c_localstate">OBJECT.c_localstate</field>
+    </data>
+  </print_record>
+</proc>

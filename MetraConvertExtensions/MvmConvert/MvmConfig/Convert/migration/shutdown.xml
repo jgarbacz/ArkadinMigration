@@ -1,0 +1,7 @@
+<proc name="shutdown">
+
+  <set_server_mode_off/>
+  <shutdown_cluster/>
+  <sleep>5000</sleep>
+
+</proc>

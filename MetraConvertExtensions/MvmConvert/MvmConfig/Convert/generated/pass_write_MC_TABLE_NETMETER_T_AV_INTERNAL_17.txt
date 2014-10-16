@@ -1,0 +1,139 @@
+<proc name="pass_write_17">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'c_timezoneid'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'global/timezoneid'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_paymentmethod'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/accountcreation/paymentmethod'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_securityquestion'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/accountcreation/securityquestion'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_invoicemethod'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumbilling/invoicedeliverymethod'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_usagecycletype'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/billingcycle/usagecycletype'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_language'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'global/languagecode'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_statusreason'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/accountcreation/statusreason'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_taxvendor'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/tax/taxvendor'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_metrataxcountryeligibility'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumglobal/subsidiaryname'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_metrataxcountryzone'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/tax/taxzone'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_metrataxoverrideband'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/tax/taxband'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_taxexemptreason'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/tax/taxexemptreason'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_av_internal.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_acc">OBJECT.id_acc</field>
+      <field name="c_taxexempt">OBJECT.c_taxexempt</field>
+      <field name="c_taxexemptid">OBJECT.c_taxexemptid</field>
+      <field name="c_timezoneid">OBJECT.c_timezoneid</field>
+      <field name="c_paymentmethod">OBJECT.c_paymentmethod</field>
+      <field name="c_securityquestion">OBJECT.c_securityquestion</field>
+      <field name="c_securityquestiontext">OBJECT.c_securityquestiontext</field>
+      <field name="c_securityanswer">OBJECT.c_securityanswer</field>
+      <field name="c_invoicemethod">OBJECT.c_invoicemethod</field>
+      <field name="c_usagecycletype">OBJECT.c_usagecycletype</field>
+      <field name="c_language">OBJECT.c_language</field>
+      <field name="c_statusreason">OBJECT.c_statusreason</field>
+      <field name="c_statusreasonother">OBJECT.c_statusreasonother</field>
+      <field name="c_currency">OBJECT.c_currency</field>
+      <field name="c_pricelist">OBJECT.c_pricelist</field>
+      <field name="c_billable">OBJECT.c_billable</field>
+      <field name="c_folder">OBJECT.c_folder</field>
+      <field name="c_division">OBJECT.c_division</field>
+      <field name="c_taxvendor">OBJECT.c_taxvendor</field>
+      <field name="c_metrataxcountryeligibility">OBJECT.c_metrataxcountryeligibility</field>
+      <field name="c_metrataxcountryzone">OBJECT.c_metrataxcountryzone</field>
+      <field name="c_metrataxhasoverrideband">OBJECT.c_metrataxhasoverrideband</field>
+      <field name="c_metrataxoverrideband">OBJECT.c_metrataxoverrideband</field>
+      <field name="c_taxserviceaddresspcode">OBJECT.c_taxserviceaddresspcode</field>
+      <field name="c_taxexemptreason">OBJECT.c_taxexemptreason</field>
+      <field name="c_taxexemptstartdate">OBJECT.c_taxexemptstartdate</field>
+      <field name="c_taxexemptenddate">OBJECT.c_taxexemptenddate</field>
+      <field name="c_taxregistryreference">OBJECT.c_taxregistryreference</field>
+    </data>
+  </print_record>
+</proc>

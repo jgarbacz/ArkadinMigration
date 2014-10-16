@@ -1,0 +1,5 @@
+<proc name='wcf_service_complete'>
+  <print>'START wcf_service_complete on wcf_service_complete_monitor='~OBJECT.wcf_service_complete_monitor</print>
+  <sync_end dynamic_name='OBJECT.wcf_service_complete_monitor'></sync_end>
+  <print>'END wcf_service_complete on wcf_service_complete_monitor='~OBJECT.wcf_service_complete_monitor</print>
+</proc>

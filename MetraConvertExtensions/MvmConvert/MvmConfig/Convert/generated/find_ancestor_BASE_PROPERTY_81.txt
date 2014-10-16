@@ -1,0 +1,70 @@
+<proc name="find_ancestor_81">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="error" mode="in out" />
+  <!-- Find ancestors for record type BASE_PROPERTY -->
+  <do>TEMP.mytypetocheck = 'BASE_PROPERTY'</do>
+  <if>
+    <condition>
+    </condition>
+    <then>
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query>"select    "</query>
+        <cursor>TEMP.dbcsr</cursor>
+        <then>
+          <do>OBJECT(TEMP.dbcsr)._mc_from_db = '1'</do>
+          <do>OBJECT(TEMP.dbcsr)._mc_base_key = OBJECT._mc_parent_key</do>
+          <do>OBJECT(TEMP.dbcsr)._mc_level = OBJECT._mc_level - 1</do>
+          <do>OBJECT._mc_parent = TEMP.dbcsr</do>
+          <if>
+            <condition>OBJECT(TEMP.dbcsr).vt_start Ne '' and OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+            <then>
+              <substring>
+                <input>OBJECT(TEMP.dbcsr).vt_start</input>
+                <offset>0</offset>
+                <length>19</length>
+                <output>OBJECT(TEMP.dbcsr).vt_start</output>
+              </substring>
+            </then>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.dbcsr).vt_end Ne '' and OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+            <then>
+              <substring>
+                <input>OBJECT(TEMP.dbcsr).vt_end</input>
+                <offset>0</offset>
+                <length>19</length>
+                <output>OBJECT(TEMP.dbcsr).vt_end</output>
+              </substring>
+            </then>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.dbcsr).dt_crt Ne '' and OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+            <then>
+              <substring>
+                <input>OBJECT(TEMP.dbcsr).dt_crt</input>
+                <offset>0</offset>
+                <length>19</length>
+                <output>OBJECT(TEMP.dbcsr).dt_crt</output>
+              </substring>
+            </then>
+          </if>
+          <index_insert_if_none>
+            <index>'MC_OBJECT_ANCESTORS_BY_OID'</index>
+            <field name="object_id">TEMP.dbcsr</field>
+          </index_insert_if_none>
+          <call_proc_for_object>
+            <name>'replace_ancestor'</name>
+            <object_id>TEMP.dbcsr</object_id>
+          </call_proc_for_object>
+        </then>
+        <else>
+          <do>TEMP.error ~= 'Could not find ancestor(s) in database: [' ~ OBJECT._mc_parent_key ~ ']. '</do>
+          <return />
+        </else>
+      </db_select>
+    </then>
+  </if>
+</proc>

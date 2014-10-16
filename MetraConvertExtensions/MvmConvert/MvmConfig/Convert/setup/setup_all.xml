@@ -1,0 +1,434 @@
+<procs>
+
+<proc name="setup_all">
+
+  <call_proc_for_current_object>
+    <name>'setup_enviroment'</name>
+  </call_proc_for_current_object>
+
+  <print>'Finished setup_environment'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+  <call_proc_for_current_object>
+    <name>'setup_phases'</name>
+  </call_proc_for_current_object>
+
+  <print>'Finished setup_phases'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+  <if>
+    <condition>GLOBAL.mode eq 'migrate'</condition>
+    <then>
+      <print>'Deleting contents of generated directory ' ~ GLOBAL.gen_directory</print>
+      <file_delete>GLOBAL.gen_directory ~ GLOBAL.path_separator ~ '*.xml'</file_delete>
+      <file_delete>GLOBAL.gen_directory ~ GLOBAL.path_separator ~ '*.txt'</file_delete>
+
+      <print>'Deleting contents of generated directory ' ~ GLOBAL.gen_record_types_directory</print>
+      <file_delete>GLOBAL.gen_record_types_directory ~ GLOBAL.path_separator ~ '*.xml'</file_delete>
+      <file_delete>GLOBAL.gen_record_types_directory ~ GLOBAL.path_separator ~ '*.txt'</file_delete>
+      <print>'Deleting contents of generated directory ' ~ GLOBAL.gen_interfaces_directory</print>
+      <file_delete>GLOBAL.gen_interfaces_directory ~ GLOBAL.path_separator ~ '*.xml'</file_delete>
+      <file_delete>GLOBAL.gen_interfaces_directory ~ GLOBAL.path_separator ~ '*.txt'</file_delete>
+
+      <print>'Deleting contents of error directory ' ~ GLOBAL.error_directory</print>
+      <file_delete>GLOBAL.error_directory ~ GLOBAL.path_separator ~ '*.data'</file_delete>
+      <file_delete>GLOBAL.error_directory ~ GLOBAL.path_separator ~ '*.csv'</file_delete>
+
+      <print>'Deleting contents of output directory ' ~ GLOBAL.table_directory</print>
+      <file_delete>GLOBAL.table_directory ~ GLOBAL.path_separator ~ '*.txt'</file_delete>
+
+      <print>'Deleting contents of temp directory ' ~ GLOBAL.sorted_directory</print>
+      <file_delete>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ '*'</file_delete>
+
+      <file_delete>GLOBAL.migration_directory ~ GLOBAL.path_separator ~ '*migration_report.csv'</file_delete>
+
+      <call_proc_for_current_object>
+        <name>'setup_migrate'</name>
+      </call_proc_for_current_object>
+        
+      <print>'Finished setup_migrate and purge of files.'</print>
+      <call_proc_for_current_object>
+          <name>'print_internals'</name>
+      </call_proc_for_current_object>
+    </then>
+    <else>
+      <file_delete>GLOBAL.migration_directory ~ GLOBAL.path_separator ~ '*load_report.csv'</file_delete>
+
+      <call_proc_for_current_object>
+        <name>'setup_load'</name>
+      </call_proc_for_current_object>
+    </else>
+  </if>
+    
+
+  <!-- Set up clustering -->
+  <if>
+    <condition>GLOBAL.clustered ne ''</condition>
+    <then>
+      <do>GLOBAL.mvm_cluster_name = 'default'</do>
+      <server_credentials_get>
+        <login_object>GLOBAL.target_login</login_object>
+      </server_credentials_get>
+      <mvm_cluster_get>
+        <login_object>GLOBAL.target_login</login_object>
+        <mvm_cluster_name>GLOBAL.mvm_cluster_name</mvm_cluster_name>
+      </mvm_cluster_get>
+
+      <set_server_mode_on/>
+
+      <print>'About to run startup_slaves...'</print>
+      <call_proc_for_current_object>
+          <name>'print_internals'</name>
+      </call_proc_for_current_object>
+        
+      <startup_slaves>
+        <slave_count>'*'</slave_count>
+        <num_started>GLOBAL.slave_count</num_started>
+      </startup_slaves>
+
+      <print>'Finished startup_slaves'</print>
+      <call_proc_for_current_object>
+          <name>'print_internals'</name>
+      </call_proc_for_current_object>
+
+      <!-- 
+      Change by TCF July 2014.
+      See comments in setup_procs.xml. Moving this logic to the individual child nodes.
+      -->
+      <!--<call_proc_for_current_object>
+          <name>'cache_nm_logins'</name>
+      </call_proc_for_current_object>
+      <print>'DUMPED FROM T_ACCOUNT_MAPPER'</print>-->
+        
+      <!-- Push data structures down to our slave processes -->
+      <if>
+        <condition>GLOBAL.mode eq 'migrate'</condition>
+        <then>
+          <call_proc_for_current_object>
+            <name>'push_migration_data'</name>
+          </call_proc_for_current_object>
+
+          <print>'Finished push_migration_data'</print>
+          <call_proc_for_current_object>
+              <name>'print_internals'</name>
+          </call_proc_for_current_object>
+        </then>
+      </if>
+    </then>
+  </if>
+
+  <!-- Indexes created in this initialize block will be created on both the parent and all slaves -->
+  <initialize namespace="global">
+    <print>'Setting up migration environment'</print>
+	
+	<!--
+	Modification by TCF September 2014. I added a new attribute called capacity to the definition for define_memory_index with the goal
+	of reigning in memory fragmentation in MetraConvert. That is being applied to select indexes. 
+	-->
+	<define_memory_index>
+      <index>'MC_MAPPINGS'</index>
+      <key_field>'namespace'</key_field>
+      <key_field>'from'</key_field>
+      <field>'to'</field>
+	  <capacity>GLOBAL.idxCap_MC_MAPPINGS</capacity>
+    </define_memory_index>
+    <print>'Created MC_MAPPINGS index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_GENERATED_PROCS'</index>
+      <unique>'1'</unique>
+      <key_field>'procname'</key_field>
+      <field>'proctext'</field>
+	  <capacity>GLOBAL.idxCap_MC_GENERATED_PROCS</capacity>
+	</define_memory_index>
+    <print>'Created MC_GENERATED_PROCS index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_GLOBAL_PARAMETERS'</index>
+      <unique>'1'</unique>
+      <key_field>'parameter'</key_field>
+      <field>'value'</field>
+	  <capacity>GLOBAL.idxCap_MC_GLOBAL_PARAMETERS</capacity>
+    </define_memory_index>
+    <print>'Created MC_GLOBAL_PARAMETERS index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_RECORD_FINAL_PASS'</index>
+      <key_field>'record_type_id'</key_field>
+      <field>'pass'</field>
+	  <capacity>GLOBAL.idxCap_MC_RECORD_FINAL_PASS</capacity>
+    </define_memory_index>
+    <print>'Created MC_RECORD_FINAL_PASS index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_CHILD_PARENT_MAP'</index>
+      <key_field>'child_keys'</key_field>
+      <key_field>'child_namespace'</key_field>
+      <field>'child_sort_key'</field>
+      <field>'parent_keys'</field>
+      <field>'parent_namespace'</field>
+	  <capacity>GLOBAL.idxCap_MC_CHILD_PARENT_MAP</capacity>
+    </define_memory_index>
+    <print>'Created MC_CHILD_PARENT_MAP index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <!-- FIXME: when we use child_count, need to accumulate counts because different kids can insert rows for same parent -->
+    <define_memory_index>
+      <index>'MC_CHILD_COUNT'</index>
+      <key_field>'parent_keys'</key_field>
+      <key_field>'parent_namespace'</key_field>
+      <field>'child_count'</field>
+      <capacity>GLOBAL.idxCap_MC_CHILD_COUNT</capacity>
+    </define_memory_index>
+    <print>'Created MC_CHILD_COUNT index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_PARENT_LOOKUP'</index>
+      <key_field>'parent_keys'</key_field>
+      <key_field>'parent_namespace'</key_field>
+      <capacity>GLOBAL.idxCap_MC_PARENT_LOOKUP</capacity>
+    </define_memory_index>
+    <print>'Created MC_PARENT_LOOKUP index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_RECORD_COUNT'</index>
+      <key_field>'record_type'</key_field>
+      <field>'count'</field>
+      <field>'display_record_type'</field>
+      <capacity>GLOBAL.idxCap_MC_RECORD_COUNT</capacity>
+    </define_memory_index>
+    <print>'Created MC_RECORD_COUNT index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_RECORD_ERROR_COUNT'</index>
+      <unique>'1'</unique>
+      <key_field>'record_type'</key_field>
+      <field>'count'</field>
+      <capacity>GLOBAL.idxCap_MC_RECORD_ERROR_COUNT</capacity>
+    </define_memory_index>
+    <print>'Created MC_RECORD_ERROR_COUNT index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_RECORD_ERRORS'</index>
+      <key_field>'chunk_no'</key_field>
+      <field>'file_id'</field>
+      <field>'line_no'</field>
+      <field>'record_type_id'</field>
+      <field>'offset'</field>
+      <field>'length'</field>
+      <field>'key_fields'</field>
+      <field>'message'</field>
+    </define_memory_index>
+    <print>'Created MC_RECORD_ERRORS index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_RECORD_ERROR_ROWS'</index>
+      <unique>'1'</unique>
+      <key_field>'record_type'</key_field>
+      <key_field>'file_id'</key_field>
+      <key_field>'line_no'</key_field>
+    </define_memory_index>
+    <print>'Created MC_RECORD_ERROR_ROWS index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_OBJECT_ANCESTORS'</index>
+      <unique>'1'</unique>
+      <key_field>'level'</key_field>
+      <field type='object_id'>'object'</field>
+      <capacity>GLOBAL.idxCap_MC_OBJECT_ANCESTORS</capacity>
+    </define_memory_index>
+    <print>'Created MC_OBJECT_ANCESTORS index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_OBJECT_ANCESTORS_BY_OID'</index>
+      <key_field type='object_id'>'object_id'</key_field>
+      <capacity>GLOBAL.idxCap_MC_OBJECT_ANCESTORS_BY_OID</capacity>
+    </define_memory_index>
+    <print>'Created MC_OBJECT_ANCESTORS_BY_OID index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+	<!-- FIXME: MC_OBJECT_ERRORS doesn't work with subsequent stages yet -->
+    <define_memory_index>
+      <index>'MC_OBJECT_ERRORS'</index>
+      <key_field>'file_id'</key_field>
+      <key_field>'file_offset'</key_field>
+    </define_memory_index>
+    <print>'Created MC_OBJECT_ERRORS index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_OBJECT_ERRORS_BY_OID'</index>
+      <key_field>'object_id'</key_field>
+    </define_memory_index>
+    <print>'Created MC_OBJECT_ERRORS_BY_OID index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_HIERARCHY_REFERENCES'</index>
+      <unique>'1'</unique>
+      <key_field>'record_type'</key_field>
+      <key_field>'key'</key_field>
+      <field type='object_id'>'object'</field>
+      <capacity>GLOBAL.idxCap_MC_HIERARCHY_REFERENCES</capacity>
+    </define_memory_index>
+    <print>'Created MC_HIERARCHY_REFERENCES index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_PARENT_QUERIES'</index>
+      <unique>'1'</unique>
+      <key_field>'record_type'</key_field>
+      <field>'query'</field>
+      <capacity>GLOBAL.idxCap_MC_PARENT_QUERIES</capacity>
+    </define_memory_index>
+    <print>'Created MC_PARENT_QUERIES index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <define_memory_index>
+      <index>'MC_RATE_SCHEDULES'</index>
+      <unique>'1'</unique>
+      <key_field>'key'</key_field>
+      <field>'id_sched'</field>
+      <field>'count'</field>
+      <capacity>GLOBAL.idxCap_MC_RATE_SCHEDULES</capacity>
+    </define_memory_index>
+    <print>'Created MC_RATE_SCHEDULES index'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+
+    <do>GLOBAL.group_sub_max = 0</do>
+    <do>GLOBAL.spawn_child_no = 1</do>
+    <do>GLOBAL.proc_counter = 1</do>
+
+    <print>'Setup mappings...'</print>
+    <call_proc_for_current_object>
+      <name>'setup_mappings'</name>
+    </call_proc_for_current_object>
+    <print>'Finished setup_mappings'</print>
+    <call_proc_for_current_object>
+      <name>'print_internals'</name>
+    </call_proc_for_current_object>
+  </initialize>
+</proc>
+
+<proc name="push_data_to_kids">
+  <param name='structure_name' />
+  <param name='clear' default='0' />
+
+  <slave_node_id_select>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <push_index>
+        <process_id>OBJECT(TEMP.csr).node_id</process_id>
+        <clear_source>TEMP.clear</clear_source>
+        <source>
+          <index>TEMP.structure_name</index>
+        </source>
+        <target>
+          <index>TEMP.structure_name</index>
+        </target>
+      </push_index>
+    </loop>
+  </slave_node_id_select>
+</proc>
+
+<proc name="push_data_to_parent">
+  <param name='structure_name' />
+  <param name='clear' default='1' />
+
+  <push_index>
+    <process_id>GLOBAL.master_id</process_id>
+    <clear_source>TEMP.clear</clear_source>
+    <source>
+      <index>TEMP.structure_name</index>
+    </source>
+    <target>
+      <index>TEMP.structure_name</index>
+    </target>
+  </push_index>
+</proc>
+
+<proc name="create_nm_login_index">
+  <param name='file_name' />
+  <define_memory_index>
+    <index>'MC_NM_LOGINS'</index>
+    <file>TEMP.file_name</file>
+    <key_field>'nm_login'</key_field>
+    <key_field>'nm_space'</key_field>
+  </define_memory_index>
+</proc>
+
+<!-- Note by TCF July 2014: this proc is no longer being called, moved logic to individual child nodes. Commenting out here. -->
+<!--<proc name="cache_nm_logins">
+  <call_proc_for_current_object>
+    <name>'create_nm_login_index'</name>
+    <param name='file_name'>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ GLOBAL.nmlogin_cache_filename</param>
+  </call_proc_for_current_object>
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>"select nm_login, nm_space from t_account_mapper"</query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'MC_NM_LOGINS'</index>
+        <field name='nm_login'>OBJECT(TEMP.csr).nm_login</field>
+        <field name='nm_space'>OBJECT(TEMP.csr).nm_space</field>
+      </index_insert>
+    </loop>
+  </db_select>
+  <index_close>
+    <index>'MC_NM_LOGINS'</index>
+  </index_close>
+</proc>-->
+
+</procs>

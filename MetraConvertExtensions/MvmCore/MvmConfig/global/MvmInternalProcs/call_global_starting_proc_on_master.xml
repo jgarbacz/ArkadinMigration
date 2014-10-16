@@ -1,0 +1,11 @@
+  <proc name="call_global_starting_proc_on_master">
+    <print>'call remote_queue_proc name=['~GLOBAL.call_global_starting_proc_on_master~'] on master_id=['~GLOBAL.master_id~']'</print>
+    <remote_queue_proc>
+      <name>GLOBAL.call_global_starting_proc_on_master</name>
+      <process_id>GLOBAL.master_id</process_id>
+      <batch_id>TEMP.my_batch_id</batch_id>
+    </remote_queue_proc>
+    <wait_for_batch_complete>TEMP.my_batch_id</wait_for_batch_complete>
+    <print>'done remote_queue_proc name=['~GLOBAL.call_global_starting_proc_on_master~'] on master_id=['~GLOBAL.master_id~']'</print>
+  </proc>
+

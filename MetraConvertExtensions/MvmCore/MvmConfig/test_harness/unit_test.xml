@@ -1,0 +1,141 @@
+<proc name="unit_test">
+  <run_once>
+    <define_memory_index>
+      <index>'UNIT_TEST_EXCEPTION_MAP'</index>
+      <key_field>'exception_name'</key_field>
+      <field>'status'</field>
+    </define_memory_index>
+    <index_insert>
+      <index>'UNIT_TEST_EXCEPTION_MAP'</index>
+      <field name="exception_name">''</field>
+      <field name="status">'pass'</field>
+    </index_insert>
+    <index_insert>
+      <index>'UNIT_TEST_EXCEPTION_MAP'</index>
+      <field name="exception_name">'nunit_pass'</field>
+      <field name="status">'pass'</field>
+    </index_insert>
+    <index_insert>
+      <index>'UNIT_TEST_EXCEPTION_MAP'</index>
+      <field name="exception_name">'nunit_fail'</field>
+      <field name="status">'fail'</field>
+    </index_insert>
+    <index_insert>
+      <index>'UNIT_TEST_EXCEPTION_MAP'</index>
+      <field name="exception_name">'nunit_ignore'</field>
+      <field name="status">'ignore'</field>
+    </index_insert>
+    <index_insert>
+      <index>'UNIT_TEST_EXCEPTION_MAP'</index>
+      <field name="exception_name">'nunit_inconclusive'</field>
+      <field name="status">'inconclusive'</field>
+    </index_insert>
+  </run_once>
+
+  <do>TEMP.log_start_string='-- Begin Unit Test '~GLOBAL.unit_test_proc_name~' --'</do>
+  <do>TEMP.log_end_string='-- End Unit Test '~GLOBAL.unit_test_proc_name~' --'</do>
+
+  <do>GLOBAL.exception_name=''</do>
+  <do>GLOBAL.exception_message=''</do>
+  <do>GLOBAL.exception_trace=''</do>
+
+  <test_output_clear>
+    <proc_name>GLOBAL.unit_test_proc_name</proc_name>
+  </test_output_clear>
+
+  <info>TEMP.log_start_string</info>
+
+  <try>
+    <config>
+      <spawn>
+        <object_type>'test_'~GLOBAL.unit_test_proc_name</object_type>
+        <object_id>TEMP.test_obj</object_id>
+      </spawn>
+      <call_dynamic_proc_for_object>
+        <name>GLOBAL.unit_test_proc_name</name>
+        <object_id>TEMP.test_obj</object_id>
+      </call_dynamic_proc_for_object>
+    </config>
+    <catch>
+      <do>GLOBAL.exception_name=TEMP.exception_name</do>
+      <do>GLOBAL.exception_message=TEMP.exception_message</do>
+      <do>GLOBAL.exception_trace=TEMP.exception_trace</do>
+    </catch>
+  </try>
+
+  <c>If user didn't explicitly PASS/FAIL etc, diff the output before saying it is a PASS</c>
+  <if>
+    <condition>GLOBAL.exception_name eq ''</condition>
+    <then>
+      <test_output_diff>
+        <proc_name>GLOBAL.unit_test_proc_name</proc_name>
+        <exception_name>GLOBAL.exception_name</exception_name>
+        <exception_message>GLOBAL.exception_message</exception_message>
+        <exception_trace>GLOBAL.exception_trace</exception_trace>
+      </test_output_diff>
+    </then>
+  </if>
+
+
+  <c>UPDATE THE MVM TEST STATUS DIR</c>
+  <get_rmp_dir>TEMP.rmp_dir</get_rmp_dir>
+  <do>GLOBAL.mvm_test_dir=TEMP.rmp_dir~'\MvmTests'</do>
+  <glob_select>
+    <glob>GLOBAL.mvm_test_dir~'\*\'~GLOBAL.unit_test_proc_name~'.lnk'</glob>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <do>TEMP.old_link=OBJECT(TEMP.csr).value</do>
+      <file_delete>TEMP.old_link</file_delete>
+    </loop>
+  </glob_select>
+
+  <c>map the exception names to the test status</c>
+  <do>TEMP.test_status='fail'</do>
+  <index_select>
+    <index>'UNIT_TEST_EXCEPTION_MAP'</index>
+    <field name="exception_name">GLOBAL.exception_name</field>
+    <cursor>TEMP.csr</cursor>
+    <then>
+      <do>TEMP.test_status=OBJECT(TEMP.csr).status</do>
+    </then>
+  </index_select>
+
+  <c>log the results</c>
+  <if>
+    <condition>GLOBAL.exception_name eq '' or GLOBAL.exception_name eq 'nunit_pass'</condition>
+    <then>
+      <print>'UNIT TEST '~GLOBAL.unit_test_proc_name~' PASS'</print>
+    </then>
+    <else>
+      <print>'UNIT TEST '~GLOBAL.unit_test_proc_name~' FAIL'</print>
+      <print>'  EXCEPTION_NAME='~GLOBAL.exception_name</print>
+      <print>'  EXCEPTION_MESSAGE='~GLOBAL.exception_message</print>
+      <print>'  EXCEPTION_TRACE='~GLOBAL.exception_trace</print>
+    </else>
+  </if>
+
+  <info>TEMP.log_end_string</info>
+
+  <c> Snip the log into a separate log file</c>
+  <do>TEMP.test_log_file=get_proc_test_current_dir(GLOBAL.unit_test_proc_name)~'\log.txt'</do>
+
+  <print>'xxxxxxxxxxxxxxxxxxxxxxxxxxxx'~TEMP.test_log_file</print>
+  <do>snip_log(TEMP.log_start_string,TEMP.log_end_string,TEMP.test_log_file)</do>
+
+  <c>create shortcut to the test xml file </c>
+  <do>TEMP.link_filename=GLOBAL.mvm_test_dir~'\'~TEMP.test_status~'\'~GLOBAL.unit_test_proc_name~'.PROC.lnk'</do>
+  <do>TEMP.test_filename=get_proc_file_name(GLOBAL.unit_test_proc_name)</do>
+  <print>'creating new link '~TEMP.link_filename~' to '~TEMP.test_filename</print>
+  <create_shortcut>
+    <link>TEMP.link_filename</link>
+    <target>TEMP.test_filename</target>
+  </create_shortcut>
+
+  <c>create shortcut to the test log file </c>
+  <do>TEMP.link_log_file=GLOBAL.mvm_test_dir~'\'~TEMP.test_status~'\'~GLOBAL.unit_test_proc_name~'.LOG.lnk'</do>
+  <print>'creating new link '~TEMP.link_log_file~' to '~TEMP.test_log_file</print>
+  <create_shortcut>
+    <link>TEMP.link_log_file</link>
+    <target>TEMP.test_log_file</target>
+  </create_shortcut>
+</proc>

@@ -1,0 +1,19 @@
+<proc name="read_kv_return_all_ACCOUNT_INDEPENDENTACCOUNT">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="pipe_cursor" />
+  <param name="filename" />
+  <do>TEMP.linecount = 0</do>
+  <sorted_object_file_select>
+    <name>TEMP.filename</name>
+    <input_file_match>TEMP.filename ~ '*'</input_file_match>
+    <cursor>TEMP.dfcsr</cursor>
+    <loop>
+      <do>TEMP.linecount += 1</do>
+      <do>OBJECT(TEMP.dfcsr)._mc_record_type_id = 28</do>
+      <do>OBJECT(TEMP.dfcsr)._mc_line_no = TEMP.linecount</do>
+      <pipe_row>TEMP.dfcsr</pipe_row>
+    </loop>
+  </sorted_object_file_select>
+</proc>

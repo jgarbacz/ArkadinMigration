@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<extension>
+    <author>Metratech</author>
+    <description>Core mvm extension</description>
+    <type>Pipeline</type>
+    <DefaultNamespace>metratech.com</DefaultNamespace>
+</extension>

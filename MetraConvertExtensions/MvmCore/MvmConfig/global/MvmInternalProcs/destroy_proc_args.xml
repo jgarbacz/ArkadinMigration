@@ -1,0 +1,3 @@
+<proc name='destroy_proc_args'>
+ <remove_object_from_cache>OBJECT.object_id</remove_object_from_cache>
+</proc>

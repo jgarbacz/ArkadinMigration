@@ -1,0 +1,39 @@
+<procs>
+  
+  <proc name="test_parallel_client">
+    <call_proc_for_current_object>
+      <name>'socket_read'</name>
+      <param name='server'>'localhost'</param>
+      <param name='port'>53077</param>
+      <param name='data_object_type'>'MINE'</param>
+      <param name='data_proc'>'thisproc'</param>
+    </call_proc_for_current_object>  
+  </proc>
+  
+  <proc name='socket_read'>
+    <param name='server'/>
+    <param name='port'/>
+    <param name='data_object_type'/>
+    <param name='data_proc'/>
+    <c> 
+      I think the config synchronization needs to happen outside of this... don't want to assume ANY mvm config is on this
+      machine!
+    </c>
+    <try>
+      <config>
+        <info>'Start reading from server=['~TEMP.server~'] port=['~TEMP.port~']'</info>
+        <mvm_socket_select>
+          <server>TEMP.server</server>
+          <port>TEMP.port</port>
+          <cursor>TEMP.csr</cursor>
+          <loop>
+            <print>'>>>>>Read the cursor value='~OBJECT(TEMP.csr).value</print>
+          </loop>
+        </mvm_socket_select>
+      </config>
+      <finally>
+        <print>'In socket_read finally block'</print>
+      </finally>
+    </try>
+  </proc>
+</procs>

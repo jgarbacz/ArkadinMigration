@@ -1,0 +1,10 @@
+<proc name="round">
+  <param name="input"/>
+  <param name="precision"/>
+  <param name="return_value" mode="out"/>
+  <round>
+    <input>TEMP.input</input>
+    <precision>TEMP.precision</precision>
+    <output>TEMP.return_value</output>
+  </round>
+</proc>

@@ -1,0 +1,24 @@
+<proc name="get_mvm_run_id">
+  <param name="mvm_run_id" mode="out"></param>
+  <param name="app_name"></param>
+  <if>
+    <condition>TEMP.app_name eq ''</condition>
+    <then>
+      <if>
+        <condition>GLOBAL.app_name eq ''</condition>
+        <then>
+          <do>TEMP.app_name='AMP'</do>
+        </then>
+        <else>
+          <do>TEMP.app_name = GLOBAL.app_name</do>
+        </else>
+      </if>
+    </then>
+  </if>
+  <db_call_proc>
+    <login_object>GLOBAL.target_login</login_object>
+    <name>'mvm_get_mvm_run_id'</name>
+    <param name="p_mvm_run_id">TEMP.mvm_run_id</param>
+    <param name="p_app_name">TEMP.app_name</param>
+  </db_call_proc>
+</proc>

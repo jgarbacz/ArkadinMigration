@@ -1,0 +1,42 @@
+<proc name="pass_write_74">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'id_pi_template'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'mc/id_pi_template_names'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'id_po'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'mc/id_po_names'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_pl_map.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="dt_modified">OBJECT.dt_modified</field>
+      <field name="id_paramtable">OBJECT.id_paramtable</field>
+      <field name="id_pi_type">OBJECT.id_pi_type</field>
+      <field name="id_pi_template">OBJECT.id_pi_template</field>
+      <field name="id_pi_instance">OBJECT.id_pi_instance</field>
+      <field name="id_pi_instance_parent">OBJECT.id_pi_instance_parent</field>
+      <field name="id_sub">OBJECT.id_sub</field>
+      <field name="id_acc">OBJECT.id_acc</field>
+      <field name="id_po">OBJECT.id_po</field>
+      <field name="id_pricelist">OBJECT.id_pricelist</field>
+      <field name="b_canicb">OBJECT.b_canicb</field>
+    </data>
+  </print_record>
+</proc>

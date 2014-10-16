@@ -1,0 +1,6 @@
+<proc name='initialize_global_namespace'>
+	<c>
+		this is a dummy proc we call to be sure we always
+		initialize global namespace before any other.
+	</c>
+</proc>

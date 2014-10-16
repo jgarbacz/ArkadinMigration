@@ -1,0 +1,8 @@
+<proc name="to_upper">
+  <param name="input"/>
+  <param name="return_value" mode="out"/>
+  <to_upper>
+    <input>TEMP.input</input>
+    <output>TEMP.return_value</output>
+  </to_upper>
+</proc>

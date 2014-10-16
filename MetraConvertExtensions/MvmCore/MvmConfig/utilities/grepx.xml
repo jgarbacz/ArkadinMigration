@@ -1,0 +1,90 @@
+<procs>
+
+<proc_info>
+  <category>Search</category>
+  <description>
+    Searches through all MVM configuration files for lines matching a regular expression.
+  </description>
+</proc_info>
+<proc name='grepx'>
+  <param name='regex' default='""' datatype='string' description='regular expression to search for'/>
+  <param name='open' default='""' datatype='integer' description='open matching files, up to the maximum number supplied'/>
+
+  <if>
+    <condition>TEMP.regex eq ''</condition>
+    <then>
+      <do>TEMP.regex = GLOBAL.regex</do>
+    </then>
+  </if>
+  <if>
+    <condition>TEMP.open eq ''</condition>
+    <then>
+      <do>TEMP.open = GLOBAL.open</do>
+    </then>
+  </if>
+
+  <if>
+    <condition>TEMP.regex eq ''</condition>
+    <then>
+      <console>'Warning: mvm grepx cannot work without a regular expression!'</console>
+    </then>
+    <else>
+
+      <get_metratech_dir>TEMP.pwd</get_metratech_dir>
+
+      <if>
+        <condition>TEMP.open eq '' or (TEMP.open GTE 0 or TEMP.open LTE 0)</condition>
+        <else>
+          <do>TEMP.open = 999999</do>
+        </else>
+      </if>
+      <glob_select>
+        <glob>TEMP.pwd ~ '\RMP\Extensions\*\MvmConfig\**.xml'</glob>
+        <cursor_value>'glob'</cursor_value>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <do>TEMP.ctr = 1</do>
+          <file_select>
+            <input_file>OBJECT(TEMP.csr).glob</input_file>
+            <cursor>TEMP.filecsr</cursor>
+            <loop>
+              <match>
+                <input>OBJECT(TEMP.filecsr).value</input>
+                <regex>TEMP.regex</regex>
+                <success>TEMP.matched</success>
+              </match>
+              <if>
+                <condition>TEMP.matched</condition>
+                <then>
+                  <if>
+                    <condition>TEMP.open GT 0</condition>
+                    <then>
+                      <console>'Opening ' ~ OBJECT(TEMP.csr).glob</console>
+                      <system_command_select>
+                        <command>'start ' ~ OBJECT(TEMP.csr).glob</command>
+                        <cursor_command>TEMP.cursor_command</cursor_command>
+                        <cursor_command_no>TEMP.cursor_command_no</cursor_command_no>
+                        <cursor_value>TEMP.cursor_value</cursor_value>
+                        <cursor>TEMP.cursor</cursor>
+                        <loop></loop>
+                      </system_command_select>
+                      <do>TEMP.open -= 1</do>
+                      <do>OBJECT(TEMP.filecsr).eof = 1</do>
+                    </then>
+                    <condition>TEMP.open eq ''</condition>
+                    <then>
+                      <console>OBJECT(TEMP.csr).glob ~ ':' ~ TEMP.ctr ~ ':' ~ OBJECT(TEMP.filecsr).value</console>
+                    </then>
+                  </if>
+                </then>
+              </if>
+              <do>TEMP.ctr += 1</do>
+            </loop>
+          </file_select>
+        </loop>
+      </glob_select>
+    </else>
+  </if>
+</proc>
+
+</procs>

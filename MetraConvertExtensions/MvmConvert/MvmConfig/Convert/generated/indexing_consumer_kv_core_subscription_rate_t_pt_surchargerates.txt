@@ -1,0 +1,16 @@
+<proc name="indexing_consumer_kv_core_subscription_rate_t_pt_surchargerates">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <proc_select>
+    <name>'read_kv_return_all_core_subscription_rate_t_pt_surchargerates'</name>
+    <param name="filename">OBJECT.filename</param>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <call_proc_for_object>
+        <name>'indexing_core_subscription_rate_t_pt_surchargerates'</name>
+        <object_id>TEMP.csr</object_id>
+      </call_proc_for_object>
+    </loop>
+  </proc_select>
+</proc>

@@ -1,0 +1,23 @@
+<proc name='print_object'>
+  <param name='object_id' default='"not_set"'/>
+  <param name='show_internal_fields' default='"0"'/>
+  <if>
+    <condition>TEMP.object_id eq 'not_set'</condition>
+    <then>
+      <do>TEMP.object_id=OBJECT.object_id</do>
+    </then>
+  </if>
+  
+  <info>'OBJECT: '~TEMP.object_id~'/'~OBJECT(TEMP.object_id).object_type~'('</info>
+  <object_field_value_select>
+    <object_id>TEMP.object_id</object_id>
+    <show_internal_fields>TEMP.show_internal_fields</show_internal_fields>
+    <cursor_field>'field'</cursor_field>
+    <cursor_value>'value'</cursor_value>
+    <cursor>TEMP.c1</cursor>
+    <loop>
+      <info>'  '~OBJECT(TEMP.c1).field~' = ['~OBJECT(TEMP.c1).value~']'</info>
+    </loop>
+  </object_field_value_select>
+  <info>')'</info>
+</proc>

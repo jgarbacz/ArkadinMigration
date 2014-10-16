@@ -1,0 +1,6 @@
+<proc name="indexing_consumer_kv_core_effective_date">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <!-- This record type either cannot have kids, or has no parent keys -->
+</proc>

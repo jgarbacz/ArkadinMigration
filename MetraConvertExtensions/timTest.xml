@@ -1,0 +1,7 @@
+﻿<procs>
+
+    <proc name="timTest">
+        <print>'Yeah baby'</print>
+    </proc>
+
+</procs>

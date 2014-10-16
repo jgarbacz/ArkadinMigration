@@ -1,0 +1,9 @@
+<proc name="register_server">
+  <print>'Encrypting and storing credentials for server='~GLOBAL.server~' username='~GLOBAL.username</print>
+  <server_credentials_set>
+    <login_object>GLOBAL.target_login</login_object>
+    <server>GLOBAL.server</server>
+    <username>GLOBAL.username</username>
+    <password>GLOBAL.password</password>
+  </server_credentials_set>
+</proc>

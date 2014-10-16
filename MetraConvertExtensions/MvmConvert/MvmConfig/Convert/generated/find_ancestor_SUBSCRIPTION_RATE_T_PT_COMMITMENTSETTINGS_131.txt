@@ -1,0 +1,89 @@
+<proc name="find_ancestor_131">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="error" mode="in out" />
+  <!-- Find ancestors for record type SUBSCRIPTION_RATE_T_PT_COMMITMENTSETTINGS -->
+  <do>TEMP.mytypetocheck = 'SUBSCRIPTION_RATE_T_PT_COMMITMENTSETTINGS'</do>
+  <if>
+    <condition>OBJECT.parent_nm_login ne '' and OBJECT.parent_nm_space ne '' and OBJECT.id_po ne ''</condition>
+    <then>
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query>"select 
+        t_account_mapper.nm_login as parent_nm_login, t_account_mapper.nm_space as parent_nm_space,
+        t_av_internal.c_currency as nm_currency_code, t_sub.id_sub as id_sub, t_sub.id_sub_ext as id_sub_ext, t_sub.id_acc as id_acc
+      , t_sub.id_sub as id_sub, t_sub.id_sub_ext as id_sub_ext, t_sub.id_acc as id_acc, t_sub.id_po as id_po, t_sub.dt_crt as dt_crt, t_sub.vt_start as vt_start, t_sub.vt_end as vt_end, t_sub.id_group as id_group 
+        from t_sub
+        inner join t_account_mapper on t_sub.id_acc = t_account_mapper.id_acc
+        inner join t_av_internal on t_av_internal.id_acc = t_account_mapper.id_acc
+        inner join t_base_props on t_sub.id_po = t_base_props.id_prop and t_base_props.n_kind = 100 and lower(t_base_props.nm_name) = lower($${OBJECT.id_po})
+        where lower(t_account_mapper.nm_login) = lower($${OBJECT.parent_nm_login}) and lower(t_account_mapper.nm_space) = lower($${OBJECT.parent_nm_space})
+        "</query>
+        <cursor>TEMP.dbcsr</cursor>
+        <then>
+          <do>OBJECT(TEMP.dbcsr)._mc_from_db = '1'</do>
+          <do>OBJECT(TEMP.dbcsr)._mc_base_key = OBJECT._mc_parent_key</do>
+          <do>OBJECT(TEMP.dbcsr)._mc_level = OBJECT._mc_level - 1</do>
+          <do>OBJECT._mc_parent = TEMP.dbcsr</do>
+          <if>
+            <condition>OBJECT(TEMP.dbcsr).vt_start Ne '' and OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+            <then>
+              <substring>
+                <input>OBJECT(TEMP.dbcsr).vt_start</input>
+                <offset>0</offset>
+                <length>19</length>
+                <output>OBJECT(TEMP.dbcsr).vt_start</output>
+              </substring>
+            </then>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.dbcsr).vt_end Ne '' and OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+            <then>
+              <substring>
+                <input>OBJECT(TEMP.dbcsr).vt_end</input>
+                <offset>0</offset>
+                <length>19</length>
+                <output>OBJECT(TEMP.dbcsr).vt_end</output>
+              </substring>
+            </then>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.dbcsr).dt_crt Ne '' and OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+            <then>
+              <substring>
+                <input>OBJECT(TEMP.dbcsr).dt_crt</input>
+                <offset>0</offset>
+                <length>19</length>
+                <output>OBJECT(TEMP.dbcsr).dt_crt</output>
+              </substring>
+            </then>
+          </if>
+          <index_insert_if_none>
+            <index>'MC_OBJECT_ANCESTORS_BY_OID'</index>
+            <field name="object_id">TEMP.dbcsr</field>
+          </index_insert_if_none>
+          <call_proc_for_object>
+            <name>'replace_ancestor'</name>
+            <object_id>TEMP.dbcsr</object_id>
+          </call_proc_for_object>
+          <if>
+            <condition>OBJECT(TEMP.dbcsr).parent_final eq '1' or TEMP.mytypetocheck Ne 'ACCOUNT'</condition>
+            <then>
+              <return />
+            </then>
+          </if>
+          <call_proc_for_object>
+            <name>'find_ancestor_60'</name>
+            <object_id>TEMP.dbcsr</object_id>
+            <param name="error">TEMP.error</param>
+          </call_proc_for_object>
+        </then>
+        <else>
+          <do>TEMP.error ~= 'Could not find ancestor(s) in database: [' ~ OBJECT._mc_parent_key ~ ']. '</do>
+          <return />
+        </else>
+      </db_select>
+    </then>
+  </if>
+</proc>

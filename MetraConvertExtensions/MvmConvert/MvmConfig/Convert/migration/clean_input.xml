@@ -1,0 +1,11 @@
+<proc name="clean_input">
+
+  <c>Delete all files contained in the data directories</c>
+  <print>'Deleting all pre-existing data files under ' ~ GLOBAL.data_directory</print>
+
+  <file_delete>GLOBAL.input_directory ~ '\*.data'</file_delete>
+  <file_delete>GLOBAL.sorted_directory ~ '\*.data'</file_delete>
+  <file_delete>GLOBAL.table_directory ~ '\*.data'</file_delete>
+  <file_delete>GLOBAL.migration_directory ~ '\*.data'</file_delete>
+
+</proc>

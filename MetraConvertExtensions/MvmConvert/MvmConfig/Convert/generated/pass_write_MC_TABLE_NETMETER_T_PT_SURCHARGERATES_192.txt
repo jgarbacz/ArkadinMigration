@@ -1,0 +1,50 @@
+<proc name="pass_write_192">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'c_subsidiaryname'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumglobal/subsidiaryname'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_currency'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'global/systemcurrencies/systemcurrencies'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_country'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'global/countryname'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_pt_surchargerates.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_sched">OBJECT.id_sched</field>
+      <field name="n_order">OBJECT.n_order</field>
+      <field name="tt_start">OBJECT.tt_start</field>
+      <field name="tt_end">OBJECT.tt_end</field>
+      <field name="id_audit">OBJECT.id_audit</field>
+      <field name="c_subsidiaryname">OBJECT.c_subsidiaryname</field>
+      <field name="c_currency">OBJECT.c_currency</field>
+      <field name="c_country">OBJECT.c_country</field>
+      <field name="c_zone">OBJECT.c_zone</field>
+      <field name="c_retailsurrateperminute">OBJECT.c_retailsurrateperminute</field>
+      <field name="c_partnersurrateperminute">OBJECT.c_partnersurrateperminute</field>
+    </data>
+  </print_record>
+</proc>

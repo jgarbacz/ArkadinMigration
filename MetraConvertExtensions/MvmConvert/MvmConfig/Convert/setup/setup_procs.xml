@@ -1,0 +1,1044 @@
+<procs>
+
+<proc name="setup_record_type_procs">
+  <index_select>
+    <index>'MC_RECORD_TYPES'</index>
+    <cursor>TEMP.reccsr</cursor>
+    <loop>
+      <!-- Generate some procs we'll need, if we have a format file for that record type -->
+      <if>
+        <condition>OBJECT(TEMP.reccsr).table eq ''</condition>
+        <then>
+          <call_proc_for_current_object>
+            <name>'generate_input_file_reader'</name>
+            <param name='record_type'>OBJECT(TEMP.reccsr).record_type</param>
+            <param name='record_type_id'>OBJECT(TEMP.reccsr).record_type_id</param>
+            <param name='display_record_type'>OBJECT(TEMP.reccsr).display_record_type</param>
+            <param name='procname'>'read_validate_return_all_' ~ OBJECT(TEMP.reccsr).record_type</param>
+          </call_proc_for_current_object>
+          <call_proc_for_current_object>
+            <name>'generate_input_file_reader'</name>
+            <param name='record_type'>OBJECT(TEMP.reccsr).record_type</param>
+            <param name='record_type_id'>OBJECT(TEMP.reccsr).record_type_id</param>
+            <param name='display_record_type'>OBJECT(TEMP.reccsr).display_record_type</param>
+            <param name='procname'>'read_file_return_all_' ~ OBJECT(TEMP.reccsr).record_type</param>
+            <param name='validate'>''</param>
+            <param name='file_or_keyvalue'>'file'</param>
+          </call_proc_for_current_object>
+          <call_proc_for_current_object>
+            <name>'generate_input_file_reader'</name>
+            <param name='record_type'>OBJECT(TEMP.reccsr).record_type</param>
+            <param name='record_type_id'>OBJECT(TEMP.reccsr).record_type_id</param>
+            <param name='display_record_type'>OBJECT(TEMP.reccsr).display_record_type</param>
+            <param name='procname'>'read_kv_return_all_' ~ OBJECT(TEMP.reccsr).record_type</param>
+            <param name='validate'>''</param>
+            <param name='file_or_keyvalue'>'kv'</param>
+          </call_proc_for_current_object>
+          <call_proc_for_current_object>
+            <name>'generate_input_file_reader'</name>
+            <param name='record_type'>OBJECT(TEMP.reccsr).record_type</param>
+            <param name='record_type_id'>OBJECT(TEMP.reccsr).record_type_id</param>
+            <param name='display_record_type'>OBJECT(TEMP.reccsr).display_record_type</param>
+            <param name='procname'>'read_validate_one_' ~ OBJECT(TEMP.reccsr).record_type</param>
+            <param name='return_rows'>''</param>
+            <param name='limit'>1</param>
+          </call_proc_for_current_object>
+          <call_proc_for_current_object>
+            <name>'generate_indexing_consumer'</name>
+            <param name='record_type'>OBJECT(TEMP.reccsr).record_type</param>
+            <param name='file_or_keyvalue'>'file'</param>
+          </call_proc_for_current_object>
+          <call_proc_for_current_object>
+            <name>'generate_indexing_consumer'</name>
+            <param name='record_type'>OBJECT(TEMP.reccsr).record_type</param>
+            <param name='file_or_keyvalue'>'kv'</param>
+          </call_proc_for_current_object>
+          <call_proc_for_current_object>
+            <name>'generate_sorting_consumer'</name>
+            <param name='record_type'>OBJECT(TEMP.reccsr).record_type</param>
+            <param name='file_or_keyvalue'>'file'</param>
+          </call_proc_for_current_object>
+          <call_proc_for_current_object>
+            <name>'generate_sorting_consumer'</name>
+            <param name='record_type'>OBJECT(TEMP.reccsr).record_type</param>
+            <param name='file_or_keyvalue'>'kv'</param>
+          </call_proc_for_current_object>
+          <!-- TODO: add back input validator to catch corrupt files 
+          <call_proc_for_current_object>
+            <name>'generate_validator'</name>
+            <param name='record_type'>OBJECT(TEMP.reccsr).record_type</param>
+          </call_proc_for_current_object>
+          -->
+        </then>
+      </if>
+    </loop>
+  </index_select>
+</proc>
+
+<proc name="generate_validator">
+  <param name='record_type' />
+
+  <do>TEMP.procname = 'validate_row_' ~ TEMP.record_type</do>
+  <do>
+    TEMP.myproc = "<![CDATA[
+      <proc name='" ~ TEMP.procname ~ "'>
+        <param name='errors' mode='out'/>
+        <do>TEMP.errors = ''</do>
+    ]]>"
+  </do>
+
+  <!-- Check for null parent/child key fields -->
+  <do>TEMP.allkeyfields = ''</do>
+  <index_select>
+    <index>'MC_RECORD_CHILD_KEYS'</index>
+    <field name='record_type'>TEMP.record_type</field>
+    <cursor>TEMP.keycsr</cursor>
+    <loop>
+      <if>
+        <condition>TEMP.allkeyfields ne ''</condition>
+        <then>
+          <do>TEMP.allkeyfields ~= ' or '</do>
+        </then>
+      </if>
+      <do>TEMP.allkeyfields ~= 'OBJECT.' ~ OBJECT(TEMP.keycsr).field ~ " eq ''"</do>
+    </loop>
+  </index_select>
+  <do>
+    TEMP.myproc ~= "<![CDATA[
+      <if>
+        <condition>" ~ TEMP.allkeyfields ~ "</condition>
+        <then>
+          <do>TEMP.errors ~= 'Record has parent/child key fields that are null. '</do>
+        </then>
+      </if>
+    ]]>"
+  </do>
+
+  <!-- TODO: the input record validator needs to make sure enums are in string format -->
+  <do>TEMP.have_fields = '1'</do>
+  <index_select>
+    <index>'MC_RECORD_FIELDS'</index>
+    <field name='record_type'>TEMP.record_type</field>
+    <cursor>TEMP.fldcsr</cursor>
+    <loop>
+      <call_proc_for_object>
+        <name>'validate_field'</name>
+        <object_id>TEMP.fldcsr</object_id>
+        <param name='identifier'>OBJECT(TEMP.fldcsr).identifier</param>
+        <param name='cursor'>''</param>
+        <param name='output'>TEMP.output</param>
+      </call_proc_for_object>
+      <do>TEMP.myproc ~= TEMP.output</do>
+    </loop>
+    <else>
+      <do>TEMP.have_fields = '0'</do>
+    </else>
+  </index_select>
+
+  <do>
+    TEMP.myproc ~= "<![CDATA[
+        <if>
+          <condition>OBJECT._mc_error ne ''</condition>
+          <then>
+            <do>OBJECT(TEMP._mc_parent)._mc_error ~= OBJECT._mc_error</do>
+          </then>
+        </if>
+      </proc>
+    ]]>"
+  </do>
+
+  <if>
+    <condition>TEMP.have_fields eq '1'</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'generate_print_proc'</name>
+        <param name='procname'>TEMP.procname</param>
+        <param name='proc'>TEMP.myproc</param>
+      </call_proc_for_current_object>
+    </then>
+  </if>
+
+</proc>
+
+<proc name='generate_input_file_reader'>
+  <param name='record_type' />
+  <param name='record_type_id' />
+  <param name='display_record_type' />
+  <param name='procname' />
+  <param name='return_rows' default='"true"'/>
+  <param name='validate' default='"true"'/>
+  <param name='limit' default='""' />
+  <param name='file_or_keyvalue' default='""' />
+
+  <do>TEMP.selector = ''</do>
+  <do>TEMP.defaults = ''</do>
+  <do>TEMP.date_conversions = ''</do>
+  <do>TEMP.validation_proc = 'validate_row_' ~ TEMP.record_type</do>
+  <if>
+    <condition>TEMP.return_rows ne ''</condition>
+    <then>
+      <do>TEMP.pipe_cursor = "<![CDATA[ <param name='pipe_cursor' /> ]]>"</do>
+    </then>
+  </if>
+  <do>
+    TEMP.myproc = "<![CDATA[
+      <proc name='" ~ TEMP.procname ~ "'> " ~ TEMP.pipe_cursor ~ "
+        <param name='filename'/>
+        <do>TEMP.linecount = 0</do>
+    ]]>"
+  </do>
+  <if>
+    <condition>TEMP.file_or_keyvalue eq 'file'</condition>
+    <then>
+      <do>TEMP.selector = 'file_select'</do>
+      <do>TEMP.trim = ''</do>
+      <if>
+        <condition>GLOBAL.trim_input_fields ne ''</condition>
+        <then>
+          <do>TEMP.trim = " trim='true'"</do>
+        </then>
+      </if>
+      <do>
+       TEMP.myproc ~= "<![CDATA[
+          <file_select>
+            <input_file>TEMP.filename</input_file>
+            <record_offset_tag>'_mc_record_offset'</record_offset_tag>
+            <record_length_tag>'_mc_record_length'</record_length_tag>
+            <encoding>'UTF-8'</encoding>
+            <cursor_type>'" ~ TEMP.record_type_id ~ "'</cursor_type>
+            <format field_delim='" ~ GLOBAL.escaped_field_delim ~ "' record_delim='" ~ GLOBAL.escaped_record_delim ~ "'" ~ TEMP.trim ~ ">
+        ]]>"
+         <!-- 
+		Change by TCF June 2014.
+		Passign "GLOBAL.record_delim_crlf_issue" as the delimiter. See my notes in setup_environment.xml. This is to deal with a file 
+		parsing issue that shows up in some environments. Make no mistake about it, this is a hack; if the opportunity presents itself 
+		it would be better to identify the true root cause of this issue and deal with it.
+		-->
+          <!--TEMP.myproc ~= "<![CDATA[
+        <file_select>
+        <input_file>TEMP.filename</input_file>
+        <record_offset_tag>'_mc_record_offset'</record_offset_tag>
+        <record_length_tag>'_mc_record_length'</record_length_tag>
+        <cursor_type>'" ~ TEMP.record_type_id ~ "'</cursor_type>
+        <format field_delim='" ~ GLOBAL.escaped_field_delim ~ "' record_delim='" ~ GLOBAL.record_delim_crlf_issue ~ "'" ~ TEMP.trim ~ ">
+        ]]>"-->
+      </do>
+      <index_select>
+        <index>'MC_RECORD_FIELDS'</index>
+        <field name='record_type'>TEMP.record_type</field>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <call_proc_for_current_object>
+            <name>'boolean'</name>
+            <param name='input'>OBJECT(TEMP.csr).missing</param>
+            <param name='output'>OBJECT(TEMP.csr).missing</param>
+          </call_proc_for_current_object>
+          <if>
+            <condition>OBJECT(TEMP.csr).missing ne '1'</condition>
+            <then>
+              <do>
+                TEMP.myproc ~= "<![CDATA[
+                  <field name='" ~ OBJECT(TEMP.csr).identifier ~ "'/>
+                ]]>"
+              </do>
+              <if>
+                <condition>OBJECT(TEMP.csr).default ne ''</condition>
+                <then>
+                  <do>
+                    TEMP.defaults ~= "<![CDATA[
+                      <if>
+                        <condition>OBJECT(TEMP.dfcsr)." ~ OBJECT(TEMP.csr).identifier ~ " eq ''</condition>
+                        <then>
+                          <do>OBJECT(TEMP.dfcsr)." ~ OBJECT(TEMP.csr).identifier ~ " = " ~ OBJECT(TEMP.csr).default ~ "</do>
+                        </then>
+                      </if>
+                    ]]>"
+                  </do>
+                </then>
+              </if>
+            </then>
+            <condition>OBJECT(TEMP.csr).missing eq '1' and OBJECT(TEMP.csr).default ne ''</condition>
+            <then>
+              <do>
+                TEMP.defaults ~= "<![CDATA[
+                  <do>OBJECT(TEMP.dfcsr)." ~ OBJECT(TEMP.csr).identifier ~ " = " ~ OBJECT(TEMP.csr).default ~ "</do>
+                ]]>"
+              </do>
+            </then>
+          </if>
+          <match>
+            <input>OBJECT(TEMP.csr).type</input>
+            <regex>'date'</regex>
+            <ignore_case>1</ignore_case>
+            <success>TEMP.date_matched</success>
+          </match>
+          <if>
+            <condition>OBJECT(TEMP.csr).format ne '' and TEMP.date_matched eq '1' and GLOBAL.dotnet_date_format ne OBJECT(TEMP.csr).format</condition>
+            <then>
+              <do>
+                TEMP.date_conversions ~= "<![CDATA[
+                  <date_convert>
+                    <from format='" ~ OBJECT(TEMP.csr).format ~ "'>OBJECT(TEMP.dfcsr)." ~ OBJECT(TEMP.csr).identifier ~ "</from>
+                    <to format='" ~ GLOBAL.dotnet_date_format ~ "'>OBJECT(TEMP.dfcsr)." ~ OBJECT(TEMP.csr).identifier ~ "</to>
+                  </date_convert>
+                ]]>"
+              </do>
+            </then>
+          </if>
+        </loop>
+      </index_select>
+      <do>
+        TEMP.myproc ~= "<![CDATA[
+          </format>
+        ]]>"
+      </do>
+    </then>
+    <else>
+      <do>TEMP.selector = 'sorted_object_file_select'</do>
+      <do>
+        TEMP.myproc ~= "<![CDATA[
+          <sorted_object_file_select>
+            <name>TEMP.filename</name>
+            <input_file_match>TEMP.filename ~ '*'</input_file_match>
+        ]]>"
+      </do>
+    </else>
+  </if>
+  <do>
+    TEMP.myproc ~= "<![CDATA[
+      <cursor>TEMP.dfcsr</cursor>
+      <loop>
+        <do>TEMP.linecount += 1</do>
+        <do>OBJECT(TEMP.dfcsr)._mc_record_type_id = " ~ TEMP.record_type_id ~ "</do>
+        <do>OBJECT(TEMP.dfcsr)._mc_line_no = TEMP.linecount</do>
+    ]]>" ~ TEMP.defaults ~ TEMP.date_conversions
+  </do>
+  <if>
+    <condition>TEMP.validate ne ''</condition>
+    <then>
+      <do>
+        TEMP.myproc ~= "<![CDATA[
+          <call_proc_for_object>
+            <name>'" ~ TEMP.validation_proc ~ "'</name>
+            <object_id>TEMP.dfcsr</object_id>
+            <param name='errors'>OBJECT(TEMP.dfcsr)._mc_error</param>
+          </call_proc_for_object>
+        ]]>"
+      </do>
+    </then>
+  </if>
+  <if>
+    <condition>TEMP.validate eq '' or TEMP.return_rows ne ''</condition>
+    <then>
+      <do>
+        TEMP.myproc ~= "<![CDATA[
+          <pipe_row>TEMP.dfcsr</pipe_row>
+        ]]>"
+      </do>
+    </then>
+    <!-- temporarily commented out until rob fixes csr.eof thing <else>
+      <do>
+        TEMP.myproc ~= "<![CDATA[
+          <if>
+            <condition>OBJECT(TEMP.dfcsr)._mc_error ne ''</condition>
+            <then>
+              <fatal>'Checked first row of file ' ~ TEMP.filename ~ ' and found these errors: ' ~ OBJECT(TEMP.dfcsr)._mc_error</fatal>
+            </then>
+          </if>
+        ]]>"
+      </do>
+    </else>-->
+  </if>
+  <if>
+    <condition>TEMP.limit ne ''</condition>
+    <then>
+      <do>
+        TEMP.myproc ~= "<![CDATA[
+          <if>
+            <condition>TEMP.linecount GTE " ~ TEMP.limit ~ "</condition>
+            <then>
+              <do>OBJECT(TEMP.dfcsr).eof = 1</do>
+            </then>
+          </if>
+        ]]>"
+      </do>
+    </then>
+  </if>
+  <do>
+    TEMP.myproc ~= "<![CDATA[
+        </loop>
+      </" ~ TEMP.selector ~ ">
+    ]]>"
+  </do>
+  <if>
+    <condition>TEMP.file_or_keyvalue eq 'file'</condition>
+    <then>
+      <do>
+        TEMP.myproc ~= "<![CDATA[
+          <if>
+            <condition>TEMP.linecount EQ 0</condition>
+            <then>
+              <file_info>
+                <filename>TEMP.filename</filename>
+                <size>TEMP.filesize</size>
+              </file_info>
+              <if>
+                <condition>TEMP.filesize GT 3</condition>
+                <then>
+                  <fatal>'Error: could not read any data from file ' ~ TEMP.filename ~ '; are delimiters configured correctly?'</fatal>
+                </then>
+              </if>
+            </then>
+          </if>
+
+          <do>TEMP.current_count = 0</do>
+          <index_get>
+            <index>'MC_RECORD_COUNT'</index>
+            <field name='record_type'>'" ~ TEMP.record_type ~ "'</field>
+            <field name='count'>TEMP.count</field>
+            <then>
+              <do>TEMP.current_count = TEMP.count</do>
+            </then>
+            <else>
+              <index_insert>
+                <index>'MC_RECORD_COUNT'</index>
+                <field name='record_type'>'" ~ TEMP.record_type ~ "'</field>
+                <field name='count'>TEMP.linecount</field>
+                <field name='display_record_type'>'" ~ TEMP.display_record_type ~ "'</field>
+              </index_insert>
+            </else>
+          </index_get>
+          <do>TEMP.current_count += TEMP.linecount</do>
+          <do>TEMP.new_count = index_update('MC_RECORD_COUNT', record_type=>'" ~ TEMP.record_type ~ "', count=>TEMP.current_count)</do>
+        ]]>"
+      </do>
+    </then>
+  </if>
+  <do>
+    TEMP.myproc ~= "<![CDATA[
+      </proc>
+    ]]>"
+  </do>
+  <call_proc_for_current_object>
+    <name>'generate_print_proc'</name>
+    <param name='procname'>TEMP.procname</param>
+    <param name='proc'>TEMP.myproc</param>
+  </call_proc_for_current_object>
+</proc>
+
+<proc name='generate_indexing_consumer'>
+  <param name='record_type' />
+  <param name='file_or_keyvalue' />
+
+  <call_proc_for_current_object>
+    <name>'get_parent_child_checks'</name>
+    <param name='record_type'>TEMP.record_type</param>
+    <param name='parents'>TEMP.parents</param>
+    <param name='parents_check'>TEMP.parents_check</param>
+    <param name='parent_namespace'>TEMP.parent_namespace</param>
+    <param name='children'>TEMP.children</param>
+    <param name='children_check'>TEMP.children_check</param>
+    <param name='child_namespace'>TEMP.child_namespace</param>
+    <param name='child_record_type_inclusion'>TEMP.child_record_type_inclusion</param>
+    <param name='child_record_type_sort_key'>TEMP.child_record_type_sort_key</param>
+    <param name='chunking_remove_from_end'>TEMP.chunking_remove_from_end</param>
+  </call_proc_for_current_object>
+
+  <!--
+  We assume that each record type statically maps to a single parent record type.
+  If this was not the case, then we'd need a dynamic lookup here.
+  -->
+
+  <!-- TODO: put back the optimization to only index record types that can have children -->
+  <do>TEMP.can_have_children = '1'</do>
+  <index_get>
+    <index>'MC_RECORD_CHILDREN'</index>
+    <field name='record_type'>TEMP.record_type</field>
+    <then>
+      <do>TEMP.can_have_children = '1'</do>
+    </then>
+  </index_get>
+
+  <!-- First the outer looping proc -->
+  <do>TEMP.procname = 'indexing_consumer_' ~ TEMP.file_or_keyvalue ~ '_' ~ TEMP.record_type</do>
+  <do>
+    TEMP.myproc = "<![CDATA[
+      <proc name='" ~ TEMP.procname ~ "'>
+    ]]>"
+  </do>
+  <if>
+    <condition>TEMP.parents ne '' and TEMP.can_have_children ne ''</condition>
+    <then>
+      <do>
+        TEMP.myproc ~= "<![CDATA[
+          <proc_select>
+            <name>'read_" ~ TEMP.file_or_keyvalue ~ "_return_all_" ~ TEMP.record_type ~ "'</name>
+            <param name='filename'>OBJECT.filename</param>
+            <cursor>TEMP.csr</cursor>
+            <loop>
+              <call_proc_for_object>
+                <name>'indexing_" ~ TEMP.record_type ~ "'</name>
+                <object_id>TEMP.csr</object_id>
+              </call_proc_for_object>
+            </loop>
+          </proc_select>
+        ]]>"
+      </do>
+    </then>
+    <else>
+      <do>
+        TEMP.myproc ~= "<![CDATA[
+          <!-- This record type either cannot have kids, or has no parent keys -->
+        ]]>"
+      </do>
+    </else>
+  </if>
+  <do>
+    TEMP.myproc ~= "<![CDATA[
+      </proc>
+    ]]>"
+  </do>
+  <call_proc_for_current_object>
+    <name>'generate_print_proc'</name>
+    <param name='procname'>TEMP.procname</param>
+    <param name='proc'>TEMP.myproc</param>
+  </call_proc_for_current_object>
+
+  <!-- Now do the inner indexing proc.  Use an inner proc so that OBJECT.x references in the parent/child key expressions will work without translation. -->
+  <if>
+    <condition>TEMP.file_or_keyvalue eq 'kv'</condition>
+    <then>
+      <return/>
+    </then>
+  </if>
+  <do>TEMP.procname = 'indexing_' ~ TEMP.record_type</do>
+  <do>
+    TEMP.myproc = "<![CDATA[
+      <proc name='" ~ TEMP.procname ~ "'>
+    ]]>"
+  </do>
+  <if>
+    <condition>TEMP.can_have_children ne ''</condition>
+    <then>
+      <do>
+        TEMP.myproc ~= "<![CDATA[
+          <!-- Insert child->parent into local index -->
+          <if>
+            <condition>(" ~ TEMP.children_check ~ ") and (" ~ TEMP.parents_check ~ ")</condition>
+            <then>
+              <!-- Duplicate children will be noticed later once we're going through the sorted object list -->
+              <index_insert>
+                <index>'MC_CHILD_PARENT_MAP'</index>
+                <field name='child_keys'>" ~ TEMP.children ~ "</field>
+                <field name='child_namespace'>'" ~ TEMP.child_namespace ~ "'</field>
+                <field name='child_sort_key'>'" ~ TEMP.child_record_type_sort_key ~ "'</field>
+                <field name='parent_keys'>" ~ TEMP.parents ~ "</field>
+                <field name='parent_namespace'>'" ~ TEMP.parent_namespace ~ "'</field>
+              </index_insert>
+              <do>TEMP.count = 1</do>
+              <index_get>
+                <index>'MC_CHILD_COUNT'</index>
+                <field name='parent_keys'>" ~ TEMP.parents ~ "</field>
+                <field name='parent_namespace'>'" ~ TEMP.parent_namespace ~ "'</field>
+                <field name='child_count'>TEMP.child_count</field>
+                <then>
+                  <do>TEMP.count = TEMP.child_count + 1</do>
+                </then>
+              </index_get>
+              <index_remove>
+                <index>'MC_CHILD_COUNT'</index>
+                <field name='parent_keys'>" ~ TEMP.parents ~ "</field>
+                <field name='parent_namespace'>'" ~ TEMP.parent_namespace ~ "'</field>
+              </index_remove>
+              <index_insert>
+                <index>'MC_CHILD_COUNT'</index>
+                <field name='parent_keys'>" ~ TEMP.parents ~ "</field>
+                <field name='parent_namespace'>'" ~ TEMP.parent_namespace ~ "'</field>
+                <field name='child_count'>TEMP.count</field>
+              </index_insert>
+            </then>
+          </if>
+          <if>
+            <condition>" ~ TEMP.children_check ~ "</condition>
+            <then>
+              <index_insert_if_none>
+                <index>'MC_PARENT_LOOKUP'</index>
+                <field name='parent_keys'>" ~ TEMP.children ~ "</field>
+                <field name='parent_namespace'>'" ~ TEMP.child_namespace ~ "'</field>
+              </index_insert_if_none>
+            </then>
+          </if>
+        ]]>"
+      </do>
+    </then>
+  </if>
+  <do>
+    TEMP.myproc ~= "<![CDATA[
+      </proc>
+    ]]>"
+  </do>
+  <call_proc_for_current_object>
+    <name>'generate_print_proc'</name>
+    <param name='procname'>TEMP.procname</param>
+    <param name='proc'>TEMP.myproc</param>
+  </call_proc_for_current_object>
+</proc>
+
+<proc name='generate_sorting_consumer'>
+  <param name='record_type' />
+  <param name='file_or_keyvalue' />
+
+  <call_proc_for_current_object>
+    <name>'get_parent_child_checks'</name>
+    <param name='record_type'>TEMP.record_type</param>
+    <param name='parents'>TEMP.parents</param>
+    <param name='parents_check'>TEMP.parents_check</param>
+    <param name='parent_namespace'>TEMP.parent_namespace</param>
+    <param name='children'>TEMP.children</param>
+    <param name='children_check'>TEMP.children_check</param>
+    <param name='child_namespace'>TEMP.child_namespace</param>
+    <param name='child_record_type_inclusion'>TEMP.child_record_type_inclusion</param>
+    <param name='child_record_type_sort_key'>TEMP.child_record_type_sort_key</param>
+    <param name='chunking_remove_from_end'>TEMP.chunking_remove_from_end</param>
+  </call_proc_for_current_object>
+
+  <!-- First do the outer looping proc -->
+  <do>TEMP.procname = 'sorting_consumer_' ~ TEMP.file_or_keyvalue ~ '_' ~ TEMP.record_type</do>
+  <do>TEMP.set_file_id = ''</do>
+  <if>
+    <condition>TEMP.file_or_keyvalue eq 'file'</condition>
+    <then>
+      <!-- TODO: this assumes that all file reads are the first stage, and all kv reads are subsequent stages, which is less than ideal... -->
+      <do>TEMP.set_file_id = "<![CDATA[ <do>OBJECT(TEMP.csr)._mc_file_id = OBJECT.file_id</do> ]]>"</do>
+    </then>
+  </if>
+  <do>
+    TEMP.myproc = "<![CDATA[
+      <proc name='" ~ TEMP.procname ~ "'>
+        <param name='phase' />
+        <param name='stage' />
+        <proc_select>
+          <name>'read_" ~ TEMP.file_or_keyvalue ~ "_return_all_" ~ TEMP.record_type ~ "'</name>
+          <param name='filename'>OBJECT.filename</param>
+          <cursor>TEMP.csr</cursor>
+          <loop>
+            " ~ TEMP.set_file_id ~ "
+            <call_proc_for_object>
+              <name>'sorting_" ~ TEMP.record_type ~ "'</name>
+              <object_id>TEMP.csr</object_id>
+              <param name='phase'>TEMP.phase</param>
+              <param name='stage'>TEMP.stage</param>
+            </call_proc_for_object>
+          </loop>
+        </proc_select>
+      </proc>
+    ]]>"
+  </do>
+  <call_proc_for_current_object>
+    <name>'generate_print_proc'</name>
+    <param name='procname'>TEMP.procname</param>
+    <param name='proc'>TEMP.myproc</param>
+  </call_proc_for_current_object>
+
+  <!-- Now do the inner proc -->
+  <if>
+    <condition>TEMP.file_or_keyvalue eq 'kv'</condition>
+    <then>
+      <return/>
+    </then>
+  </if>
+  <do>TEMP.procname = 'sorting_' ~ TEMP.record_type</do>
+  <do>
+    TEMP.myproc = "<![CDATA[
+      <proc name='" ~ TEMP.procname ~ "'>
+        <param name='phase' />
+        <param name='stage' />
+    ]]>"
+  </do>
+
+  <if>
+    <condition>TEMP.parents ne ''</condition>
+    <then>
+      <do>
+        TEMP.myproc ~= "<![CDATA[
+          <do>TEMP.counter = 1</do>
+          <do>OBJECT._mc_sort_key = '" ~ TEMP.child_record_type_sort_key ~ "' ~ " ~ TEMP.children ~ "</do>
+          <if>
+            <condition>" ~ TEMP.parents_check ~ "</condition>
+            <then>
+              <do>TEMP.ccount = index_count('MC_CHILD_PARENT_MAP', child_keys=>" ~ TEMP.children ~ ", child_namespace=>'" ~ TEMP.child_namespace ~ "')</do>
+              <if>
+                <condition>TEMP.ccount GT 1</condition>
+                <then>
+                  <do>OBJECT._mc_error ~= 'Duplicate object found: ' ~ " ~ TEMP.children ~ " ~ ' for " ~ TEMP.child_namespace ~ "'</do>
+                </then>
+              </if>
+              <do>TEMP.child_keys = " ~ TEMP.parents ~ "</do>
+              <do>TEMP.child_namespace = '" ~ TEMP.parent_namespace ~ "'</do>
+              <do>OBJECT._mc_parent_key = " ~ TEMP.parents ~ "</do>
+              <do>OBJECT._mc_sort_key = " ~ TEMP.parents ~ " ~ '" ~ GLOBAL.internal_escaped_delim ~ "' ~ OBJECT._mc_sort_key</do>
+              <do>TEMP.continue = '1'</do>
+              <do>TEMP.limit = 1</do>
+              <while>
+                <condition>TEMP.continue ne ''</condition>
+                <loop>
+                  <do>TEMP.limit += 1</do>
+                  <if>
+                    <condition>TEMP.limit GT 20</condition>
+                    <then>
+                      <fatal>'Circular ancestor chain detected for child: ' ~ TEMP.child_keys</fatal>
+                    </then>
+                  </if>
+                  <!-- FIXME: need to start using MC_CHILD_COUNT in here -->
+                  <index_get>
+                    <index>'MC_CHILD_PARENT_MAP'</index>
+                    <field name='child_keys'>TEMP.child_keys</field>
+                    <field name='child_namespace'>TEMP.child_namespace</field>
+                    <field name='child_sort_key'>TEMP.child_sort_key</field>
+                    <field name='parent_keys'>TEMP.parent_keys</field>
+                    <field name='parent_namespace'>TEMP.parent_namespace</field>
+                    <then>
+                      <do>TEMP.counter += 1</do>
+                      <do>OBJECT._mc_sort_key = TEMP.parent_keys ~ '" ~ GLOBAL.internal_escaped_delim ~ "' ~ TEMP.child_sort_key ~ OBJECT._mc_sort_key</do>
+                      <do>TEMP.child_keys = TEMP.parent_keys</do>
+                      <do>TEMP.child_namespace = TEMP.parent_namespace</do>
+                    </then>
+                    <else>
+                      <do>TEMP.continue = ''</do>
+
+                      <!-- Need to determine if the parent is present in our files or not -->
+                      <index_get>
+                        <index>'MC_PARENT_LOOKUP'</index>
+                        <field name='parent_keys'>TEMP.child_keys</field>
+                        <field name='parent_namespace'>TEMP.child_namespace</field>
+                        <then>
+                          <do>TEMP.counter += 1</do>
+                        </then>
+                        <else>
+                          <if>
+                            <condition>TEMP.counter eq '1'</condition>
+                            <then>
+                              <do>OBJECT._mc_unknown_parent = '1'</do>
+                            </then>
+                          </if>
+                        </else>
+                      </index_get>
+                      <do>OBJECT._mc_level = TEMP.counter</do>
+                    </else>
+                  </index_get>
+                </loop>
+              </while>
+            </then>
+            <else>
+              <do>OBJECT._mc_level = 1</do>
+              <do>OBJECT._mc_parent_key = ''</do>
+            </else>
+          </if>
+        ]]>"
+      </do>
+    </then>
+    <else>
+      <do>
+        TEMP.myproc ~= "<![CDATA[
+          <do>OBJECT._mc_parent_key = ''</do>
+          <do>OBJECT._mc_sort_key = '" ~ TEMP.child_record_type_sort_key ~ "' ~ " ~ TEMP.children ~ "</do>
+          <do>OBJECT._mc_level = 1</do>
+        ]]>"
+      </do>
+    </else>
+  </if>
+  <do>
+    TEMP.myproc ~= "<![CDATA[
+        <do>OBJECT._mc_chunking_remove_from_end = " ~ TEMP.chunking_remove_from_end ~ "</do>
+        <sorted_object_file_write>
+          <file>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ TEMP.phase ~ '.' ~ TEMP.stage ~ '.' ~ GLOBAL.sort_filename ~ GLOBAL.node_id</file>
+          <object_id>OBJECT.object_id</object_id>
+          <key_field>'_mc_sort_key'</key_field>
+        </sorted_object_file_write>
+      </proc>
+    ]]>"
+  </do>
+  <call_proc_for_current_object>
+    <name>'generate_print_proc'</name>
+    <param name='procname'>TEMP.procname</param>
+    <param name='proc'>TEMP.myproc</param>
+  </call_proc_for_current_object>
+</proc>
+
+<proc name='get_parent_child_checks'>
+  <param name='record_type' />
+  <param name='parents' mode='out' />
+  <param name='parents_check' mode='out' />
+  <param name='parent_namespace' mode='out' />
+  <param name='children' mode='out' />
+  <param name='children_check' mode='out' />
+  <param name='child_namespace' mode='out' />
+  <param name='child_record_type_inclusion' mode='out' />
+  <param name='child_record_type_sort_key' mode='out' />
+  <param name='chunking_remove_from_end' mode='out' />
+
+  <do>TEMP.parents = ''</do>
+  <do>TEMP.parents_check = ''</do>
+  <call_proc_for_current_object>
+    <name>'get_parent_fields_check'</name>
+    <param name='record_type'>TEMP.record_type</param>
+    <param name='parents'>TEMP.parents</param>
+    <param name='parents_check'>TEMP.parents_check</param>
+  </call_proc_for_current_object>
+
+  <do>TEMP.children = ''</do>
+  <do>TEMP.children_check = ''</do>
+  <index_select>
+    <index>'MC_RECORD_CHILD_KEYS'</index>
+    <field name='record_type'>TEMP.record_type</field>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <if>
+        <condition>TEMP.children ne ''</condition>
+        <then>
+          <do>TEMP.children ~= ' ~ "' ~ GLOBAL.internal_escaped_delim ~ '" ~ '</do>
+          <do>TEMP.children_check ~= ' and '</do>
+        </then>
+      </if>
+      <do>TEMP.children ~= OBJECT(TEMP.csr).expression</do>
+      <do>TEMP.children_check ~= OBJECT(TEMP.csr).expression ~ " ne ''"</do>
+    </loop>
+  </index_select>
+  <index_get>
+    <index>'MC_RECORD_TYPES'</index>
+    <field name='record_type'>TEMP.record_type</field>
+    <field name='stable_sort'>TEMP.ss</field>
+    <then>
+      <if>
+        <condition>TEMP.ss eq '1'</condition>
+        <then>
+          <if>
+            <condition>TEMP.children ne ''</condition>
+            <then>
+              <do>TEMP.children ~= ' ~ "' ~ GLOBAL.internal_escaped_delim ~ '" ~ '</do>
+            </then>
+          </if>
+          <do>TEMP.children ~= 'lpad(OBJECT._mc_record_offset, 11, "0")'</do>
+          <do>TEMP.chunking_remove_from_end = length(GLOBAL.field_delim) + 11</do>
+        </then>
+      </if>
+    </then>
+  </index_get>
+
+  <do>TEMP.parent_namespace = ''</do>
+  <do>TEMP.child_record_type_inclusion = ''</do>
+  <do>TEMP.child_record_type_sort_key = ''</do>
+  <index_get>
+    <index>'MC_RECORD_TYPES'</index>
+    <field name='record_type'>TEMP.record_type</field>
+    <field name='parent_inclusion'>TEMP.child_record_type_inclusion</field>
+    <field name='sort_key'>TEMP.child_record_type_sort_key</field>
+    <field name='namespace'>TEMP.child_namespace</field>
+    <field name='parent_namespace'>TEMP.parent_namespace</field>
+  </index_get>
+</proc>
+
+<proc name='get_parent_fields_check'>
+  <param name='record_type' />
+  <param name='parents' mode='out' />
+  <param name='parents_check' mode='out' />
+  <do>TEMP.parents = ''</do>
+  <do>TEMP.parents_check = ''</do>
+  <index_select>
+    <index>'MC_RECORD_PARENT_KEYS'</index>
+    <field name='record_type'>TEMP.record_type</field>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <if>
+        <condition>TEMP.parents ne ''</condition>
+        <then>
+          <do>TEMP.parents ~= ' ~ "' ~ GLOBAL.internal_escaped_delim ~ '" ~ '</do>
+          <do>TEMP.parents_check ~= ' and '</do>
+        </then>
+      </if>
+      <do>TEMP.parents ~= OBJECT(TEMP.csr).expression</do>
+      <do>TEMP.parents_check ~= OBJECT(TEMP.csr).expression ~ " ne ''"</do>        
+    </loop>
+  </index_select>
+</proc>
+
+<proc name='generate_print_proc'>
+  <param name='procname' />
+  <param name='proc' />
+  <param name='altprocname' default='""' />
+  <c>Create the proc and pretty-print it</c>
+  <execute_immediate>TEMP.proc</execute_immediate>
+  <index_insert>
+    <index>'MC_GENERATED_PROCS'</index>
+    <field name='procname'>TEMP.procname</field>
+    <field name='proctext'>TEMP.proc</field>
+  </index_insert>
+  <get_proc_text>
+    <name>TEMP.procname</name>
+    <output>TEMP.proctext</output>
+  </get_proc_text>
+  <if>
+    <condition>TEMP.altprocname ne ''</condition>
+    <then>
+      <do>TEMP.procname = TEMP.altprocname</do>
+    </then>
+  </if>
+  <print_text_to_file>
+    <file>GLOBAL.gen_directory ~ GLOBAL.path_separator ~ TEMP.procname ~ '.txt'</file>
+    <text>TEMP.proctext</text>
+  </print_text_to_file>
+</proc>
+
+<proc name='setup_slave'>
+  <index_select_keys>
+    <index>'MC_GENERATED_PROCS'</index>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_select>
+        <index>'MC_GENERATED_PROCS'</index>
+        <field name='procname'>OBJECT(TEMP.csr).procname</field>
+        <cursor>TEMP.gcsr</cursor>
+        <loop>
+          <execute_immediate>OBJECT(TEMP.gcsr).proctext</execute_immediate>
+        </loop>
+      </index_select>
+    </loop>
+  </index_select_keys>
+
+  <!-- Handle global parameters -->
+  <index_get>
+    <index>'MC_GLOBAL_PARAMETERS'</index>
+    <field name='parameter'>'field_delim'</field>
+    <field name='value'>GLOBAL.field_delim</field>
+  </index_get>
+  <index_get>
+    <index>'MC_GLOBAL_PARAMETERS'</index>
+    <field name='parameter'>'record_delim'</field>
+    <field name='value'>GLOBAL.record_delim</field>
+  </index_get>
+  <call_proc_for_current_object>
+    <name>'set_delimiters'</name>
+  </call_proc_for_current_object>
+
+  <!-- Index for t_usage_interval -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>"select * from t_usage_interval where tx_interval_status = 'O' order by dt_start"</query>
+    <cursor>TEMP.csr</cursor>
+    <run>
+      <create_memory_index_from_cursor>
+        <index>'MC_T_USAGE_INTERVAL'</index>
+        <cursor>TEMP.csr</cursor>
+        <key_field>'id_usage_cycle'</key_field>
+      </create_memory_index_from_cursor>
+    </run>
+  </db_select>
+
+  <!-- Index for po->pi lookup for recurring charges -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>
+      "select lower(bp.nm_name) as id_po, plm.id_pi_instance as id_pi_instance
+      from t_pl_map plm
+      inner join t_base_props bp on plm.id_po = bp.id_prop
+      inner join t_recur r on plm.id_pi_instance = r.id_prop
+      where plm.id_acc is null and plm.id_sub is null and plm.id_paramtable is null and r.b_charge_per_participant = 'N'"
+    </query>
+    <cursor>TEMP.csr</cursor>
+    <run>
+      <create_memory_index_from_cursor>
+        <index>'MC_PO_TO_PI_RECUR_MAPPING'</index>
+        <cursor>TEMP.csr</cursor>
+        <key_field>'id_po'</key_field>
+      </create_memory_index_from_cursor>
+    </run>
+  </db_select>
+
+  <!-- Index for po->pi lookup for unit-dependent recurring charges -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>
+      "select lower(bp.nm_name) as id_po, plm.id_pi_instance as id_pi_instance
+      from t_pl_map plm
+      inner join t_base_props bp on plm.id_po = bp.id_prop
+      inner join t_rulesetdefinition rs on plm.id_paramtable = rs.id_paramtable
+      where plm.id_acc is null and plm.id_sub is null and lower(rs.nm_instance_tablename) like '%udrc%'"
+    </query>
+    <cursor>TEMP.csr</cursor>
+    <run>
+      <create_memory_index_from_cursor>
+        <index>'MC_PO_TO_PI_UDRC_MAPPING'</index>
+        <cursor>TEMP.csr</cursor>
+        <key_field>'id_po'</key_field>
+      </create_memory_index_from_cursor>
+    </run>
+  </db_select>
+    
+  <!-- Added by TCF August 2014.-->
+  <!-- Index for license entries for UDRC group subscriptions -->
+    <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query>
+            "SELECT lower(bp2.nm_name) AS id_po, pm.id_pi_instance
+            FROM t_pl_map AS pm
+            INNER JOIN t_base_props AS bp ON bp.id_prop = pm.id_pi_instance
+            INNER JOIN t_base_props AS bp2 ON bp2.id_prop = pm.id_po
+            WHERE bp.n_kind = 25
+            AND pm.id_pricelist IS NULL
+            AND bp.b_archive = 'N'"
+        </query>
+        <cursor>TEMP.csr</cursor>
+        <run>
+            <create_memory_index_from_cursor>
+                <index>'MC_TBASEPROPS_TO_GSUB_MAPPING'</index>
+                <cursor>TEMP.csr</cursor>
+                <key_field>'id_po'</key_field>
+            </create_memory_index_from_cursor>
+        </run>
+    </db_select>
+
+  <!-- Copy nm_login cache -->
+  <!--
+  Modification by TCF July 2014.
+  The original intent here was to create the t_account_mapper index in one place, then make a copy for each
+  child note. However, the index was getting copied before the original was created, leading to empty indexes
+  for each child node (and the duplicate account issue). Upon fixing this, encountered IO errors as the nodes
+  fought over the different indexes (and/or, the data files were hard-wired to the original .idx files). So I 
+  implemented the change below, rather than creating in one place and copying over, each node just creates its
+  own index. Not ideal from an efficiency perspective, but now the duplicate check is working like a charm and
+  the performance hit is not too bad.
+  -->
+<!--  <glob_select>
+    <glob>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ GLOBAL.nmlogin_cache_filename ~ '*'</glob>
+    <cursor_value>'file'</cursor_value>
+    <cursor>TEMP.filecsr</cursor>
+    <loop>
+      <file_info>
+        <filename>OBJECT(TEMP.filecsr).file</filename>
+        <basename>TEMP.basename</basename>
+      </file_info>
+      <file_copy>
+        <source>OBJECT(TEMP.filecsr).file</source>
+        <target>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ GLOBAL.node_id ~ TEMP.basename</target>
+      </file_copy>
+    </loop>
+  </glob_select>-->
+  <call_proc_for_current_object>
+    <name>'create_nm_login_index'</name>
+    <param name='file_name'>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ GLOBAL.node_id ~ GLOBAL.nmlogin_cache_filename</param>
+  </call_proc_for_current_object>
+  <db_select>
+      <login_object>GLOBAL.target_login</login_object>
+      <query>"select nm_login, nm_space from t_account_mapper"</query>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+          <index_insert>
+              <index>'MC_NM_LOGINS'</index>
+              <field name='nm_login'>OBJECT(TEMP.csr).nm_login</field>
+              <field name='nm_space'>OBJECT(TEMP.csr).nm_space</field>
+          </index_insert>
+      </loop>
+  </db_select>
+</proc>
+
+</procs>

@@ -1,0 +1,121 @@
+<proc name="pass_1_52">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <call_proc_for_current_object>
+    <name>'sequence_get_next_id_cap_instance'</name>
+    <param name="value">TEMP.GeNsYm680__MC_SEQUENCE</param>
+  </call_proc_for_current_object>
+  <do>OBJECT.id_cap_instance = TEMP.GeNsYm680__MC_SEQUENCE</do>
+  <if>
+    <condition>OBJECT.param_value eq ''</condition>
+    <then>
+      <do>OBJECT.param_value = (OBJECT.full_tx_path ~ '/-')</do>
+      <validate_field>
+        <field>'param_value'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'nvarchar'</datatype>
+        <length>'2000'</length>
+        <nullable>'1'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </then>
+    <else>
+      <validate_field>
+        <field>'param_value'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'nvarchar'</datatype>
+        <length>'2000'</length>
+        <nullable>'1'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT._mc_error ne ''</condition>
+    <then>
+      <return />
+    </then>
+  </if>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'51'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_CAPABILITY_INSTANCE'</object_type>
+    <object_id>TEMP.GeNsYm681__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm681__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm681__mc).id_cap_instance = OBJECT.id_cap_instance</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc).tx_guid = OBJECT.tx_guid</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc).id_parent_cap_instance = OBJECT.id_parent_cap_instance</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc).id_policy = OBJECT.id_policy</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc).id_cap_type = OBJECT.id_cap_type</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc)._mc_record_type_id = 51</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_capability_instance' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm681__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm681__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm681__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm681__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'53'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_PATH_CAPABILITY'</object_type>
+    <object_id>TEMP.GeNsYm682__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm682__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm682__mc).id_cap_instance = OBJECT.id_cap_instance</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc).tx_param_name = OBJECT.tx_param_name</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc).tx_op = OBJECT.tx_op</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc).param_value = OBJECT.param_value</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc)._mc_record_type_id = 53</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_path_capability' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm682__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm682__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm682__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm682__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+</proc>

@@ -1,0 +1,31 @@
+<proc name="pass_write_36">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'c_partnerrelationshiptype'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumpartner/partnerrelationshiptype'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_av_partner.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_acc">OBJECT.id_acc</field>
+      <field name="c_partnerrelationshiptype">OBJECT.c_partnerrelationshiptype</field>
+      <field name="c_partnershipstartdate">OBJECT.c_partnershipstartdate</field>
+      <field name="c_partnershipenddate">OBJECT.c_partnershipenddate</field>
+      <field name="c_crmonbehalfof">OBJECT.c_crmonbehalfof</field>
+      <field name="c_aronbehalfof">OBJECT.c_aronbehalfof</field>
+      <field name="c_marketingonbehalfof">OBJECT.c_marketingonbehalfof</field>
+      <field name="c_partnerregion">OBJECT.c_partnerregion</field>
+    </data>
+  </print_record>
+</proc>

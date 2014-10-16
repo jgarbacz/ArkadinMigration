@@ -1,0 +1,43 @@
+<proc name="run_unit_tests">
+  <test_select>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+
+      
+      
+      <split>
+        <source>OBJECT(TEMP.csr).value</source>
+        <delimiter>'.'</delimiter>
+        <limit>2</limit>
+        <target>GLOBAL.unit_test_proc_namespace</target>
+        <target>GLOBAL.unit_test_proc_name</target>
+      </split>
+
+      <do>TEMP.skip=0</do>
+      <if>
+        <condition>GLOBAL.unit_test_namespace ne ''</condition>
+        <then>
+          <do>TEMP.skip=1</do>
+          <print>'unit_test_namespace='~GLOBAL.unit_test_namespace~' ? '~GLOBAL.unit_test_proc_namespace</print>
+          <if>
+            <condition>GLOBAL.unit_test_namespace Eq GLOBAL.unit_test_proc_namespace</condition>
+            <then>
+              <do>TEMP.skip=0</do>
+            </then>
+          </if>
+        </then>
+      </if>
+      
+      <!--<print>'FOUND NAMESPACE=['~GLOBAL.unit_test_proc_namespace~'] PROC_NAME=['~GLOBAL.unit_test_proc_name~']'</print>-->
+      <if>
+        <condition>TEMP.skip ne 1</condition>
+        <then>
+          <call_proc_for_current_object>
+            <name>'unit_test'</name>
+          </call_proc_for_current_object>
+        </then>
+      </if>
+
+    </loop>
+  </test_select>
+</proc>

@@ -1,0 +1,10 @@
+<procs>
+  <proc name="define_core_indexes">
+    <initialize priority="999999999">
+      <define_memory_index>
+        <index>'GLOBAL_OBJECTS'</index>
+        <field type="object_id">'object_id'</field>
+      </define_memory_index>
+    </initialize>
+  </proc>
+</procs>

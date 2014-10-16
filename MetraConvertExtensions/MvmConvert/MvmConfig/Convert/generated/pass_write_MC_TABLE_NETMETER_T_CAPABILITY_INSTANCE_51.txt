@@ -1,0 +1,28 @@
+<proc name="pass_write_51">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'id_cap_type'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'mc/id_cap_type_names'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_capability_instance.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_cap_instance">OBJECT.id_cap_instance</field>
+      <field name="tx_guid">OBJECT.tx_guid</field>
+      <field name="id_parent_cap_instance">OBJECT.id_parent_cap_instance</field>
+      <field name="id_policy">OBJECT.id_policy</field>
+      <field name="id_cap_type">OBJECT.id_cap_type</field>
+    </data>
+  </print_record>
+</proc>

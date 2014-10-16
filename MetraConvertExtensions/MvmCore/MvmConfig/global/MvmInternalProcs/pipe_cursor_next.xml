@@ -1,0 +1,46 @@
+<procs>
+ 
+  <proc name='pipe_cursor_next'>
+    <param name='cursor_inst_id'/>
+    <param name='proc_inst_id'/>
+    <try>
+      <config>
+        <info switch='log_pipe'>'[pipe_cursor_next] Entering pipe_cursor_next cursor_inst_id=['~TEMP.cursor_inst_id~'] proc_inst_id=['~TEMP.proc_inst_id~']'</info>
+        <while>
+          <condition>1</condition>
+          <loop>
+            <info switch='log_pipe'>'[pipe_cursor_next] resuming proc_inst_id=['~TEMP.proc_inst_id~']'</info>
+            <proc_inst_resume>TEMP.proc_inst_id</proc_inst_resume>
+            <info switch='log_pipe'>'[pipe_cursor_next] seeing if producer proc_inst_id=['~TEMP.proc_inst_id~'] is complete'</info>
+            <proc_inst_is_complete>
+              <proc_inst_id>TEMP.proc_inst_id</proc_inst_id>
+              <is_complete>TEMP.is_complete</is_complete>
+            </proc_inst_is_complete>
+            <info switch='log_pipe'>'[pipe_cursor_next] pipe_cursor_next is_complete=['~TEMP.is_complete~']'</info>
+            <if>
+              <condition>TEMP.is_complete eq 1</condition>
+              <then>
+                <info switch='log_pipe'>'[pipe_cursor_next] producer proc has exited. create an eof object if there is not one and return.'</info>
+                <cursor_inst_create_eof_if_none>TEMP.cursor_inst_id</cursor_inst_create_eof_if_none>
+                <return/>
+              </then>
+            </if>
+            <cursor_inst_id_to_object_id>
+              <cursor_inst_id>TEMP.cursor_inst_id</cursor_inst_id>
+              <cursor>TEMP.cursor_object_id</cursor>
+            </cursor_inst_id_to_object_id>
+            <info switch='log_pipe'>'[pipe_cursor_next] producer proc not done, so it must have piped a row, so yield.  cursor_inst_id=['~TEMP.cursor_inst_id~'] cursor_object_id is ['~TEMP.cursor_object_id~'] CURSOR.eof=['~OBJECT(TEMP.cursor_object_id).eof~']'</info>
+            <yield/>
+          </loop>
+        </while>
+      </config>
+      <finally>
+        <info switch='log_pipe'>'[pipe_cursor_next] deleting producer proc_inst_id=['~TEMP.proc_inst_id~']'</info>
+        <proc_inst_delete>TEMP.proc_inst_id</proc_inst_delete>
+      </finally>
+    </try>
+    <info switch='log_pipe'>'[pipe_cursor_next] exiting.'</info>
+  </proc>
+  
+  
+</procs>

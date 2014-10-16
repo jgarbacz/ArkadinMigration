@@ -1,0 +1,56 @@
+﻿<procs>
+  
+  <proc name="xl_write_cursor_to_worksheet">
+    <param name="cursor"/>
+    <param name="workbook"/>
+    <param name="worksheet"/>
+    <try>
+      <config>
+        <c>open workbook should be in try so even if we error we close it</c>
+        <xl_open_workbook>TEMP.workbook</xl_open_workbook>
+
+        <c>delete does not complain if the worksheet is not there</c>
+        <xl_delete_worksheet>
+          <workbook>TEMP.workbook</workbook>
+          <worksheet>TEMP.worksheet</worksheet>
+        </xl_delete_worksheet>
+
+        <c>assume we want the cursor field names to be in the header</c>
+        <object_field_value_select>
+          <object_id>TEMP.cursor</object_id>
+          <cursor_field>'field_name'</cursor_field>
+          <cursor_value>'value'</cursor_value>
+          <cursor>TEMP.metacsr</cursor>
+          <loop>
+            <xl_append_field>
+              <workbook>TEMP.workbook</workbook>
+              <worksheet>TEMP.worksheet</worksheet>
+              <field>OBJECT(TEMP.metacsr).field_name</field>
+            </xl_append_field>
+          </loop>
+        </object_field_value_select>
+        <xl_next_row>
+          <workbook>TEMP.workbook</workbook>
+          <worksheet>TEMP.worksheet</worksheet>
+        </xl_next_row>
+
+        <c>drain the cursor appending rows to the sheet</c>
+        <while>
+          <condition>!OBJECT(TEMP.cursor).eof</condition>
+          <loop>
+            <xl_append_row>
+              <workbook>TEMP.workbook</workbook>
+              <worksheet>TEMP.worksheet</worksheet>
+              <cursor>TEMP.cursor</cursor>
+            </xl_append_row>
+            <cursor_next>TEMP.cursor</cursor_next>
+          </loop>
+        </while>
+      </config>
+      <finally>
+        <xl_close_workbook>TEMP.workbook</xl_close_workbook>
+      </finally>
+    </try>
+  </proc>
+
+</procs>

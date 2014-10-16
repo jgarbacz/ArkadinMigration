@@ -1,0 +1,215 @@
+<proc name="read_file_return_all_core_account_partneraccount">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="pipe_cursor" />
+  <param name="filename" />
+  <do>TEMP.linecount = 0</do>
+  <file_select>
+    <input_file>TEMP.filename</input_file>
+    <record_offset_tag>'_mc_record_offset'</record_offset_tag>
+    <record_length_tag>'_mc_record_length'</record_length_tag>
+    <encoding>'UTF-8'</encoding>
+    <cursor_type>'213'</cursor_type>
+    <format field_delim="`|" record_delim="&lt;&#xD;&#xA;" trim="true">
+      <field name="nm_login" />
+      <field name="c_legacysystemname" />
+      <field name="parent_nm_login" />
+      <field name="payer_account" />
+      <field name="dt_crt" />
+      <field name="vt_end" />
+      <field name="status" />
+      <field name="tx_password" />
+      <field name="c_createdby" />
+      <field name="c_createddate" />
+      <field name="c_modifiedby" />
+      <field name="c_modifieddate" />
+      <field name="c_orderstatus" />
+      <field name="c_custpartnerextid" />
+      <field name="c_customernodename" />
+      <field name="c_commentc" />
+      <field name="c_language" />
+      <field name="c_currency" />
+      <field name="c_timezoneid" />
+      <field name="c_securityquestion" />
+      <field name="c_securityanswer" />
+      <field name="c_usagecycletype" />
+      <field name="c_paymentmethod" />
+      <field name="c_registrationnumber" />
+      <field name="c_salesforceidb" />
+      <field name="c_subbillingb" />
+      <field name="c_submanagementb" />
+      <field name="c_subrevenueb" />
+      <field name="c_navisioninstance" />
+      <field name="c_paymenttermcode" />
+      <field name="c_invoicedeliverymethod" />
+      <field name="c_invoiceoutputformat" />
+      <field name="c_invoicelanguage" />
+      <field name="c_invoiceminimumamount" />
+      <field name="c_legalentityinheritance" />
+      <field name="c_centralbillingflagba" />
+      <field name="c_cudtemplate" />
+      <field name="c_eudtemplate" />
+      <field name="c_iscoverpagerequired" />
+      <field name="c_purchaseorderreference" />
+      <field name="c_ispurchaseordermandatory" />
+      <field name="c_purchaseorderexpirydate" />
+      <field name="c_arkadinbankaccountdetailsid" />
+      <field name="c_printhouse" />
+      <field name="c_partnerrelationshiptype" />
+      <field name="c_partnershipstartdate" />
+      <field name="c_partnershipenddate" />
+      <field name="c_crmonbehalfof" />
+      <field name="c_aronbehalfof" />
+      <field name="c_marketingonbehalfof" />
+      <field name="c_partnerregion" />
+      <field name="c_taxexemptid" />
+      <field name="c_taxvendor" />
+      <field name="c_metrataxcountryeligibility" />
+      <field name="c_metrataxcountryzone" />
+      <field name="c_metrataxhasoverrideband" />
+      <field name="c_metrataxoverrideband" />
+      <field name="c_taxserviceaddresspcode" />
+      <field name="c_taxexemptreason" />
+      <field name="c_taxexemptstartdate" />
+      <field name="c_taxexemptenddate" />
+      <field name="c_taxregistryreference" />
+      <field name="billed_thru_date" />
+      <field name="c_ismigrated" />
+    </format>
+    <cursor>TEMP.dfcsr</cursor>
+    <loop>
+      <do>TEMP.linecount += 1</do>
+      <do>OBJECT(TEMP.dfcsr)._mc_record_type_id = 213</do>
+      <do>OBJECT(TEMP.dfcsr)._mc_line_no = TEMP.linecount</do>
+      <do>OBJECT(TEMP.dfcsr).parent_nm_space = 'mt'</do>
+      <do>OBJECT(TEMP.dfcsr).nm_space = 'mt'</do>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).vt_end eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).vt_end = 2038-01-01 00:00:00</do>
+        </then>
+      </if>
+      <do>OBJECT(TEMP.dfcsr).vt_start = dt_crt</do>
+      <do>OBJECT(TEMP.dfcsr).tt_start = dt_crt</do>
+      <do>OBJECT(TEMP.dfcsr).tt_end = vt_end</do>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_orderstatus eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_orderstatus = 'Unlock'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_currency eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_currency = 'USD'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_centralbillingflagba eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_centralbillingflagba = '0'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_cudtemplate eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_cudtemplate = 'None'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_eudtemplate eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_eudtemplate = 'None'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_iscoverpagerequired eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_iscoverpagerequired = '1'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_ispurchaseordermandatory eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_ispurchaseordermandatory = '0'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_crmonbehalfof eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_crmonbehalfof = '0'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_aronbehalfof eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_aronbehalfof = '0'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_marketingonbehalfof eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_marketingonbehalfof = '0'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_metrataxhasoverrideband eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_metrataxhasoverrideband = '0'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_taxexemptreason eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_taxexemptreason = 'NotExempt'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_ismigrated eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_ismigrated = '0'</do>
+        </then>
+      </if>
+      <do>OBJECT(TEMP.dfcsr).c_billable = '1'</do>
+      <do>OBJECT(TEMP.dfcsr).c_folder = '0'</do>
+      <do>OBJECT(TEMP.dfcsr).c_statusreasonother = 'None'</do>
+      <do>OBJECT(TEMP.dfcsr).c_communicationoptin = '0'</do>
+      <pipe_row>TEMP.dfcsr</pipe_row>
+    </loop>
+  </file_select>
+  <if>
+    <condition>TEMP.linecount EQ 0</condition>
+    <then>
+      <file_info>
+        <filename>TEMP.filename</filename>
+        <size>TEMP.filesize</size>
+      </file_info>
+      <if>
+        <condition>TEMP.filesize GT 3</condition>
+        <then>
+          <fatal>'Error: could not read any data from file ' ~ TEMP.filename ~ '; are delimiters configured correctly?'</fatal>
+        </then>
+      </if>
+    </then>
+  </if>
+  <do>TEMP.current_count = 0</do>
+  <index_get>
+    <index>'MC_RECORD_COUNT'</index>
+    <field name="record_type">'core_account_partneraccount'</field>
+    <field name="count">TEMP.count</field>
+    <then>
+      <do>TEMP.current_count = TEMP.count</do>
+    </then>
+    <else>
+      <index_insert>
+        <index>'MC_RECORD_COUNT'</index>
+        <field name="record_type">'core_account_partneraccount'</field>
+        <field name="count">TEMP.linecount</field>
+        <field name="display_record_type">'ACCOUNT_PARTNERACCOUNT'</field>
+      </index_insert>
+    </else>
+  </index_get>
+  <do>TEMP.current_count += TEMP.linecount</do>
+  <do>TEMP.new_count = index_update('MC_RECORD_COUNT', record_type=&gt;'core_account_partneraccount', count=&gt;TEMP.current_count)</do>
+</proc>

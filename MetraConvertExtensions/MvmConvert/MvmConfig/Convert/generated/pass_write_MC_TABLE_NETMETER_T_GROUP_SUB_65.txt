@@ -1,0 +1,25 @@
+<proc name="pass_write_65">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_group_sub.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_group">OBJECT.id_group</field>
+      <field name="id_group_ext">OBJECT.id_group_ext</field>
+      <field name="tx_name">OBJECT.tx_name</field>
+      <field name="tx_desc">OBJECT.tx_desc</field>
+      <field name="b_visable">OBJECT.b_visable</field>
+      <field name="b_supportgroupops">OBJECT.b_supportgroupops</field>
+      <field name="id_usage_cycle">OBJECT.id_usage_cycle</field>
+      <field name="b_proportional">OBJECT.b_proportional</field>
+      <field name="id_corporate_account">OBJECT.id_corporate_account</field>
+      <field name="id_discountaccount">OBJECT.id_discountaccount</field>
+    </data>
+  </print_record>
+</proc>

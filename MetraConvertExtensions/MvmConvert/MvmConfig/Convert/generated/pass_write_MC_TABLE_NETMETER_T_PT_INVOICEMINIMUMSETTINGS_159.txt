@@ -1,0 +1,21 @@
+<proc name="pass_write_159">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_pt_invoiceminimumsettings.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_sched">OBJECT.id_sched</field>
+      <field name="n_order">OBJECT.n_order</field>
+      <field name="tt_start">OBJECT.tt_start</field>
+      <field name="tt_end">OBJECT.tt_end</field>
+      <field name="id_audit">OBJECT.id_audit</field>
+      <field name="c_generatedifferencefee">OBJECT.c_generatedifferencefee</field>
+    </data>
+  </print_record>
+</proc>

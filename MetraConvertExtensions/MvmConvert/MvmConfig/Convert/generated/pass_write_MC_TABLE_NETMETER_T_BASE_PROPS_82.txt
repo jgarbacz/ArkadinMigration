@@ -1,0 +1,25 @@
+<proc name="pass_write_82">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_base_props.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_prop">OBJECT.id_prop</field>
+      <field name="n_kind">OBJECT.n_kind</field>
+      <field name="n_name">OBJECT.n_name</field>
+      <field name="n_desc">OBJECT.n_desc</field>
+      <field name="nm_name">OBJECT.nm_name</field>
+      <field name="nm_desc">OBJECT.nm_desc</field>
+      <field name="b_approved">OBJECT.b_approved</field>
+      <field name="b_archive">OBJECT.b_archive</field>
+      <field name="n_display_name">OBJECT.n_display_name</field>
+      <field name="nm_display_name">OBJECT.nm_display_name</field>
+    </data>
+  </print_record>
+</proc>

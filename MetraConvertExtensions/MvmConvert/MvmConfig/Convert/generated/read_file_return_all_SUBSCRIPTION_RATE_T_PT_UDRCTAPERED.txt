@@ -1,0 +1,58 @@
+<proc name="read_file_return_all_SUBSCRIPTION_RATE_T_PT_UDRCTAPERED">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="pipe_cursor" />
+  <param name="filename" />
+  <do>TEMP.linecount = 0</do>
+  <file_select>
+    <input_file>TEMP.filename</input_file>
+    <record_offset_tag>'_mc_record_offset'</record_offset_tag>
+    <record_length_tag>'_mc_record_length'</record_length_tag>
+    <encoding>'UTF-8'</encoding>
+    <cursor_type>'107'</cursor_type>
+    <format field_delim="`|" record_delim="&lt;&#xD;&#xA;" trim="true">
+    </format>
+    <cursor>TEMP.dfcsr</cursor>
+    <loop>
+      <do>TEMP.linecount += 1</do>
+      <do>OBJECT(TEMP.dfcsr)._mc_record_type_id = 107</do>
+      <do>OBJECT(TEMP.dfcsr)._mc_line_no = TEMP.linecount</do>
+      <pipe_row>TEMP.dfcsr</pipe_row>
+    </loop>
+  </file_select>
+  <if>
+    <condition>TEMP.linecount EQ 0</condition>
+    <then>
+      <file_info>
+        <filename>TEMP.filename</filename>
+        <size>TEMP.filesize</size>
+      </file_info>
+      <if>
+        <condition>TEMP.filesize GT 3</condition>
+        <then>
+          <fatal>'Error: could not read any data from file ' ~ TEMP.filename ~ '; are delimiters configured correctly?'</fatal>
+        </then>
+      </if>
+    </then>
+  </if>
+  <do>TEMP.current_count = 0</do>
+  <index_get>
+    <index>'MC_RECORD_COUNT'</index>
+    <field name="record_type">'SUBSCRIPTION_RATE_T_PT_UDRCTAPERED'</field>
+    <field name="count">TEMP.count</field>
+    <then>
+      <do>TEMP.current_count = TEMP.count</do>
+    </then>
+    <else>
+      <index_insert>
+        <index>'MC_RECORD_COUNT'</index>
+        <field name="record_type">'SUBSCRIPTION_RATE_T_PT_UDRCTAPERED'</field>
+        <field name="count">TEMP.linecount</field>
+        <field name="display_record_type">'SUBSCRIPTION_RATE_T_PT_UDRCTAPERED'</field>
+      </index_insert>
+    </else>
+  </index_get>
+  <do>TEMP.current_count += TEMP.linecount</do>
+  <do>TEMP.new_count = index_update('MC_RECORD_COUNT', record_type=&gt;'SUBSCRIPTION_RATE_T_PT_UDRCTAPERED', count=&gt;TEMP.current_count)</do>
+</proc>

@@ -1,0 +1,1163 @@
+<proc name="pass_1_64">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <if>
+    <condition>OBJECT.id_acc eq ''</condition>
+    <then>
+      <do>OBJECT.id_acc = OBJECT(OBJECT._mc_parent).id_acc</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.id_sub eq ''</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'sequence_get_next_id_sub'</name>
+        <param name="value">TEMP.GeNsYm710__MC_SEQUENCE</param>
+      </call_proc_for_current_object>
+      <do>OBJECT.id_sub = TEMP.GeNsYm710__MC_SEQUENCE</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_sub'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.id_sub_ext eq ''</condition>
+    <then>
+      <get_guid>TEMP.GeNsYm711__MC_GUID</get_guid>
+      <do>OBJECT.id_sub_ext = TEMP.GeNsYm711__MC_GUID</do>
+    </then>
+    <else>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.dt_crt eq ''</condition>
+    <then>
+      <do>OBJECT.dt_crt = OBJECT(OBJECT._mc_parent).dt_crt</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'dt_crt'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'datetime'</datatype>
+        <format>'yyyy-MM-dd HH:mm:ss'</format>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.vt_start eq ''</condition>
+    <then>
+      <do>OBJECT.vt_start = OBJECT.dt_crt</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.vt_end eq ''</condition>
+    <then>
+      <do>OBJECT.vt_end = OBJECT(OBJECT._mc_parent).vt_end</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'vt_end'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'datetime'</datatype>
+        <format>'yyyy-MM-dd HH:mm:ss'</format>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.tt_start eq ''</condition>
+    <then>
+      <do>OBJECT.tt_start = OBJECT(OBJECT._mc_parent).tt_start</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.tt_start eq ''</condition>
+    <then>
+      <do>OBJECT.tt_start = GLOBAL.mvm_startup_day</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'tt_start'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'datetime'</datatype>
+        <format>'yyyy-MM-dd HH:mm:ss'</format>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.tt_end eq ''</condition>
+    <then>
+      <do>OBJECT.tt_end = OBJECT(OBJECT._mc_parent).tt_end</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.tt_end eq ''</condition>
+    <then>
+      <do>OBJECT.tt_end = GLOBAL.maxdate</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'tt_end'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'datetime'</datatype>
+        <format>'yyyy-MM-dd HH:mm:ss'</format>
+        <nullable>'1'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.id_group eq ''</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'sequence_get_next_id_group'</name>
+        <param name="value">TEMP.GeNsYm712__MC_SEQUENCE</param>
+      </call_proc_for_current_object>
+      <do>OBJECT.id_group = TEMP.GeNsYm712__MC_SEQUENCE</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_group'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'1'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.id_group_ext eq ''</condition>
+    <then>
+      <do>OBJECT.id_group_ext = OBJECT.id_sub_ext</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.b_visable eq ''</condition>
+    <then>
+      <do>OBJECT.b_visable = 'N'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'b_visable'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'char'</datatype>
+        <length>'1'</length>
+        <nullable>'0'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.b_supportgroupops eq ''</condition>
+    <then>
+      <do>OBJECT.b_supportgroupops = 'Y'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'b_supportgroupops'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'char'</datatype>
+        <length>'1'</length>
+        <nullable>'0'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.b_proportional eq ''</condition>
+    <then>
+      <do>OBJECT.b_proportional = 'Y'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'b_proportional'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'char'</datatype>
+        <length>'1'</length>
+        <nullable>'0'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.id_usage_cycle eq ''</condition>
+    <then>
+      <do>OBJECT.id_usage_cycle = OBJECT(OBJECT._mc_parent).id_usage_cycle</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_usage_cycle'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.id_corporate_account eq ''</condition>
+    <then>
+      <do>OBJECT.id_corporate_account = OBJECT(OBJECT._mc_parent).id_acc</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_corporate_account'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.nm_currency_code eq ''</condition>
+    <then>
+      <do>OBJECT.nm_currency_code = OBJECT(OBJECT._mc_parent).c_currency</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.nm_currency_code eq ''</condition>
+    <then>
+      <do>OBJECT.nm_currency_code = 'USD'</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.n_value eq ''</condition>
+    <then>
+      <do>OBJECT.n_value = OBJECT.n_value</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.subname eq ''</condition>
+    <then>
+      <do>OBJECT.subname = OBJECT.subname</do>
+      <validate_field>
+        <field>'subname'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'nvarchar'</datatype>
+        <length>'255'</length>
+        <nullable>'0'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </then>
+    <else>
+      <validate_field>
+        <field>'subname'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'nvarchar'</datatype>
+        <length>'255'</length>
+        <nullable>'0'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.parentgroupid eq ''</condition>
+    <then>
+      <do>OBJECT.parentgroupid = OBJECT.parentgroupid</do>
+      <validate_field>
+        <field>'parentgroupid'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'nvarchar'</datatype>
+        <length>'255'</length>
+        <nullable>'0'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </then>
+    <else>
+      <validate_field>
+        <field>'parentgroupid'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'nvarchar'</datatype>
+        <length>'255'</length>
+        <nullable>'0'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.techinstance eq ''</condition>
+    <then>
+      <do>OBJECT.techinstance = OBJECT.techinstance</do>
+    </then>
+  </if>
+  <call_proc_for_current_object>
+    <name>'store_hierarchy_reference'</name>
+    <param name="record_type">'GROUP_SUBSCRIPTION'</param>
+    <param name="key">OBJECT.tx_name</param>
+    <param name="object">OBJECT.object_id</param>
+    <param name="value">TEMP.GeNsYm713__MC_PROC</param>
+  </call_proc_for_current_object>
+  <do>OBJECT.group_sub = TEMP.GeNsYm713__MC_PROC</do>
+  <if>
+    <condition>OBJECT._mc_error ne ''</condition>
+    <then>
+      <return />
+    </then>
+  </if>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'65'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_GROUP_SUB'</object_type>
+    <object_id>TEMP.GeNsYm714__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm714__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm714__mc).id_group = OBJECT.id_group</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc).id_group_ext = OBJECT.id_group_ext</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc).tx_name = OBJECT.tx_name</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc).tx_desc = OBJECT.tx_desc</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc).b_visable = OBJECT.b_visable</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc).b_supportgroupops = OBJECT.b_supportgroupops</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc).id_usage_cycle = OBJECT.id_usage_cycle</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc).b_proportional = OBJECT.b_proportional</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc).id_corporate_account = OBJECT.id_corporate_account</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc).id_discountaccount = OBJECT.id_discountaccount</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc)._mc_record_type_id = 65</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_group_sub' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm714__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm714__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm714__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm714__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'61'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_SUB'</object_type>
+    <object_id>TEMP.GeNsYm715__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm715__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm715__mc).id_sub = OBJECT.id_sub</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc).id_sub_ext = OBJECT.id_sub_ext</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc).id_acc = OBJECT.id_acc</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc).id_po = OBJECT.id_po</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc).dt_crt = OBJECT.dt_crt</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc).vt_start = OBJECT.vt_start</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc).vt_end = OBJECT.vt_end</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc).id_group = OBJECT.id_group</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc).id_acc = ''</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc)._mc_record_type_id = 61</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_sub' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm715__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm715__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm715__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm715__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'62'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_SUB_HISTORY'</object_type>
+    <object_id>TEMP.GeNsYm716__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm716__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm716__mc).id_sub = OBJECT.id_sub</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc).id_sub_ext = OBJECT.id_sub_ext</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc).id_acc = OBJECT.id_acc</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc).id_po = OBJECT.id_po</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc).dt_crt = OBJECT.dt_crt</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc).id_group = OBJECT.id_group</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc).vt_start = OBJECT.vt_start</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc).vt_end = OBJECT.vt_end</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc).tt_start = OBJECT.tt_start</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc).tt_end = OBJECT.tt_end</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc).id_acc = ''</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc)._mc_record_type_id = 62</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_sub_history' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm716__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm716__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm716__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm716__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <if>
+    <condition>OBJECT.subname ne ''</condition>
+    <then>
+      <spawn>
+        <internal_type>'format_array'</internal_type>
+        <feedback_name>'66'</feedback_name>
+        <object_type>'MC_TABLE_NETMETER_T_CHAR_VALUES'</object_type>
+        <object_id>TEMP.GeNsYm717__mc</object_id>
+        <pin_to_proc>0</pin_to_proc>
+      </spawn>
+      <object_ref_get>
+        <object_id>TEMP.GeNsYm717__mc</object_id>
+        <target>TEMP.x</target>
+      </object_ref_get>
+      <do>OBJECT(TEMP.GeNsYm717__mc).id_scv = OBJECT.id_scv</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc).id_entity = OBJECT.id_entity</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc).nm_value = OBJECT.nm_value</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc).c_start_date = OBJECT.c_start_date</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc).c_end_date = OBJECT.c_end_date</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc).c_spec_name = OBJECT.c_spec_name</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc).c_spec_type = OBJECT.c_spec_type</do>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm717__mc).id_scv eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm717__mc).id_scv = 1000</do>
+        </then>
+        <else>
+          <validate_field>
+            <field>'id_scv'</field>
+            <object_id>TEMP.GeNsYm717__mc</object_id>
+            <datatype>'int'</datatype>
+            <length>'10'</length>
+            <scale>'0'</scale>
+            <nullable>'0'</nullable>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </else>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm717__mc).nm_value eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm717__mc).nm_value = OBJECT.subname</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm717__mc).id_entity eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm717__mc).id_entity = OBJECT.id_sub</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm717__mc).c_start_date eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm717__mc).c_start_date = OBJECT.tt_start</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm717__mc).c_end_date eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm717__mc).c_end_date = OBJECT.tt_end</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm717__mc).c_spec_name eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm717__mc).c_spec_name = 'SubscriptionName'</do>
+        </then>
+        <else>
+          <validate_field>
+            <field>'c_spec_name'</field>
+            <object_id>TEMP.GeNsYm717__mc</object_id>
+            <datatype>'nvarchar'</datatype>
+            <length>'20'</length>
+            <nullable>'0'</nullable>
+            <default>
+            </default>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </else>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm717__mc).c_spec_type eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm717__mc).c_spec_type = 0</do>
+        </then>
+        <else>
+          <validate_field>
+            <field>'c_spec_type'</field>
+            <object_id>TEMP.GeNsYm717__mc</object_id>
+            <datatype>'int'</datatype>
+            <length>'10'</length>
+            <scale>'0'</scale>
+            <nullable>'0'</nullable>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </else>
+      </if>
+      <do>OBJECT(TEMP.GeNsYm717__mc)._mc_file_id = OBJECT._mc_file_id</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc)._mc_line_no = OBJECT._mc_line_no</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc)._mc_record_length = OBJECT._mc_record_length</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc)._mc_record_type_id = 66</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc)._mc_parent = OBJECT.object_id</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc)._mc_level = OBJECT._mc_level + 1</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc)._mc_first_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc)._mc_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_char_values' ~ GLOBAL.spawn_child_no</do>
+      <do>GLOBAL.spawn_child_no += 1</do>
+      <do>OBJECT(TEMP.GeNsYm717__mc)._mc_spawned = '1'</do>
+      <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm717__mc)._mc_sort_key</print>-->
+      <sorted_object_file_write>
+        <file>TEMP.infile</file>
+        <object_id>TEMP.GeNsYm717__mc</object_id>
+        <key_field>'_mc_sort_key'</key_field>
+      </sorted_object_file_write>
+      <object_ref_remove>
+        <object_id>TEMP.GeNsYm717__mc</object_id>
+        <ref_count>TEMP.temp</ref_count>
+      </object_ref_remove>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.parentgroupid ne ''</condition>
+    <then>
+      <spawn>
+        <internal_type>'format_array'</internal_type>
+        <feedback_name>'66'</feedback_name>
+        <object_type>'MC_TABLE_NETMETER_T_CHAR_VALUES'</object_type>
+        <object_id>TEMP.GeNsYm718__mc</object_id>
+        <pin_to_proc>0</pin_to_proc>
+      </spawn>
+      <object_ref_get>
+        <object_id>TEMP.GeNsYm718__mc</object_id>
+        <target>TEMP.x</target>
+      </object_ref_get>
+      <do>OBJECT(TEMP.GeNsYm718__mc).id_scv = OBJECT.id_scv</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc).id_entity = OBJECT.id_entity</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc).nm_value = OBJECT.nm_value</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc).c_start_date = OBJECT.c_start_date</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc).c_end_date = OBJECT.c_end_date</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc).c_spec_name = OBJECT.c_spec_name</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc).c_spec_type = OBJECT.c_spec_type</do>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm718__mc).id_scv eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm718__mc).id_scv = 1002</do>
+        </then>
+        <else>
+          <validate_field>
+            <field>'id_scv'</field>
+            <object_id>TEMP.GeNsYm718__mc</object_id>
+            <datatype>'int'</datatype>
+            <length>'10'</length>
+            <scale>'0'</scale>
+            <nullable>'0'</nullable>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </else>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm718__mc).nm_value eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm718__mc).nm_value = OBJECT.parentgroupid</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm718__mc).id_entity eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm718__mc).id_entity = OBJECT.id_sub</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm718__mc).c_start_date eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm718__mc).c_start_date = OBJECT.tt_start</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm718__mc).c_end_date eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm718__mc).c_end_date = OBJECT.tt_end</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm718__mc).c_spec_name eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm718__mc).c_spec_name = 'ParentSubID'</do>
+        </then>
+        <else>
+          <validate_field>
+            <field>'c_spec_name'</field>
+            <object_id>TEMP.GeNsYm718__mc</object_id>
+            <datatype>'nvarchar'</datatype>
+            <length>'20'</length>
+            <nullable>'0'</nullable>
+            <default>
+            </default>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </else>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm718__mc).c_spec_type eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm718__mc).c_spec_type = 1</do>
+        </then>
+        <else>
+          <validate_field>
+            <field>'c_spec_type'</field>
+            <object_id>TEMP.GeNsYm718__mc</object_id>
+            <datatype>'int'</datatype>
+            <length>'10'</length>
+            <scale>'0'</scale>
+            <nullable>'0'</nullable>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </else>
+      </if>
+      <do>OBJECT(TEMP.GeNsYm718__mc)._mc_file_id = OBJECT._mc_file_id</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc)._mc_line_no = OBJECT._mc_line_no</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc)._mc_record_length = OBJECT._mc_record_length</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc)._mc_record_type_id = 66</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc)._mc_parent = OBJECT.object_id</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc)._mc_level = OBJECT._mc_level + 1</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc)._mc_first_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc)._mc_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_char_values' ~ GLOBAL.spawn_child_no</do>
+      <do>GLOBAL.spawn_child_no += 1</do>
+      <do>OBJECT(TEMP.GeNsYm718__mc)._mc_spawned = '1'</do>
+      <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm718__mc)._mc_sort_key</print>-->
+      <sorted_object_file_write>
+        <file>TEMP.infile</file>
+        <object_id>TEMP.GeNsYm718__mc</object_id>
+        <key_field>'_mc_sort_key'</key_field>
+      </sorted_object_file_write>
+      <object_ref_remove>
+        <object_id>TEMP.GeNsYm718__mc</object_id>
+        <ref_count>TEMP.temp</ref_count>
+      </object_ref_remove>
+    </then>
+  </if>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'66'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_CHAR_VALUES'</object_type>
+    <object_id>TEMP.GeNsYm719__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm719__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm719__mc).id_scv = OBJECT.id_scv</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc).id_entity = OBJECT.id_entity</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc).nm_value = OBJECT.nm_value</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc).c_start_date = OBJECT.c_start_date</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc).c_end_date = OBJECT.c_end_date</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc).c_spec_name = OBJECT.c_spec_name</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc).c_spec_type = OBJECT.c_spec_type</do>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm719__mc).id_scv eq ''</condition>
+    <then>
+      <do>OBJECT(TEMP.GeNsYm719__mc).id_scv = 1001</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_scv'</field>
+        <object_id>TEMP.GeNsYm719__mc</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm719__mc).nm_value eq ''</condition>
+    <then>
+      <do>OBJECT(TEMP.GeNsYm719__mc).nm_value = '0'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'nm_value'</field>
+        <object_id>TEMP.GeNsYm719__mc</object_id>
+        <datatype>'nvarchar'</datatype>
+        <length>'255'</length>
+        <nullable>'0'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm719__mc).id_entity eq ''</condition>
+    <then>
+      <do>OBJECT(TEMP.GeNsYm719__mc).id_entity = OBJECT.id_sub</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm719__mc).c_start_date eq ''</condition>
+    <then>
+      <do>OBJECT(TEMP.GeNsYm719__mc).c_start_date = OBJECT.tt_start</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm719__mc).c_end_date eq ''</condition>
+    <then>
+      <do>OBJECT(TEMP.GeNsYm719__mc).c_end_date = OBJECT.tt_end</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm719__mc).c_spec_name eq ''</condition>
+    <then>
+      <do>OBJECT(TEMP.GeNsYm719__mc).c_spec_name = 'TechInstID'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'c_spec_name'</field>
+        <object_id>TEMP.GeNsYm719__mc</object_id>
+        <datatype>'nvarchar'</datatype>
+        <length>'20'</length>
+        <nullable>'0'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm719__mc).c_spec_type eq ''</condition>
+    <then>
+      <do>OBJECT(TEMP.GeNsYm719__mc).c_spec_type = 1</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'c_spec_type'</field>
+        <object_id>TEMP.GeNsYm719__mc</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <do>OBJECT(TEMP.GeNsYm719__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc)._mc_record_type_id = 66</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_char_values' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm719__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm719__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm719__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm719__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <if>
+    <condition>OBJECT.n_value ne ''</condition>
+    <then>
+      <select>
+        <index_select>
+          <!-- Changed to new index by TCF August 2014. -->
+          <!--<index>'MC_PO_TO_PI_RECUR_MAPPING'</index>
+	    <field name="id_po">lc(OBJECT.id_po)</field>-->
+          <index>'MC_TBASEPROPS_TO_GSUB_MAPPING'</index>
+          <field name="id_po">lc(OBJECT.id_po)</field>
+        </index_select>
+        <cursor>TEMP.GeNsYm720__mc</cursor>
+        <loop>
+          <do>OBJECT(TEMP.GeNsYm720__mc).id_group = OBJECT.id_group</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc).id_prop = OBJECT.id_prop</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc).id_acc = OBJECT.id_acc</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc).vt_start = OBJECT.vt_start</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc).vt_end = OBJECT.vt_end</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc).tt_start = OBJECT.tt_start</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc).tt_end = OBJECT.tt_end</do>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm720__mc).id_acc eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm720__mc).id_acc = OBJECT(OBJECT._mc_parent).id_acc</do>
+            </then>
+            <else>
+              <validate_field>
+                <field>'id_acc'</field>
+                <object_id>TEMP.GeNsYm720__mc</object_id>
+                <datatype>'int'</datatype>
+                <length>'10'</length>
+                <scale>'0'</scale>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm720__mc).id_group eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm720__mc).id_group = OBJECT(OBJECT._mc_parent).id_group</do>
+            </then>
+            <else>
+              <validate_field>
+                <field>'id_group'</field>
+                <object_id>TEMP.GeNsYm720__mc</object_id>
+                <datatype>'int'</datatype>
+                <length>'10'</length>
+                <scale>'0'</scale>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm720__mc).id_prop eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm720__mc).id_prop = OBJECT(TEMP.GeNsYm720__mc).id_pi_instance</do>
+              <validate_field>
+                <field>'id_prop'</field>
+                <object_id>TEMP.GeNsYm720__mc</object_id>
+                <datatype>'int'</datatype>
+                <length>'10'</length>
+                <scale>'0'</scale>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </then>
+            <else>
+              <validate_field>
+                <field>'id_prop'</field>
+                <object_id>TEMP.GeNsYm720__mc</object_id>
+                <datatype>'int'</datatype>
+                <length>'10'</length>
+                <scale>'0'</scale>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm720__mc).vt_start eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm720__mc).vt_start = OBJECT(OBJECT._mc_parent).vt_start</do>
+            </then>
+            <else>
+              <validate_field>
+                <field>'vt_start'</field>
+                <object_id>TEMP.GeNsYm720__mc</object_id>
+                <datatype>'datetime'</datatype>
+                <format>'yyyy-MM-dd HH:mm:ss'</format>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm720__mc).vt_end eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm720__mc).vt_end = OBJECT(OBJECT._mc_parent).vt_end</do>
+            </then>
+            <else>
+              <validate_field>
+                <field>'vt_end'</field>
+                <object_id>TEMP.GeNsYm720__mc</object_id>
+                <datatype>'datetime'</datatype>
+                <format>'yyyy-MM-dd HH:mm:ss'</format>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm720__mc).tt_start eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm720__mc).tt_start = OBJECT(OBJECT._mc_parent).tt_start</do>
+            </then>
+            <else>
+              <validate_field>
+                <field>'tt_start'</field>
+                <object_id>TEMP.GeNsYm720__mc</object_id>
+                <datatype>'datetime'</datatype>
+                <format>'yyyy-MM-dd HH:mm:ss'</format>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm720__mc).tt_end eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm720__mc).tt_end = OBJECT(OBJECT._mc_parent).tt_end</do>
+            </then>
+            <else>
+              <validate_field>
+                <field>'tt_end'</field>
+                <object_id>TEMP.GeNsYm720__mc</object_id>
+                <datatype>'datetime'</datatype>
+                <format>'yyyy-MM-dd HH:mm:ss'</format>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <do>OBJECT(TEMP.GeNsYm720__mc)._mc_file_id = OBJECT._mc_file_id</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc)._mc_line_no = OBJECT._mc_line_no</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc)._mc_record_length = OBJECT._mc_record_length</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc)._mc_record_type_id = 67</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc)._mc_parent = OBJECT.object_id</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc)._mc_level = OBJECT._mc_level + 1</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc)._mc_first_pass = '1'</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc)._mc_pass = '1'</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_gsub_recur_map' ~ GLOBAL.spawn_child_no</do>
+          <do>GLOBAL.spawn_child_no += 1</do>
+          <do>OBJECT(TEMP.GeNsYm720__mc)._mc_spawned = '1'</do>
+          <sorted_object_file_write>
+            <file>TEMP.infile</file>
+            <object_id>TEMP.GeNsYm720__mc</object_id>
+            <key_field>'_mc_sort_key'</key_field>
+          </sorted_object_file_write>
+        </loop>
+      </select>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.n_value ne ''</condition>
+    <then>
+      <select>
+        <index_select>
+          <!-- Changed to new index by TCF August 2014. -->
+          <!--<index>'MC_PO_TO_PI_UDRC_MAPPING'</index>
+	    <field name="id_po">lc(OBJECT.id_po)</field>-->
+          <index>'MC_TBASEPROPS_TO_GSUB_MAPPING'</index>
+          <field name="id_po">lc(OBJECT.id_po)</field>
+        </index_select>
+        <cursor>TEMP.GeNsYm721__mc</cursor>
+        <loop>
+          <do>OBJECT(TEMP.GeNsYm721__mc).id_prop = OBJECT.id_prop</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc).id_sub = OBJECT.id_sub</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc).n_value = OBJECT.n_value</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc).vt_start = OBJECT.vt_start</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc).vt_end = OBJECT.vt_end</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc).tt_start = OBJECT.tt_start</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc).tt_end = OBJECT.tt_end</do>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm721__mc).id_sub eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm721__mc).id_sub = OBJECT(OBJECT._mc_parent).id_sub</do>
+            </then>
+            <else>
+              <validate_field>
+                <field>'id_sub'</field>
+                <object_id>TEMP.GeNsYm721__mc</object_id>
+                <datatype>'int'</datatype>
+                <length>'10'</length>
+                <scale>'0'</scale>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm721__mc).id_prop eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm721__mc).id_prop = OBJECT(TEMP.GeNsYm721__mc).id_pi_instance</do>
+              <validate_field>
+                <field>'id_prop'</field>
+                <object_id>TEMP.GeNsYm721__mc</object_id>
+                <datatype>'int'</datatype>
+                <length>'10'</length>
+                <scale>'0'</scale>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </then>
+            <else>
+              <validate_field>
+                <field>'id_prop'</field>
+                <object_id>TEMP.GeNsYm721__mc</object_id>
+                <datatype>'int'</datatype>
+                <length>'10'</length>
+                <scale>'0'</scale>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm721__mc).n_value eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm721__mc).n_value = OBJECT(OBJECT._mc_parent).n_value</do>
+            </then>
+            <else>
+              <validate_field>
+                <field>'n_value'</field>
+                <object_id>TEMP.GeNsYm721__mc</object_id>
+                <datatype>'numeric'</datatype>
+                <length>'22'</length>
+                <scale>'10'</scale>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm721__mc).vt_start eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm721__mc).vt_start = OBJECT(OBJECT._mc_parent).vt_start</do>
+            </then>
+            <else>
+              <validate_field>
+                <field>'vt_start'</field>
+                <object_id>TEMP.GeNsYm721__mc</object_id>
+                <datatype>'datetime'</datatype>
+                <format>'yyyy-MM-dd HH:mm:ss'</format>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm721__mc).vt_end eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm721__mc).vt_end = OBJECT(OBJECT._mc_parent).vt_end</do>
+            </then>
+            <else>
+              <validate_field>
+                <field>'vt_end'</field>
+                <object_id>TEMP.GeNsYm721__mc</object_id>
+                <datatype>'datetime'</datatype>
+                <format>'yyyy-MM-dd HH:mm:ss'</format>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm721__mc).tt_start eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm721__mc).tt_start = OBJECT(OBJECT._mc_parent).tt_start</do>
+            </then>
+            <else>
+              <validate_field>
+                <field>'tt_start'</field>
+                <object_id>TEMP.GeNsYm721__mc</object_id>
+                <datatype>'datetime'</datatype>
+                <format>'yyyy-MM-dd HH:mm:ss'</format>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.GeNsYm721__mc).tt_end eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.GeNsYm721__mc).tt_end = OBJECT(OBJECT._mc_parent).tt_end</do>
+            </then>
+            <else>
+              <validate_field>
+                <field>'tt_end'</field>
+                <object_id>TEMP.GeNsYm721__mc</object_id>
+                <datatype>'datetime'</datatype>
+                <format>'yyyy-MM-dd HH:mm:ss'</format>
+                <nullable>'0'</nullable>
+                <output_field>'_mc_error'</output_field>
+              </validate_field>
+            </else>
+          </if>
+          <do>OBJECT(TEMP.GeNsYm721__mc)._mc_file_id = OBJECT._mc_file_id</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc)._mc_line_no = OBJECT._mc_line_no</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc)._mc_record_length = OBJECT._mc_record_length</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc)._mc_record_type_id = 68</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc)._mc_parent = OBJECT.object_id</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc)._mc_level = OBJECT._mc_level + 1</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc)._mc_first_pass = '1'</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc)._mc_pass = '1'</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_recur_value' ~ GLOBAL.spawn_child_no</do>
+          <do>GLOBAL.spawn_child_no += 1</do>
+          <do>OBJECT(TEMP.GeNsYm721__mc)._mc_spawned = '1'</do>
+          <sorted_object_file_write>
+            <file>TEMP.infile</file>
+            <object_id>TEMP.GeNsYm721__mc</object_id>
+            <key_field>'_mc_sort_key'</key_field>
+          </sorted_object_file_write>
+        </loop>
+      </select>
+    </then>
+  </if>
+</proc>

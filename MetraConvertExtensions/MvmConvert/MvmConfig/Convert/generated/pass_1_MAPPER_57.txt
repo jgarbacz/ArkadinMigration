@@ -1,0 +1,71 @@
+<proc name="pass_1_57">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <if>
+    <condition>OBJECT.nm_space eq ''</condition>
+    <then>
+      <do>OBJECT.nm_space = 'mt'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'nm_space'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'mc/nm_space'</namespace>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.id_acc eq ''</condition>
+    <then>
+      <do>OBJECT.id_acc = OBJECT(OBJECT._mc_parent).id_acc</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_acc'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <call_proc_for_current_object>
+    <name>'check_nm_login_uniqueness'</name>
+    <param name="value">TEMP.GeNsYm690__MC_PROC</param>
+  </call_proc_for_current_object>
+  <do>OBJECT.nm_login_check = TEMP.GeNsYm690__MC_PROC</do>
+  <if>
+    <condition>OBJECT._mc_error ne ''</condition>
+    <then>
+      <return />
+    </then>
+  </if>
+  <do>OBJECT._mc_record_type_id = 4</do>
+  <do>OBJECT._mc_transformed = '1'</do>
+  <do>TEMP.myprocname = 'pass_1_' ~ OBJECT._mc_record_type_id</do>
+  <get_proc_text>
+    <name>TEMP.myprocname</name>
+    <success>TEMP.success</success>
+  </get_proc_text>
+  <if>
+    <condition>TEMP.success eq '1'</condition>
+    <then>
+      <call_dynamic_proc_for_object>
+        <name>TEMP.myprocname</name>
+        <object_id>OBJECT.object_id</object_id>
+        <param name="infile">TEMP.infile</param>
+        <param name="outfile">TEMP.outfile</param>
+      </call_dynamic_proc_for_object>
+      <do>OBJECT._mc_transformed = ''</do>
+    </then>
+  </if>
+</proc>

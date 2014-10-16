@@ -1,0 +1,359 @@
+<proc name="pass_2_146">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <if>
+    <condition>OBJECT.n_order eq ''</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'get_rate_schedule_order'</name>
+        <param name="value">TEMP.GeNsYm1226__MC_PROC</param>
+      </call_proc_for_current_object>
+      <do>OBJECT.n_order = TEMP.GeNsYm1226__MC_PROC</do>
+      <validate_field>
+        <field>'n_order'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </then>
+    <else>
+      <validate_field>
+        <field>'n_order'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT._mc_error ne ''</condition>
+    <then>
+      <return />
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.rate_schedule eq '1'</condition>
+    <then>
+      <spawn>
+        <internal_type>'format_array'</internal_type>
+        <feedback_name>'77'</feedback_name>
+        <object_type>'PRICELIST'</object_type>
+        <object_id>TEMP.GeNsYm1227__mc</object_id>
+        <inherit_parent>0</inherit_parent>
+        <pin_to_proc>0</pin_to_proc>
+      </spawn>
+      <do>OBJECT(TEMP.GeNsYm1227__mc).object_type = 'PRICELIST'</do>
+      <object_ref_get>
+        <object_id>TEMP.GeNsYm1227__mc</object_id>
+        <target>TEMP.x</target>
+      </object_ref_get>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1227__mc).n_type eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1227__mc).n_type = 0</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1227__mc).nm_name eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1227__mc).nm_name = ('ICB rate for id_sub=' ~ OBJECT(OBJECT._mc_parent).id_sub)</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1227__mc).nm_desc eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1227__mc).nm_desc = ('ICB rate for id_sub=' ~ OBJECT(OBJECT._mc_parent).id_sub)</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1227__mc).id_pricelist eq ''</condition>
+        <then>
+          <call_proc_for_current_object>
+            <name>'sequence_get_next_id_base_props'</name>
+            <param name="value">TEMP.GeNsYm1228__MC_SEQUENCE</param>
+          </call_proc_for_current_object>
+          <do>OBJECT(TEMP.GeNsYm1227__mc).id_pricelist = TEMP.GeNsYm1228__MC_SEQUENCE</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT.id_pricelist eq ''</condition>
+        <then>
+          <do>OBJECT.id_pricelist = OBJECT(TEMP.GeNsYm1227__mc).id_pricelist</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1227__mc).nm_currency_code eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1227__mc).nm_currency_code = OBJECT.nm_currency_code</do>
+        </then>
+      </if>
+      <do>OBJECT(TEMP.GeNsYm1227__mc)._mc_file_id = OBJECT._mc_file_id</do>
+      <do>OBJECT(TEMP.GeNsYm1227__mc)._mc_line_no = OBJECT._mc_line_no</do>
+      <do>OBJECT(TEMP.GeNsYm1227__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+      <do>OBJECT(TEMP.GeNsYm1227__mc)._mc_record_length = OBJECT._mc_record_length</do>
+      <do>OBJECT(TEMP.GeNsYm1227__mc)._mc_record_type_id = 77</do>
+      <do>OBJECT(TEMP.GeNsYm1227__mc)._mc_parent = OBJECT.object_id</do>
+      <do>OBJECT(TEMP.GeNsYm1227__mc)._mc_level = OBJECT._mc_level + 1</do>
+      <do>OBJECT(TEMP.GeNsYm1227__mc)._mc_first_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm1227__mc)._mc_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm1227__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 'PRICELIST' ~ GLOBAL.spawn_child_no</do>
+      <do>GLOBAL.spawn_child_no += 1</do>
+      <do>OBJECT(TEMP.GeNsYm1227__mc)._mc_spawned = '1'</do>
+      <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm1227__mc)._mc_sort_key</print>-->
+      <sorted_object_file_write>
+        <file>TEMP.infile</file>
+        <object_id>TEMP.GeNsYm1227__mc</object_id>
+        <key_field>'_mc_sort_key'</key_field>
+      </sorted_object_file_write>
+      <object_ref_remove>
+        <object_id>TEMP.GeNsYm1227__mc</object_id>
+        <ref_count>TEMP.temp</ref_count>
+      </object_ref_remove>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.rate_schedule eq '1'</condition>
+    <then>
+      <spawn>
+        <internal_type>'format_array'</internal_type>
+        <feedback_name>'75'</feedback_name>
+        <object_type>'RATE_SCHEDULE'</object_type>
+        <object_id>TEMP.GeNsYm1229__mc</object_id>
+        <inherit_parent>0</inherit_parent>
+        <pin_to_proc>0</pin_to_proc>
+      </spawn>
+      <do>OBJECT(TEMP.GeNsYm1229__mc).object_type = 'RATE_SCHEDULE'</do>
+      <object_ref_get>
+        <object_id>TEMP.GeNsYm1229__mc</object_id>
+        <target>TEMP.x</target>
+      </object_ref_get>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1229__mc).id_pricelist eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1229__mc).id_pricelist = OBJECT.id_pricelist</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1229__mc).id_sched eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1229__mc).id_sched = OBJECT.id_sched</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1229__mc).id_pt eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1229__mc).id_pt = OBJECT.id_paramtable</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1229__mc).id_pi_template eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1229__mc).id_pi_template = OBJECT.id_pi_template</do>
+        </then>
+      </if>
+      <do>OBJECT(TEMP.GeNsYm1229__mc)._mc_file_id = OBJECT._mc_file_id</do>
+      <do>OBJECT(TEMP.GeNsYm1229__mc)._mc_line_no = OBJECT._mc_line_no</do>
+      <do>OBJECT(TEMP.GeNsYm1229__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+      <do>OBJECT(TEMP.GeNsYm1229__mc)._mc_record_length = OBJECT._mc_record_length</do>
+      <do>OBJECT(TEMP.GeNsYm1229__mc)._mc_record_type_id = 75</do>
+      <do>OBJECT(TEMP.GeNsYm1229__mc)._mc_parent = OBJECT.object_id</do>
+      <do>OBJECT(TEMP.GeNsYm1229__mc)._mc_level = OBJECT._mc_level + 1</do>
+      <do>OBJECT(TEMP.GeNsYm1229__mc)._mc_first_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm1229__mc)._mc_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm1229__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 'RATE_SCHEDULE' ~ GLOBAL.spawn_child_no</do>
+      <do>GLOBAL.spawn_child_no += 1</do>
+      <do>OBJECT(TEMP.GeNsYm1229__mc)._mc_spawned = '1'</do>
+      <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm1229__mc)._mc_sort_key</print>-->
+      <sorted_object_file_write>
+        <file>TEMP.infile</file>
+        <object_id>TEMP.GeNsYm1229__mc</object_id>
+        <key_field>'_mc_sort_key'</key_field>
+      </sorted_object_file_write>
+      <object_ref_remove>
+        <object_id>TEMP.GeNsYm1229__mc</object_id>
+        <ref_count>TEMP.temp</ref_count>
+      </object_ref_remove>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.rate_schedule eq '1'</condition>
+    <then>
+      <spawn>
+        <internal_type>'format_array'</internal_type>
+        <feedback_name>'73'</feedback_name>
+        <object_type>'PRICELIST_MAP'</object_type>
+        <object_id>TEMP.GeNsYm1230__mc</object_id>
+        <inherit_parent>0</inherit_parent>
+        <pin_to_proc>0</pin_to_proc>
+      </spawn>
+      <do>OBJECT(TEMP.GeNsYm1230__mc).object_type = 'PRICELIST_MAP'</do>
+      <object_ref_get>
+        <object_id>TEMP.GeNsYm1230__mc</object_id>
+        <target>TEMP.x</target>
+      </object_ref_get>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1230__mc).id_acc eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1230__mc).id_acc = OBJECT(OBJECT._mc_parent).id_acc</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1230__mc).id_sub eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1230__mc).id_sub = OBJECT(OBJECT._mc_parent).id_sub</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1230__mc).id_po eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1230__mc).id_po = OBJECT.id_po</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1230__mc).id_pricelist eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1230__mc).id_pricelist = OBJECT.id_pricelist</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1230__mc).id_paramtable eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1230__mc).id_paramtable = OBJECT.id_paramtable</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1230__mc).id_pi_template eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm1230__mc).id_pi_template = OBJECT.id_pi_template</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1230__mc).id_pi_type eq ''</condition>
+        <then>
+          <do>TEMP.GeNsYm1231__MC_MAPPING = ''</do>
+          <to_lower>
+            <input>'mc/id_pi_names'</input>
+            <output>TEMP.lowerarg1</output>
+          </to_lower>
+          <to_lower>
+            <input>OBJECT.id_pi_template</input>
+            <output>TEMP.lowerarg2</output>
+          </to_lower>
+          <index_select>
+            <index>'MC_MAPPINGS'</index>
+            <field name="namespace">TEMP.lowerarg1</field>
+            <field name="from">TEMP.lowerarg2</field>
+            <cursor>TEMP.ecsr</cursor>
+            <then>
+              <do>TEMP.GeNsYm1231__MC_MAPPING = OBJECT(TEMP.ecsr).to</do>
+            </then>
+            <else>
+              <do>OBJECT._mc_error ~= 'Failed lookup with [' ~ TEMP.lowerarg1 ~ ':' ~ TEMP.lowerarg2 ~ ']. '</do>
+            </else>
+          </index_select>
+          <do>OBJECT(TEMP.GeNsYm1230__mc).id_pi_type = TEMP.GeNsYm1231__MC_MAPPING</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm1230__mc).id_pi_instance eq ''</condition>
+        <then>
+          <do>TEMP.GeNsYm1232__MC_MAPPING = ''</do>
+          <to_lower>
+            <input>'mc/id_pi_instances'</input>
+            <output>TEMP.lowerarg1</output>
+          </to_lower>
+          <to_lower>
+            <input>((OBJECT.id_po ~ '||') ~ OBJECT.id_pi_template)</input>
+            <output>TEMP.lowerarg2</output>
+          </to_lower>
+          <index_select>
+            <index>'MC_MAPPINGS'</index>
+            <field name="namespace">TEMP.lowerarg1</field>
+            <field name="from">TEMP.lowerarg2</field>
+            <cursor>TEMP.ecsr</cursor>
+            <then>
+              <do>TEMP.GeNsYm1232__MC_MAPPING = OBJECT(TEMP.ecsr).to</do>
+            </then>
+            <else>
+              <do>OBJECT._mc_error ~= 'Failed lookup with [' ~ TEMP.lowerarg1 ~ ':' ~ TEMP.lowerarg2 ~ ']. '</do>
+            </else>
+          </index_select>
+          <do>OBJECT(TEMP.GeNsYm1230__mc).id_pi_instance = TEMP.GeNsYm1232__MC_MAPPING</do>
+        </then>
+      </if>
+      <do>OBJECT(TEMP.GeNsYm1230__mc)._mc_file_id = OBJECT._mc_file_id</do>
+      <do>OBJECT(TEMP.GeNsYm1230__mc)._mc_line_no = OBJECT._mc_line_no</do>
+      <do>OBJECT(TEMP.GeNsYm1230__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+      <do>OBJECT(TEMP.GeNsYm1230__mc)._mc_record_length = OBJECT._mc_record_length</do>
+      <do>OBJECT(TEMP.GeNsYm1230__mc)._mc_record_type_id = 73</do>
+      <do>OBJECT(TEMP.GeNsYm1230__mc)._mc_parent = OBJECT.object_id</do>
+      <do>OBJECT(TEMP.GeNsYm1230__mc)._mc_level = OBJECT._mc_level + 1</do>
+      <do>OBJECT(TEMP.GeNsYm1230__mc)._mc_first_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm1230__mc)._mc_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm1230__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 'PRICELIST_MAP' ~ GLOBAL.spawn_child_no</do>
+      <do>GLOBAL.spawn_child_no += 1</do>
+      <do>OBJECT(TEMP.GeNsYm1230__mc)._mc_spawned = '1'</do>
+      <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm1230__mc)._mc_sort_key</print>-->
+      <sorted_object_file_write>
+        <file>TEMP.infile</file>
+        <object_id>TEMP.GeNsYm1230__mc</object_id>
+        <key_field>'_mc_sort_key'</key_field>
+      </sorted_object_file_write>
+      <object_ref_remove>
+        <object_id>TEMP.GeNsYm1230__mc</object_id>
+        <ref_count>TEMP.temp</ref_count>
+      </object_ref_remove>
+    </then>
+  </if>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'147'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_PT_EVENTMINIMUMAMOUNTRATES'</object_type>
+    <object_id>TEMP.GeNsYm1233__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm1233__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm1233__mc).id_sched = OBJECT.id_sched</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc).n_order = OBJECT.n_order</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc).tt_start = OBJECT.tt_start</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc).tt_end = OBJECT.tt_end</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc).id_audit = OBJECT.id_audit</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc).c_currency = OBJECT.c_currency</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc).c_numberofattendees = OBJECT.c_numberofattendees</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc).c_expecteddurationofevent = OBJECT.c_expecteddurationofevent</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc).c_rate = OBJECT.c_rate</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc)._mc_record_type_id = 147</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_pt_eventminimumamountrates' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm1233__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm1233__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm1233__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm1233__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+</proc>

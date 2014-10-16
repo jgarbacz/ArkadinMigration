@@ -1,0 +1,12 @@
+<proc name="get_target_login_date">
+  <param name="target_login_date" mode="out"></param>
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query type="oracle">'select SYSDATE target_login_date from dual'</query>
+    <query type="sql">'select getdate() target_login_date'</query>
+    <cursor>TEMP.csr</cursor>
+    <then>
+	    <do>TEMP.target_login_date=OBJECT(TEMP.csr).target_login_date</do>
+	</then>
+  </db_select>
+</proc>

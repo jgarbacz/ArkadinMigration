@@ -1,0 +1,16 @@
+<proc name="sorting_RATE_SCHEDULE">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="phase" />
+  <param name="stage" />
+  <do>OBJECT._mc_parent_key = ''</do>
+  <do>OBJECT._mc_sort_key = '' ~ OBJECT.id_sched</do>
+  <do>OBJECT._mc_level = 1</do>
+  <do>OBJECT._mc_chunking_remove_from_end = </do>
+  <sorted_object_file_write>
+    <file>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ TEMP.phase ~ '.' ~ TEMP.stage ~ '.' ~ GLOBAL.sort_filename ~ GLOBAL.node_id</file>
+    <object_id>OBJECT.object_id</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+</proc>

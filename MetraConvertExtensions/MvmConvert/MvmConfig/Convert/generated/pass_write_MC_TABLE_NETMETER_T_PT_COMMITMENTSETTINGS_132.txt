@@ -1,0 +1,40 @@
+<proc name="pass_write_132">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'c_commitmentfrequency'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/billingcycle/usagecycletype'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_cancellationfeepolicy'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumproductcatalog/cancellationfeepolicy'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_pt_commitmentsettings.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_sched">OBJECT.id_sched</field>
+      <field name="n_order">OBJECT.n_order</field>
+      <field name="tt_start">OBJECT.tt_start</field>
+      <field name="tt_end">OBJECT.tt_end</field>
+      <field name="id_audit">OBJECT.id_audit</field>
+      <field name="c_commitmentstartdate">OBJECT.c_commitmentstartdate</field>
+      <field name="c_commitmentfrequency">OBJECT.c_commitmentfrequency</field>
+      <field name="c_commitmentamount">OBJECT.c_commitmentamount</field>
+      <field name="c_cancellationfeepolicy">OBJECT.c_cancellationfeepolicy</field>
+    </data>
+  </print_record>
+</proc>

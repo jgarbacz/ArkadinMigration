@@ -1,0 +1,513 @@
+<proc name="setup_mappings">
+
+  <!-- Call this proc just to have it set up the enum lookup tables -->
+  <call_proc_for_current_object>
+    <name>'convert_to_enum'</name>
+    <param name='value'>TEMP.garbage</param>
+    <param name='namespace'>''</param>
+    <param name='success'>TEMP.success</param>
+  </call_proc_for_current_object>
+
+  <!-- Add custom mapping for t_namespace -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>"select lower(nm_space) as lower_nm_space, nm_space from t_namespace"</query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'ENUMS_BY_NAME'</index>
+        <field name='namespace'>'mc/nm_space'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).lower_nm_space</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).nm_space</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_ID'</index>
+        <field name='namespace'>'mc/nm_space'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).lower_nm_space</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).nm_space</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_NAMESPACE'</index>
+        <field name='namespace'>'mc/nm_space'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).lower_nm_space</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).nm_space</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Add custom mapping for t_account_type -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>"select lower(name) as name, id_type from t_account_type"</query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'ENUMS_BY_NAME'</index>
+        <field name='namespace'>'mc/id_type'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_type</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_ID'</index>
+        <field name='namespace'>'mc/id_type'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_type</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_NAMESPACE'</index>
+        <field name='namespace'>'mc/id_type'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_type</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Add custom mapping for t_acctype_descendenttype_map (valid parents/children by account type) -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>"select id_type, id_descendent_type from t_acctype_descendenttype_map"</query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'MC_MAPPINGS'</index>
+        <field name='namespace'>'mc/id_type_children'</field>
+        <field name='from'>OBJECT(TEMP.csr).id_type</field>
+        <field name='to'>OBJECT(TEMP.csr).id_descendent_type</field>
+      </index_insert>
+      <index_insert>
+        <index>'MC_MAPPINGS'</index>
+        <field name='namespace'>'mc/id_type_parents'</field>
+        <field name='from'>OBJECT(TEMP.csr).id_descendent_type</field>
+        <field name='to'>OBJECT(TEMP.csr).id_type</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Add custom mapping for t_localized_site -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query type='oracle'>"select id_site, lower(nm_space) || '/' || lower(tx_lang_code) as text from t_localized_site"</query>
+    <query type='sql'>"select id_site, lower(nm_space) + '/' + lower(tx_lang_code) as text from t_localized_site"</query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'ENUMS_BY_NAME'</index>
+        <field name='namespace'>'mc/t_localized_site'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).text</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_site</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_ID'</index>
+        <field name='namespace'>'mc/t_localized_site'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).text</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_site</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_NAMESPACE'</index>
+        <field name='namespace'>'mc/t_localized_site'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).text</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_site</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Add custom mapping for billable account types -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>"select lower(name) as name, b_canbepayer from t_account_type"</query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'MC_MAPPINGS'</index>
+        <field name='namespace'>'mc/payer_account_types'</field>
+        <field name='from'>OBJECT(TEMP.csr).name</field>
+        <field name='to'>OBJECT(TEMP.csr).b_canbepayer</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Add custom mapping for account states -->
+  <index_insert>
+    <index>'ENUMS_BY_NAME'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'pa'</field>
+    <field name='id_enum_data'>'PA'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_ID'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'pa'</field>
+    <field name='id_enum_data'>'PA'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_NAMESPACE'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'pa'</field>
+    <field name='id_enum_data'>'PA'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_NAME'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'ac'</field>
+    <field name='id_enum_data'>'AC'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_ID'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'ac'</field>
+    <field name='id_enum_data'>'AC'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_NAMESPACE'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'ac'</field>
+    <field name='id_enum_data'>'AC'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_NAME'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'su'</field>
+    <field name='id_enum_data'>'SU'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_ID'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'su'</field>
+    <field name='id_enum_data'>'SU'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_NAMESPACE'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'su'</field>
+    <field name='id_enum_data'>'SU'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_NAME'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'pf'</field>
+    <field name='id_enum_data'>'PF'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_ID'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'pf'</field>
+    <field name='id_enum_data'>'PF'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_NAMESPACE'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'pf'</field>
+    <field name='id_enum_data'>'PF'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_NAME'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'cl'</field>
+    <field name='id_enum_data'>'CL'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_ID'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'cl'</field>
+    <field name='id_enum_data'>'CL'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_NAMESPACE'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'cl'</field>
+    <field name='id_enum_data'>'CL'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_NAME'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'ar'</field>
+    <field name='id_enum_data'>'AR'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_ID'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'ar'</field>
+    <field name='id_enum_data'>'AR'</field>
+  </index_insert>
+  <index_insert>
+    <index>'ENUMS_BY_NAMESPACE'</index>
+    <field name='namespace'>'mc/account_states'</field>
+    <field name='enum_value'>'ar'</field>
+    <field name='id_enum_data'>'AR'</field>
+  </index_insert>
+
+  <!-- Add custom mapping for usage cycles -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>"select id_usage_cycle, id_cycle_type, day_of_month, day_of_week, first_day_of_month, second_day_of_month, start_day, start_month, start_year from t_usage_cycle"</query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <join>
+        <delim>'|'</delim>
+        <input>OBJECT(TEMP.csr).day_of_month</input>
+        <input>OBJECT(TEMP.csr).day_of_week</input>
+        <input>OBJECT(TEMP.csr).first_day_of_month</input>
+        <input>OBJECT(TEMP.csr).second_day_of_month</input>
+        <input>OBJECT(TEMP.csr).start_day</input>
+        <input>OBJECT(TEMP.csr).start_month</input>
+        <input>OBJECT(TEMP.csr).start_year</input>
+        <output>TEMP.key</output>
+      </join>
+      <index_insert>
+        <index>'MC_MAPPINGS'</index>
+        <field name='namespace'>'mc/usage_cycles'</field>
+        <field name='from'>TEMP.key</field>
+        <field name='to'>OBJECT(TEMP.csr).id_usage_cycle</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Add custom mapping for product offering names -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>"select lower(nm_name) as nm_name, id_po from t_po po inner join t_base_props bp on po.id_po = bp.id_prop where n_kind = 100"</query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'ENUMS_BY_NAME'</index>
+        <field name='namespace'>'mc/id_po_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).nm_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_po</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_ID'</index>
+        <field name='namespace'>'mc/id_po_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).nm_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_po</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_NAMESPACE'</index>
+        <field name='namespace'>'mc/id_po_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).nm_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_po</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Add custom mapping for priceable item names -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>"select lower(nm_name) as nm_name, id_template, id_pi from t_pi_template pi inner join t_base_props bp on pi.id_template = bp.id_prop"</query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'MC_MAPPINGS'</index>
+        <field name='namespace'>'mc/id_pi_names'</field>
+        <field name='from'>OBJECT(TEMP.csr).nm_name</field>
+        <field name='to'>OBJECT(TEMP.csr).id_pi</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Add custom mappings for priceable item template names -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>
+      "select lower(bppi.nm_name) as pi_nm_name, lower(bptmp.nm_name) as tmp_nm_name, id_template
+      from t_pi_template pi
+      inner join t_base_props bppi on pi.id_pi = bppi.id_prop
+      inner join t_base_props bptmp on pi.id_template = bptmp.id_prop"
+    </query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'ENUMS_BY_NAME'</index>
+        <field name='namespace'>'mc/id_pi_template_map'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).tmp_nm_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).pi_nm_name</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_ID'</index>
+        <field name='namespace'>'mc/id_pi_template_map'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).tmp_nm_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).pi_nm_name</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_NAMESPACE'</index>
+        <field name='namespace'>'mc/id_pi_template_map'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).tmp_nm_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).pi_nm_name</field>
+      </index_insert>
+
+      <index_insert>
+        <index>'ENUMS_BY_NAME'</index>
+        <field name='namespace'>'mc/id_pi_template_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).tmp_nm_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_template</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_ID'</index>
+        <field name='namespace'>'mc/id_pi_template_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).tmp_nm_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_template</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_NAMESPACE'</index>
+        <field name='namespace'>'mc/id_pi_template_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).tmp_nm_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_template</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Add custom mapping for priceable item instances -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>
+      "select lower(bppo.nm_name) as po_nm_name, lower(bppi.nm_name) as pi_nm_name, id_pi_instance
+      from t_pl_map pl
+      inner join t_base_props bppo on pl.id_po = bppo.id_prop
+      inner join t_base_props bppi on pl.id_pi_template = bppi.id_prop
+      where pl.id_acc is null and pl.id_sub is null and pl.id_paramtable is null"
+    </query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'MC_MAPPINGS'</index>
+        <field name='namespace'>'mc/id_pi_instances'</field>
+        <field name='from'>OBJECT(TEMP.csr).po_nm_name ~ '||' ~ OBJECT(TEMP.csr).pi_nm_name</field>
+        <field name='to'>OBJECT(TEMP.csr).id_pi_instance</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Add custom mapping for parameter table names -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query type='sql'>
+      "select id_paramtable, case when lower(nm_instance_tablename) like 't_pt_%'
+      then substring(lower(nm_instance_tablename), 6, 9999) else lower(nm_instance_tablename) end as nm_name
+      from t_rulesetdefinition"
+    </query>
+    <query type='oracle'>
+      "select id_paramtable, case when lower(nm_instance_tablename) like 't_pt_%'
+      then substr(lower(nm_instance_tablename), 6, 9999) else lower(nm_instance_tablename) end as nm_name
+      from t_rulesetdefinition"
+    </query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'ENUMS_BY_NAME'</index>
+        <field name='namespace'>'mc/id_pt_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).nm_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_paramtable</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_ID'</index>
+        <field name='namespace'>'mc/id_pt_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).nm_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_paramtable</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_NAMESPACE'</index>
+        <field name='namespace'>'mc/id_pt_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).nm_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_paramtable</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Add custom mapping for role names (each one has an additional abbreviation as well) -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>
+      "select lower(tx_name) as tx_name, case
+      when lower(tx_name) = 'super user' then 'super'
+      when lower(tx_name) = 'product administrator (metraoffer)' then 'prod'
+      when lower(tx_name) = 'operations staff (metracontrol)' then 'ops'
+      when lower(tx_name) = 'subscriber (metraview)' then 'sub'
+      when lower(tx_name) = 'sales' then 'sales'
+      when lower(tx_name) = 'csr (metracare)' then 'csr'
+      when lower(tx_name) = 'junior adjustment manager' then 'jr'
+      when lower(tx_name) = 'senior adjustment manager' then 'sr'
+      else 'unknown' end as abbrev,
+      id_role from t_role"
+    </query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'ENUMS_BY_NAME'</index>
+        <field name='namespace'>'mc/id_role_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).tx_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_role</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_ID'</index>
+        <field name='namespace'>'mc/id_role_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).tx_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_role</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_NAMESPACE'</index>
+        <field name='namespace'>'mc/id_role_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).tx_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_role</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_NAME'</index>
+        <field name='namespace'>'mc/id_role_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).abbrev</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_role</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_ID'</index>
+        <field name='namespace'>'mc/id_role_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).abbrev</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_role</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_NAMESPACE'</index>
+        <field name='namespace'>'mc/id_role_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).abbrev</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_role</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Add custom mapping for capability names -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>"select lower(tx_name) as tx_name, id_cap_type from t_composite_capability_type"</query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'ENUMS_BY_NAME'</index>
+        <field name='namespace'>'mc/id_cap_type_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).tx_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_cap_type</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_ID'</index>
+        <field name='namespace'>'mc/id_cap_type_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).tx_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_cap_type</field>
+      </index_insert>
+      <index_insert>
+        <index>'ENUMS_BY_NAMESPACE'</index>
+        <field name='namespace'>'mc/id_cap_type_names'</field>
+        <field name='enum_value'>OBJECT(TEMP.csr).tx_name</field>
+        <field name='id_enum_data'>OBJECT(TEMP.csr).id_cap_type</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Default language code -->
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query>"select id_lang_code default_id_lang_code from t_language where n_order = (select min(n_order) from t_language)"</query>
+    <cursor>TEMP.csr</cursor>
+    <then>
+      <do>GLOBAL.default_id_lang_code = OBJECT(TEMP.csr).default_id_lang_code</do>
+      <print>'Default_id_lang_code=' ~ GLOBAL.default_id_lang_code</print>
+    </then>
+    <else>
+      <fatal>'Cannot get the default id_lang_code'</fatal>
+    </else>
+  </db_select>
+
+</proc>

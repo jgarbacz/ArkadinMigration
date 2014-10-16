@@ -1,0 +1,50 @@
+<procs>
+  <proc name="print_input_file">
+    <param name="file"/>
+    <param name="num_lines"/>
+
+    <do>GLOBAL.allow_invalid_records = 1</do>
+
+    <!-- Display this file in an easily readable way -->
+    <if>
+      <condition>TEMP.num_lines eq ''</condition>
+      <then>
+        <do>TEMP.num_lines = 9999999</do>
+      </then>
+    </if>
+    <do>TEMP.record_type = ''</do>
+    <index_get>
+      <index>'MC_DATAFILES_BY_NAME'</index>
+      <field name='filename'>GLOBAL.input_directory ~ GLOBAL.path_separator ~ TEMP.file</field>
+      <field name='record_type'>TEMP.record_type</field>
+      <else>
+        <fatal>'Error: unknown datafile ' ~ TEMP.file</fatal>
+      </else>
+    </index_get>
+    <do>TEMP.lineno = 0</do>
+    <proc_select>
+      <name>'read_file_return_all_' ~ TEMP.record_type</name>
+      <param name="filename">GLOBAL.input_directory ~ GLOBAL.path_separator ~ TEMP.file</param>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <do>TEMP.lineno += 1</do>
+        <if>
+          <condition>TEMP.lineno GT TEMP.num_lines</condition>
+          <then>
+            <return/>
+          </then>
+        </if>
+        <object_field_value_select>
+          <object_id>TEMP.csr</object_id>
+          <cursor_field>'field'</cursor_field>
+          <cursor_value>'value'</cursor_value>
+          <where>regex_match('^_mc_', OBJECT.field) eq '1'</where>
+          <cursor>TEMP.fcsr</cursor>
+          <loop>
+          </loop>
+        </object_field_value_select>
+        <print>'Input object from row ' ~ TEMP.lineno ~ ': ' ~ dump_object(TEMP.csr)</print>
+      </loop>
+    </proc_select>
+  </proc>
+</procs>

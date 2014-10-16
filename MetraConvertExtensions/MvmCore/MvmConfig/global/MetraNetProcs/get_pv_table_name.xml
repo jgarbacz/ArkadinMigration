@@ -1,0 +1,39 @@
+<proc name='get_pv_table_name'>
+  <param name='id_view'/>
+  <param name='table_name' mode='out'/>
+
+  <run_once>
+    <db_select_dynamic>
+      <login_object>GLOBAL.target_login</login_object>
+      <query>
+        "select id_view, nm_table_name table_name from t_prod_view"
+      </query>
+      <cursor>TEMP.csr</cursor>
+      <run>
+        <create_memory_index_from_cursor>
+          <index>'ID_VIEW_PV_TABLE_MAP'</index>
+          <cursor>TEMP.csr</cursor>
+          <key_field>'id_view'</key_field>
+        </create_memory_index_from_cursor>
+      </run>
+    </db_select_dynamic>
+  </run_once>
+  
+  <if>
+    <condition>TEMP.id_view ne ''</condition>
+    <then>
+      <index_select>
+        <index>'ID_VIEW_PV_TABLE_MAP'</index>
+        <field name='id_view'>TEMP.id_view</field>
+        <cursor>TEMP.csr</cursor>
+        <then>
+          <do>TEMP.table_name=OBJECT(TEMP.csr).table_name</do>
+        </then>
+        <else>
+          <warning>'get_pv_table_name cannot find pv for id_view='~TEMP.id_view</warning>
+        </else>
+      </index_select>
+    </then>
+  </if>
+  
+</proc>

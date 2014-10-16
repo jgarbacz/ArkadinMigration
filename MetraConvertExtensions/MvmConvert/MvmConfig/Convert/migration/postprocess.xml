@@ -1,0 +1,9 @@
+<proc name="postprocess">
+
+<!-- FIXME: from lifelock migration:
+UPDATE t_payment_instrument SET nm_address2 = '' WHERE nm_address2 IS NULL
+UPDATE t_ps_payment_instrument SET nm_address2  = '' WHERE nm_address2 IS NULL
+UPDATE t_ps_credit_card SET nm_startdate = '', nm_issuernumber = '' WHERE nm_issuernumber IS NULL and nm_startdate IS NULL
+-->
+
+</proc>

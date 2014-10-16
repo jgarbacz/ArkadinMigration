@@ -1,0 +1,49 @@
+<proc name="pass_write_126">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'c_subsidiaryname'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumglobal/subsidiaryname'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_currency'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'global/systemcurrencies/systemcurrencies'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_servicetype'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumrating/servicetype'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_pt_bridgingrates.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_sched">OBJECT.id_sched</field>
+      <field name="n_order">OBJECT.n_order</field>
+      <field name="tt_start">OBJECT.tt_start</field>
+      <field name="tt_end">OBJECT.tt_end</field>
+      <field name="id_audit">OBJECT.id_audit</field>
+      <field name="c_subsidiaryname">OBJECT.c_subsidiaryname</field>
+      <field name="c_currency">OBJECT.c_currency</field>
+      <field name="c_servicetype">OBJECT.c_servicetype</field>
+      <field name="c_retailbridgingrateperminute">OBJECT.c_retailbridgingrateperminute</field>
+      <field name="c_partnerbridgingrateperminute">OBJECT.c_partnerbridgingrateperminute</field>
+    </data>
+  </print_record>
+</proc>

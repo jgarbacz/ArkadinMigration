@@ -1,0 +1,134 @@
+<proc name="pass_write_22">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'c_subbillingb'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumglobal/subsidiaryname'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_submanagementb'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumglobal/subsidiaryname'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_subrevenueb'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumglobal/subsidiaryname'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_navisioninstance'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumglobal/navisioninstance'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_paymenttermcode'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumbilling/paymentterm'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_invoicedeliverymethod'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumbilling/invoicedeliverymethod'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_invoiceoutputformat'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumbilling/invoiceoutputformat'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_invoicelanguage'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'global/languagecode'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_legalentityinheritance'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumaccount/legalentityinheritance'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_cudtemplate'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumbilling/cudtemplate'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_eudtemplate'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumbilling/eudtemplate'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_printhouse'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumglobal/printhouse'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_av_billing.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_acc">OBJECT.id_acc</field>
+      <field name="c_registrationnumber">OBJECT.c_registrationnumber</field>
+      <field name="c_salesforceidb">OBJECT.c_salesforceidb</field>
+      <field name="c_subbillingb">OBJECT.c_subbillingb</field>
+      <field name="c_submanagementb">OBJECT.c_submanagementb</field>
+      <field name="c_subrevenueb">OBJECT.c_subrevenueb</field>
+      <field name="c_navisioninstance">OBJECT.c_navisioninstance</field>
+      <field name="c_paymenttermcode">OBJECT.c_paymenttermcode</field>
+      <field name="c_invoicedeliverymethod">OBJECT.c_invoicedeliverymethod</field>
+      <field name="c_invoiceoutputformat">OBJECT.c_invoiceoutputformat</field>
+      <field name="c_invoicelanguage">OBJECT.c_invoicelanguage</field>
+      <field name="c_masterlegalentity">OBJECT.c_masterlegalentity</field>
+      <field name="c_legalentityinheritance">OBJECT.c_legalentityinheritance</field>
+      <field name="c_centralbillingflagba">OBJECT.c_centralbillingflagba</field>
+      <field name="c_cudtemplate">OBJECT.c_cudtemplate</field>
+      <field name="c_eudtemplate">OBJECT.c_eudtemplate</field>
+      <field name="c_iscoverpagerequired">OBJECT.c_iscoverpagerequired</field>
+      <field name="c_purchaseorderreference">OBJECT.c_purchaseorderreference</field>
+      <field name="c_ispurchaseordermandatory">OBJECT.c_ispurchaseordermandatory</field>
+      <field name="c_purchaseorderexpirydate">OBJECT.c_purchaseorderexpirydate</field>
+      <field name="c_arkadinbankaccountdetailsid">OBJECT.c_arkadinbankaccountdetailsid</field>
+      <field name="c_printhouse">OBJECT.c_printhouse</field>
+      <field name="c_invoiceminimumamount">OBJECT.c_invoiceminimumamount</field>
+    </data>
+  </print_record>
+</proc>

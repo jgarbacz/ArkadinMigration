@@ -1,0 +1,17 @@
+<proc name="set_global_mtmaxdate_mtmindate">
+  <if>
+    <condition>GLOBAL.mtmaxdate eq '' or GLOBAL.mtmaxdate eq ''</condition>
+    <then>
+      <db_select_dynamic>
+        <login_object>GLOBAL.target_login</login_object>
+        <query type="oracle">"select mtmindate() min_date, mtmaxdate() max_date from dual"</query>
+        <query type="sql">"select dbo.MTMinDate() min_date, dbo.MTMaxDate() max_date"</query>
+        <cursor>TEMP.c</cursor>
+        <then>
+          <do>GLOBAL.mtmaxdate = OBJECT(TEMP.c).max_date</do>
+          <do>GLOBAL.mtmindate = OBJECT(TEMP.c).min_date</do>
+        </then>
+      </db_select_dynamic>
+    </then>
+  </if>
+</proc>

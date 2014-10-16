@@ -1,0 +1,34 @@
+<proc name="sequence_get_next_id_cap_instance">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="value" mode="out" />
+  <if>
+    <condition>GLOBAL.sequence_current_id_cap_instance eq '' or GLOBAL.sequence_current_id_cap_instance GTE GLOBAL.sequence_max_id_cap_instance</condition>
+    <then>
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query type="sql">"begin transaction
+          declare @currval integer, @junk integer
+          select @junk = 1 from t_capability_instance with (HOLDLOCK, TABLOCKX) where 0=1;
+          select top 1 @currval = ident_current('t_capability_instance') + 1000;
+          dbcc checkident('t_capability_instance', reseed, @currval);
+          select @currval + 1 - 1000 as id_current, @currval as id_max;
+          commit transaction"</query>
+        <timeout>'0'</timeout>
+        <num_retries>10</num_retries>
+        <retry_sleep>1000</retry_sleep>
+        <cursor>TEMP.csr</cursor>
+        <then>
+          <do>GLOBAL.sequence_current_id_cap_instance = OBJECT(TEMP.csr).id_current</do>
+          <do>GLOBAL.sequence_max_id_cap_instance = OBJECT(TEMP.csr).id_max</do>
+        </then>
+        <else>
+          <fatal>'Error: cannot query the next sequence value for id_cap_instance'</fatal>
+        </else>
+      </db_select>
+    </then>
+  </if>
+  <do>TEMP.value = GLOBAL.sequence_current_id_cap_instance</do>
+  <do>GLOBAL.sequence_current_id_cap_instance += 1</do>
+</proc>

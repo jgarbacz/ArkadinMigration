@@ -1,0 +1,76 @@
+<proc name="databases">
+
+  <c>
+    Priority is set to 1 million. If you wants to use different databases then
+    the ones configured here and you do not want to change this file. Add another
+    initialize blocks with a higher priority then this one.
+  </c>
+  <initialize namespace="global" priority="1000000">
+    <print>'init databases'</print>
+
+    <c>if already setup then just return </c>
+    <if>
+      <condition>GLOBAL.target_login ne ''</condition>
+      <then>
+        <print>'using preset target_login: server='~OBJECT(GLOBAL.target_login).database_server~', name='~OBJECT(GLOBAL.target_login).database_name~',type='~ OBJECT(GLOBAL.target_login).database_type</print>
+      </then>
+      <else>
+        
+        <spawn>
+          <object_type>'LOGIN'</object_type>
+          <object_id>GLOBAL.target_login</object_id>
+        </spawn>
+        <index_insert>
+          <index>'GLOBAL_OBJECTS'</index>
+          <field name="object_id">GLOBAL.target_login</field>
+        </index_insert>
+        
+        <get_mt_db_info>
+          <server_type>'Netmeter'</server_type>
+          <database_type>OBJECT(GLOBAL.target_login).database_type</database_type>
+          <database_server>OBJECT(GLOBAL.target_login).database_server</database_server>
+          <database_name>OBJECT(GLOBAL.target_login).database_name</database_name>
+          <database_user>OBJECT(GLOBAL.target_login).database_user</database_user>
+          <database_password>OBJECT(GLOBAL.target_login).database_password</database_password>
+        </get_mt_db_info>
+        
+        <print>'using local target_login: server='~OBJECT(GLOBAL.target_login).database_server~', name='~OBJECT(GLOBAL.target_login).database_name~',user='~ OBJECT(GLOBAL.target_login).database_user~',type='~ OBJECT(GLOBAL.target_login).database_type</print>
+
+      </else>
+    </if>
+
+    <do>GLOBAL.global_date_format = OBJECT(GLOBAL.target_login).database_type Eq 'sql' ? 'YYYY-MM-DD HH24:MI:SS' : 'YYYYMMDDHH24MISS'</do>
+    <print>'got global_date_format='~GLOBAL.global_date_format</print>
+
+    <if>
+      <condition>GLOBAL.application_name eq ''</condition>
+      <then>
+        <do>GLOBAL.application_name = 'AMP'</do>
+      </then>
+    </if>
+    
+    <if>
+      <condition>GLOBAL.mvm_run_id eq ''</condition>
+      <then>
+        <call_proc_for_current_object>
+          <name>'get_mvm_run_id'</name>
+          <param name="mvm_run_id">GLOBAL.mvm_run_id</param>
+          <param name="app_name">GLOBAL.application_name</param>
+        </call_proc_for_current_object>
+      </then>
+    </if>
+    <print>'got mvm_run_id='~GLOBAL.mvm_run_id</print>
+
+    <if>
+      <condition>GLOBAL.mvm_startup_date eq ''</condition>
+      <then>
+        <call_proc_for_current_object>
+          <name>'get_target_login_date'</name>
+          <param name="target_login_date">GLOBAL.mvm_startup_date</param>
+        </call_proc_for_current_object>
+      </then>
+    </if>
+    <print>'got mvm_startup_date='~GLOBAL.mvm_startup_date</print>
+  </initialize>
+
+</proc>

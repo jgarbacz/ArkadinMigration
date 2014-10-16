@@ -1,0 +1,40 @@
+<proc name="pass_write_99">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'c_subsidiary'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumglobal/subsidiaryname'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_currency'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'global/systemcurrencies/systemcurrencies'</namespace>
+    <nullable>'1'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_pt_nonrecurringcharge.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_sched">OBJECT.id_sched</field>
+      <field name="n_order">OBJECT.n_order</field>
+      <field name="tt_start">OBJECT.tt_start</field>
+      <field name="tt_end">OBJECT.tt_end</field>
+      <field name="id_audit">OBJECT.id_audit</field>
+      <field name="c_nrcamount">OBJECT.c_nrcamount</field>
+      <field name="c_subsidiary">OBJECT.c_subsidiary</field>
+      <field name="c_currency">OBJECT.c_currency</field>
+      <field name="c_ratingkey">OBJECT.c_ratingkey</field>
+    </data>
+  </print_record>
+</proc>

@@ -1,0 +1,351 @@
+<proc name="pass_1_81">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <if>
+    <condition>OBJECT.n_name eq ''</condition>
+    <then>
+      <do>OBJECT.n_name = 0</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.n_desc eq ''</condition>
+    <then>
+      <do>OBJECT.n_desc = 0</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.n_display_name eq ''</condition>
+    <then>
+      <do>OBJECT.n_display_name = 0</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.b_approved eq ''</condition>
+    <then>
+      <do>OBJECT.b_approved = 'N'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'b_approved'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'char'</datatype>
+        <length>'1'</length>
+        <nullable>'1'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.b_archive eq ''</condition>
+    <then>
+      <do>OBJECT.b_archive = 'N'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'b_archive'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'char'</datatype>
+        <length>'1'</length>
+        <nullable>'1'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT._mc_error ne ''</condition>
+    <then>
+      <return />
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.nm_name ne ''</condition>
+    <then>
+      <spawn>
+        <internal_type>'format_array'</internal_type>
+        <feedback_name>'83'</feedback_name>
+        <object_type>'DESCRIPTION'</object_type>
+        <object_id>TEMP.GeNsYm750__mc</object_id>
+        <inherit_parent>0</inherit_parent>
+        <pin_to_proc>0</pin_to_proc>
+      </spawn>
+      <do>OBJECT(TEMP.GeNsYm750__mc).object_type = 'DESCRIPTION'</do>
+      <object_ref_get>
+        <object_id>TEMP.GeNsYm750__mc</object_id>
+        <target>TEMP.x</target>
+      </object_ref_get>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm750__mc).tx_desc eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm750__mc).tx_desc = OBJECT.nm_name</do>
+          <validate_field>
+            <field>'tx_desc'</field>
+            <object_id>TEMP.GeNsYm750__mc</object_id>
+            <datatype>'nvarchar'</datatype>
+            <length>'4000'</length>
+            <nullable>'1'</nullable>
+            <default>
+            </default>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </then>
+        <else>
+          <validate_field>
+            <field>'tx_desc'</field>
+            <object_id>TEMP.GeNsYm750__mc</object_id>
+            <datatype>'nvarchar'</datatype>
+            <length>'4000'</length>
+            <nullable>'1'</nullable>
+            <default>
+            </default>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </else>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm750__mc).id_mt eq ''</condition>
+        <then>
+          <call_proc_for_current_object>
+            <name>'sequence_get_next_id_mt'</name>
+            <param name="value">TEMP.GeNsYm751__MC_SEQUENCE</param>
+          </call_proc_for_current_object>
+          <do>OBJECT(TEMP.GeNsYm750__mc).id_mt = TEMP.GeNsYm751__MC_SEQUENCE</do>
+        </then>
+        <else>
+          <validate_field>
+            <field>'id_mt'</field>
+            <object_id>TEMP.GeNsYm750__mc</object_id>
+            <datatype>'int'</datatype>
+            <length>'10'</length>
+            <scale>'0'</scale>
+            <nullable>'1'</nullable>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </else>
+      </if>
+      <if>
+        <condition>OBJECT.n_name eq ''</condition>
+        <then>
+          <do>OBJECT.n_name = OBJECT(TEMP.GeNsYm750__mc).id_mt</do>
+        </then>
+      </if>
+      <do>OBJECT(TEMP.GeNsYm750__mc)._mc_file_id = OBJECT._mc_file_id</do>
+      <do>OBJECT(TEMP.GeNsYm750__mc)._mc_line_no = OBJECT._mc_line_no</do>
+      <do>OBJECT(TEMP.GeNsYm750__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+      <do>OBJECT(TEMP.GeNsYm750__mc)._mc_record_length = OBJECT._mc_record_length</do>
+      <do>OBJECT(TEMP.GeNsYm750__mc)._mc_record_type_id = 83</do>
+      <do>OBJECT(TEMP.GeNsYm750__mc)._mc_parent = OBJECT.object_id</do>
+      <do>OBJECT(TEMP.GeNsYm750__mc)._mc_level = OBJECT._mc_level + 1</do>
+      <do>OBJECT(TEMP.GeNsYm750__mc)._mc_first_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm750__mc)._mc_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm750__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 'DESCRIPTION' ~ GLOBAL.spawn_child_no</do>
+      <do>GLOBAL.spawn_child_no += 1</do>
+      <do>OBJECT(TEMP.GeNsYm750__mc)._mc_spawned = '1'</do>
+      <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm750__mc)._mc_sort_key</print>-->
+      <sorted_object_file_write>
+        <file>TEMP.infile</file>
+        <object_id>TEMP.GeNsYm750__mc</object_id>
+        <key_field>'_mc_sort_key'</key_field>
+      </sorted_object_file_write>
+      <object_ref_remove>
+        <object_id>TEMP.GeNsYm750__mc</object_id>
+        <ref_count>TEMP.temp</ref_count>
+      </object_ref_remove>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.nm_desc ne ''</condition>
+    <then>
+      <spawn>
+        <internal_type>'format_array'</internal_type>
+        <feedback_name>'83'</feedback_name>
+        <object_type>'DESCRIPTION'</object_type>
+        <object_id>TEMP.GeNsYm752__mc</object_id>
+        <inherit_parent>0</inherit_parent>
+        <pin_to_proc>0</pin_to_proc>
+      </spawn>
+      <do>OBJECT(TEMP.GeNsYm752__mc).object_type = 'DESCRIPTION'</do>
+      <object_ref_get>
+        <object_id>TEMP.GeNsYm752__mc</object_id>
+        <target>TEMP.x</target>
+      </object_ref_get>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm752__mc).tx_desc eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm752__mc).tx_desc = OBJECT.nm_desc</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm752__mc).id_mt eq ''</condition>
+        <then>
+          <call_proc_for_current_object>
+            <name>'sequence_get_next_id_mt'</name>
+            <param name="value">TEMP.GeNsYm753__MC_SEQUENCE</param>
+          </call_proc_for_current_object>
+          <do>OBJECT(TEMP.GeNsYm752__mc).id_mt = TEMP.GeNsYm753__MC_SEQUENCE</do>
+        </then>
+        <else>
+          <validate_field>
+            <field>'id_mt'</field>
+            <object_id>TEMP.GeNsYm752__mc</object_id>
+            <datatype>'int'</datatype>
+            <length>'10'</length>
+            <scale>'0'</scale>
+            <nullable>'1'</nullable>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </else>
+      </if>
+      <if>
+        <condition>OBJECT.n_desc eq ''</condition>
+        <then>
+          <do>OBJECT.n_desc = OBJECT(TEMP.GeNsYm752__mc).id_mt</do>
+        </then>
+      </if>
+      <do>OBJECT(TEMP.GeNsYm752__mc)._mc_file_id = OBJECT._mc_file_id</do>
+      <do>OBJECT(TEMP.GeNsYm752__mc)._mc_line_no = OBJECT._mc_line_no</do>
+      <do>OBJECT(TEMP.GeNsYm752__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+      <do>OBJECT(TEMP.GeNsYm752__mc)._mc_record_length = OBJECT._mc_record_length</do>
+      <do>OBJECT(TEMP.GeNsYm752__mc)._mc_record_type_id = 83</do>
+      <do>OBJECT(TEMP.GeNsYm752__mc)._mc_parent = OBJECT.object_id</do>
+      <do>OBJECT(TEMP.GeNsYm752__mc)._mc_level = OBJECT._mc_level + 1</do>
+      <do>OBJECT(TEMP.GeNsYm752__mc)._mc_first_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm752__mc)._mc_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm752__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 'DESCRIPTION' ~ GLOBAL.spawn_child_no</do>
+      <do>GLOBAL.spawn_child_no += 1</do>
+      <do>OBJECT(TEMP.GeNsYm752__mc)._mc_spawned = '1'</do>
+      <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm752__mc)._mc_sort_key</print>-->
+      <sorted_object_file_write>
+        <file>TEMP.infile</file>
+        <object_id>TEMP.GeNsYm752__mc</object_id>
+        <key_field>'_mc_sort_key'</key_field>
+      </sorted_object_file_write>
+      <object_ref_remove>
+        <object_id>TEMP.GeNsYm752__mc</object_id>
+        <ref_count>TEMP.temp</ref_count>
+      </object_ref_remove>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.nm_display_name ne ''</condition>
+    <then>
+      <spawn>
+        <internal_type>'format_array'</internal_type>
+        <feedback_name>'83'</feedback_name>
+        <object_type>'DESCRIPTION'</object_type>
+        <object_id>TEMP.GeNsYm754__mc</object_id>
+        <inherit_parent>0</inherit_parent>
+        <pin_to_proc>0</pin_to_proc>
+      </spawn>
+      <do>OBJECT(TEMP.GeNsYm754__mc).object_type = 'DESCRIPTION'</do>
+      <object_ref_get>
+        <object_id>TEMP.GeNsYm754__mc</object_id>
+        <target>TEMP.x</target>
+      </object_ref_get>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm754__mc).tx_desc eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm754__mc).tx_desc = OBJECT.nm_display_name</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm754__mc).id_mt eq ''</condition>
+        <then>
+          <call_proc_for_current_object>
+            <name>'sequence_get_next_id_mt'</name>
+            <param name="value">TEMP.GeNsYm755__MC_SEQUENCE</param>
+          </call_proc_for_current_object>
+          <do>OBJECT(TEMP.GeNsYm754__mc).id_mt = TEMP.GeNsYm755__MC_SEQUENCE</do>
+        </then>
+        <else>
+          <validate_field>
+            <field>'id_mt'</field>
+            <object_id>TEMP.GeNsYm754__mc</object_id>
+            <datatype>'int'</datatype>
+            <length>'10'</length>
+            <scale>'0'</scale>
+            <nullable>'1'</nullable>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </else>
+      </if>
+      <if>
+        <condition>OBJECT.n_display_name eq ''</condition>
+        <then>
+          <do>OBJECT.n_display_name = OBJECT(TEMP.GeNsYm754__mc).id_mt</do>
+        </then>
+      </if>
+      <do>OBJECT(TEMP.GeNsYm754__mc)._mc_file_id = OBJECT._mc_file_id</do>
+      <do>OBJECT(TEMP.GeNsYm754__mc)._mc_line_no = OBJECT._mc_line_no</do>
+      <do>OBJECT(TEMP.GeNsYm754__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+      <do>OBJECT(TEMP.GeNsYm754__mc)._mc_record_length = OBJECT._mc_record_length</do>
+      <do>OBJECT(TEMP.GeNsYm754__mc)._mc_record_type_id = 83</do>
+      <do>OBJECT(TEMP.GeNsYm754__mc)._mc_parent = OBJECT.object_id</do>
+      <do>OBJECT(TEMP.GeNsYm754__mc)._mc_level = OBJECT._mc_level + 1</do>
+      <do>OBJECT(TEMP.GeNsYm754__mc)._mc_first_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm754__mc)._mc_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm754__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 'DESCRIPTION' ~ GLOBAL.spawn_child_no</do>
+      <do>GLOBAL.spawn_child_no += 1</do>
+      <do>OBJECT(TEMP.GeNsYm754__mc)._mc_spawned = '1'</do>
+      <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm754__mc)._mc_sort_key</print>-->
+      <sorted_object_file_write>
+        <file>TEMP.infile</file>
+        <object_id>TEMP.GeNsYm754__mc</object_id>
+        <key_field>'_mc_sort_key'</key_field>
+      </sorted_object_file_write>
+      <object_ref_remove>
+        <object_id>TEMP.GeNsYm754__mc</object_id>
+        <ref_count>TEMP.temp</ref_count>
+      </object_ref_remove>
+    </then>
+  </if>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'82'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_BASE_PROPS'</object_type>
+    <object_id>TEMP.GeNsYm756__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm756__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm756__mc).id_prop = OBJECT.id_prop</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc).n_kind = OBJECT.n_kind</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc).n_name = OBJECT.n_name</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc).n_desc = OBJECT.n_desc</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc).nm_name = OBJECT.nm_name</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc).nm_desc = OBJECT.nm_desc</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc).b_approved = OBJECT.b_approved</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc).b_archive = OBJECT.b_archive</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc).n_display_name = OBJECT.n_display_name</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc).nm_display_name = OBJECT.nm_display_name</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc)._mc_record_type_id = 82</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_base_props' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm756__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm756__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm756__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm756__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+</proc>

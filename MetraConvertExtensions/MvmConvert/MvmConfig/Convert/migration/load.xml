@@ -1,0 +1,695 @@
+<procs>
+
+<!-- This proc loads MN table data files into the db -->
+<proc name="load">
+  <do>GLOBAL.mode = 'load'</do>
+
+  <c>Initial setup</c>
+  <call_proc_for_current_object>
+    <name>'setup_all'</name>
+  </call_proc_for_current_object>
+
+  <c>Run the load</c>
+  <call_proc_for_current_object>
+    <name>'load_files'</name>
+  </call_proc_for_current_object>
+
+  <c>Post-processing: update sequences, etc</c>
+  <call_proc_for_current_object>
+    <name>'postprocess'</name>
+  </call_proc_for_current_object>
+
+  <c>Cleanup</c>
+  <call_proc_for_current_object>
+    <name>'shutdown'</name>
+  </call_proc_for_current_object>
+
+</proc>
+
+<proc name="setup_load">
+  <if>
+    <condition>GLOBAL.bcp_batchsize eq ''</condition>
+    <then>
+      <do>GLOBAL.bcp_batchsize = 500</do>
+    </then>
+  </if>
+
+  <define_memory_index>
+    <index>'MC_LOAD_COMMANDS'</index>
+    <use_nested_keys>'1'</use_nested_keys>
+    <key_field>'group'</key_field>
+    <key_field>'datafile'</key_field>
+    <field>'table'</field>
+    <field>'database'</field>
+    <field>'command'</field>
+    <field>'dbms'</field>
+    <field>'outputfile'</field>
+    <field>'logfile'</field>
+    <field>'errorfile'</field>
+    <field>'status'</field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_LOAD_REPORT'</index>
+    <use_nested_keys>'1'</use_nested_keys>
+    <key_field>'database'</key_field>
+    <key_field>'table'</key_field>
+    <field>'file'</field>
+    <field>'errored'</field>
+    <field>'status'</field>
+    <field>'rows'</field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_TABLE_LOCKS'</index>
+    <unique>'1'</unique>
+    <key_field>'database'</key_field>
+    <key_field>'table'</key_field>
+    <field>'locked'</field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_TABLES'</index>
+    <unique>'1'</unique>
+    <key_field>'table'</key_field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_TABLE_DEPENDENCIES_BEFORE'</index>
+    <use_nested_keys>'1'</use_nested_keys>
+    <unique>'1'</unique>
+    <key_field>'before_table'</key_field>
+    <key_field>'after_table'</key_field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_TABLE_DEPENDENCIES_AFTER'</index>
+    <key_field>'after_table'</key_field>
+    <field>'before_table'</field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_TABLE_DEPENDENCIES_DELETION'</index>
+    <use_nested_keys>'1'</use_nested_keys>
+    <key_field>'before_table'</key_field>
+    <field>'after_table'</field>
+  </define_memory_index>
+
+  <define_memory_index>
+    <index>'MC_TABLE_GROUP'</index>
+    <key_field>'table'</key_field>
+    <field>'group'</field>
+  </define_memory_index>
+
+  <do>GLOBAL.load_group_min = 1</do>
+  <do>GLOBAL.current_group = GLOBAL.load_group_min</do>
+  <do>GLOBAL.load_group_max = GLOBAL.current_group</do>
+
+  <!-- TODO: eventually support other logical databases -->
+  <do>TEMP.logical_db = OBJECT(GLOBAL.target_login).database_logical_name</do>
+  <do>TEMP.serv = OBJECT(GLOBAL.target_login).database_server</do>
+  <do>TEMP.db = OBJECT(GLOBAL.target_login).database_name</do>
+  <do>TEMP.user = OBJECT(GLOBAL.target_login).database_user</do>
+  <do>TEMP.pass = OBJECT(GLOBAL.target_login).database_password</do>
+  <do>TEMP.dbms = OBJECT(GLOBAL.target_login).database_type</do>
+  <do>TEMP.direct = 'FALSE'</do>
+  <if>
+    <condition>GLOBAL.direct_load eq '1'</condition>
+    <then>
+      <do>TEMP.direct = 'TRUE'</do>
+    </then>
+  </if>
+
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query type='sql'>
+      "select lower(table_name) as tbl from INFORMATION_SCHEMA.TABLES
+      where table_type = 'BASE TABLE' and table_catalog = $${TEMP.db}"
+    </query>
+    <query type='oracle'>"select lower(table_name) as tbl from USER_TABLES"</query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'MC_TABLES'</index>
+        <field name='table'>OBJECT(TEMP.csr).tbl</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query type='sql'>
+      "select lower(c2.table_name) as before_table, lower(t.table_name) as after_table
+      from INFORMATION_SCHEMA.TABLES t
+      inner join INFORMATION_SCHEMA.TABLE_CONSTRAINTS c on t.table_name = c.table_name and c.constraint_type = 'FOREIGN KEY'
+      inner join INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS r on c.constraint_name = r.constraint_name
+      inner join INFORMATION_SCHEMA.TABLE_CONSTRAINTS c2 on r.unique_constraint_name = c2.constraint_name
+      where t.table_type = 'BASE TABLE' and c2.table_name != t.table_name and t.table_catalog = $${TEMP.db}"
+    </query>
+    <query type='oracle'>
+      "select lower(c2.table_name) as before_table, lower(c.table_name) as after_table
+      from USER_CONSTRAINTS c
+      inner join USER_CONSTRAINTS c2 on c.r_constraint_name = c2.constraint_name
+      where c.constraint_type = 'R' and c.status = 'ENABLED' and c2.table_name != c.table_name"
+    </query>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_insert>
+        <index>'MC_TABLE_DEPENDENCIES_BEFORE'</index>
+        <field name='after_table'>OBJECT(TEMP.csr).after_table</field>
+        <field name='before_table'>OBJECT(TEMP.csr).before_table</field>
+      </index_insert>
+      <index_insert>
+        <index>'MC_TABLE_DEPENDENCIES_AFTER'</index>
+        <field name='after_table'>OBJECT(TEMP.csr).after_table</field>
+        <field name='before_table'>OBJECT(TEMP.csr).before_table</field>
+      </index_insert>
+    </loop>
+  </db_select>
+
+  <!-- Determine a safe loading order based on table dependencies -->
+  <do>TEMP.continue = '1'</do>
+  <while>
+    <condition>TEMP.continue eq '1'</condition>
+    <loop>
+      <do>TEMP.increment = 1</do>
+
+      <!-- Scan all dependencies for before-tables that aren't after anything -->
+      <index_select>
+        <index>'MC_TABLE_DEPENDENCIES_BEFORE'</index>
+        <cursor>TEMP.bcsr</cursor>
+        <loop>
+          <index_select>
+            <index>'MC_TABLE_DEPENDENCIES_AFTER'</index>
+            <field name='after_table'>OBJECT(TEMP.bcsr).before_table</field>
+            <cursor>TEMP.acsr</cursor>
+            <else>
+              <!-- Mark these tables for deletion and enter them in the next open group -->
+              <index_insert>
+                <index>'MC_TABLE_DEPENDENCIES_DELETION'</index>
+                <field name='after_table'>OBJECT(TEMP.bcsr).after_table</field>
+                <field name='before_table'>OBJECT(TEMP.bcsr).before_table</field>
+              </index_insert>
+              <index_insert_if_none>
+                <index>'MC_TABLE_GROUP'</index>
+                <field name='group'>GLOBAL.current_group</field>
+                <field name='table'>OBJECT(TEMP.bcsr).before_table</field>
+              </index_insert_if_none>
+            </else>
+          </index_select>
+        </loop>
+        <else>
+          <do>TEMP.continue = ''</do>
+        </else>
+      </index_select>
+
+      <!-- Delete the marked rows and rebuild indexes -->
+      <index_select>
+        <index>'MC_TABLE_DEPENDENCIES_DELETION'</index>
+        <cursor>TEMP.dcsr</cursor>
+        <loop>
+          <index_remove>
+            <index>'MC_TABLE_DEPENDENCIES_BEFORE'</index>
+            <field name='before_table'>OBJECT(TEMP.dcsr).before_table</field>
+          </index_remove>
+        </loop>
+      </index_select>
+
+      <!-- Rebuild the after index -->
+      <index_clear>
+        <index>'MC_TABLE_DEPENDENCIES_AFTER'</index>
+      </index_clear>
+      <index_select>
+        <index>'MC_TABLE_DEPENDENCIES_BEFORE'</index>
+        <cursor>TEMP.bcsr</cursor>
+        <loop>
+          <index_insert>
+            <index>'MC_TABLE_DEPENDENCIES_AFTER'</index>
+            <field name='after_table'>OBJECT(TEMP.bcsr).after_table</field>
+            <field name='before_table'>OBJECT(TEMP.bcsr).before_table</field>
+          </index_insert>
+        </loop>
+      </index_select>
+
+      <!-- Some deleted rows may have just been freed up -->
+      <index_select>
+        <index>'MC_TABLE_DEPENDENCIES_DELETION'</index>
+        <cursor>TEMP.dcsr</cursor>
+        <loop>
+          <index_select>
+            <index>'MC_TABLE_DEPENDENCIES_BEFORE'</index>
+            <field name='before_table'>OBJECT(TEMP.dcsr).after_table</field>
+            <cursor>TEMP.acsr</cursor>
+            <else>
+              <index_select>
+                <index>'MC_TABLE_DEPENDENCIES_AFTER'</index>
+                <field name='after_table'>OBJECT(TEMP.dcsr).after_table</field>
+                <cursor>TEMP.acsr2</cursor>
+                <else>
+                  <index_insert_if_none>
+                    <index>'MC_TABLE_GROUP'</index>
+                    <field name='group'>GLOBAL.current_group + 1</field>
+                    <field name='table'>OBJECT(TEMP.dcsr).after_table</field>
+                  </index_insert_if_none>
+                </else>
+              </index_select>
+            </else>
+          </index_select>
+        </loop>
+      </index_select>
+
+      <index_clear>
+        <index>'MC_TABLE_DEPENDENCIES_DELETION'</index>
+      </index_clear>
+      <index_clear>
+        <index>'MC_TABLE_DEPENDENCIES_AFTER'</index>
+      </index_clear>
+
+      <!-- Rebuild the after index again -->
+      <index_select>
+        <index>'MC_TABLE_DEPENDENCIES_BEFORE'</index>
+        <cursor>TEMP.bcsr</cursor>
+        <loop>
+          <index_insert>
+            <index>'MC_TABLE_DEPENDENCIES_AFTER'</index>
+            <field name='after_table'>OBJECT(TEMP.bcsr).after_table</field>
+            <field name='before_table'>OBJECT(TEMP.bcsr).before_table</field>
+          </index_insert>
+        </loop>
+      </index_select>
+
+      <do>GLOBAL.current_group += TEMP.increment</do>
+      <do>GLOBAL.load_group_max = GLOBAL.current_group</do>
+    </loop>
+  </while>
+
+  <!-- Scan the load files -->
+  <glob_select>
+    <glob>GLOBAL.table_directory ~ GLOBAL.path_separator ~ '*.dat.txt'</glob>
+    <cursor_value>'file'</cursor_value>
+    <cursor>TEMP.filecsr</cursor>
+    <loop>
+      <do>TEMP.file = OBJECT(TEMP.filecsr).file</do>
+      <match>
+        <input>TEMP.file</input>
+        <regex>'^(.*)\b(\w+)\.([^\.]+)\.(\w+)\.dat\.txt$'</regex>
+        <success>TEMP.matched</success>
+        <capture>TEMP.dir</capture>
+        <capture>TEMP.ctable</capture>
+        <capture>TEMP.file_db</capture>
+        <capture>TEMP.batch</capture>
+      </match>
+      <if>
+        <condition>TEMP.matched eq '1' and TEMP.file_db Eq TEMP.db</condition>
+        <then>
+          <to_lower>
+            <input>TEMP.ctable</input>
+            <output>TEMP.table</output>
+          </to_lower>
+          <index_select>
+            <index>'MC_TABLES'</index>
+            <field name='table'>TEMP.table</field>
+            <cursor>TEMP.tcsr</cursor>
+            <loop>
+              <!-- TODO: do we need to set NLS_LANG? -->
+              <do>TEMP.log = ''</do>
+              <do>TEMP.ctl = TEMP.dir ~ TEMP.table ~ '.' ~ TEMP.db ~ '.ctl.txt'</do>
+              <do>TEMP.bad = TEMP.dir ~ TEMP.table ~ '.' ~ TEMP.db ~ '.' ~ TEMP.batch ~ '.bad.txt'</do>
+              <do>TEMP.out = TEMP.dir ~ TEMP.table ~ '.' ~ TEMP.db ~ '.' ~ TEMP.batch ~ '.out.txt'</do>
+              <if>
+                <condition>TEMP.dbms eq 'sql'</condition>
+                <!-- 
+                Modification by TCF May 2014.
+                This code is limited to only load ANSI formatted data; in fact, in its original incarnation, 
+                it will only load ANSI character codes 32 - 127 reliably. So there are two new versions here:
+                one that will explicitly set the ANSI code page to Windows-1252-thereby reliably loading all 
+                255 ANSI characters in that code page-and one that loads Unicode characters.
+                Note that these changes must deployed in conjunction to the changes in setup_defaults; the formatting
+                parameters you pass to BCP must match the formatting of the file (e.g. if you pass "-w" to BCP and try 
+                load an ANSI file it will fail, pass "-C" with a Unicode file and it will fail). setup_defaults
+                proc generate_rtype_printing is creating the temp procs that output the table dumps consumed below
+                by BCP.
+                -->
+                <!-- ORIGINAL CODE; don't use this-->
+                <!--<then>
+                  <do>TEMP.cmd = 'bcp ' ~ TEMP.db ~ '..' ~ TEMP.table ~ ' in ' ~ TEMP.file ~ ' -f ' ~ TEMP.ctl</do>
+                  <do>TEMP.cmd ~= ' -S ' ~ TEMP.serv ~ ' -U ' ~ TEMP.user ~ ' -P "' ~ TEMP.pass ~ '"'</do>
+                  <do>TEMP.cmd ~= ' -e ' ~ TEMP.bad ~ ' -m 1000000 -b ' ~ GLOBAL.bcp_batchsize ~ ' -q -E &gt;' ~ TEMP.out ~ ' 2&gt;&amp;1'</do>
+                </then>-->
+                <then>
+                    <if>
+                        <condition>GLOBAL.run_mode Eq 'Unicode'</condition>
+                        <then>
+                            <!-- NEW CODE, UNICODE FORMAT FILES -->
+                            <do>TEMP.cmd = 'bcp ' ~ TEMP.db ~ '..' ~ TEMP.table ~ ' in ' ~ TEMP.file ~ ' -w'</do>
+                            <do>TEMP.cmd ~= ' -t "' ~ GLOBAL.escaped_field_delim ~ '" -r "' ~ GLOBAL.cdata_record_delim ~ '"'</do>
+                            <do>TEMP.cmd ~= ' -S ' ~ TEMP.serv ~ ' -U ' ~ TEMP.user ~ ' -P "' ~ TEMP.pass ~ '"'</do>
+                            <do>TEMP.cmd ~= ' -e ' ~ TEMP.bad ~ ' -m 1000000 -b ' ~ GLOBAL.bcp_batchsize ~ ' -q -E &gt;' ~ TEMP.out ~ ' 2&gt;&amp;1'</do>
+                        </then>
+                        <else>
+                            <!-- NEW CODE, ANSI FORMAT FILES: adds "-C ACP" parameter to load files as ANSI/Windows-1252 code page-->
+                            <do>TEMP.cmd = 'bcp ' ~ TEMP.db ~ '..' ~ TEMP.table ~ ' in ' ~ TEMP.file ~ ' -C ACP -f ' ~ TEMP.ctl</do>
+                            <do>TEMP.cmd ~= ' -S ' ~ TEMP.serv ~ ' -U ' ~ TEMP.user ~ ' -P "' ~ TEMP.pass ~ '"'</do>
+                            <do>TEMP.cmd ~= ' -e ' ~ TEMP.bad ~ ' -m 1000000 -b ' ~ GLOBAL.bcp_batchsize ~ ' -q -E &gt;' ~ TEMP.out ~ ' 2&gt;&amp;1'</do>
+                        </else>
+                    </if>
+                </then>
+                <condition>TEMP.dbms eq 'oracle'</condition>
+                <then>
+                  <do>TEMP.log = TEMP.dir ~ TEMP.table ~ '.' ~ TEMP.db ~ '.' ~ TEMP.batch ~ '.log.txt'</do>
+                  <do>TEMP.cmd = 'sqlldr "' ~ TEMP.user ~ '/' ~ TEMP.pass ~ '@' ~ TEMP.db ~ '" control=' ~ TEMP.ctl</do>
+                  <do>TEMP.cmd ~= ' data=' ~ TEMP.file ~ ' log=' ~ TEMP.log ~ ' bad=' ~ TEMP.bad</do>
+                  <do>TEMP.cmd ~= ' errors=1000000 direct=' ~ TEMP.direct ~ ' &gt;' ~ TEMP.out ~ ' 2&gt;&amp;1'</do>
+                </then>
+              </if>
+              <do>TEMP.group = ''</do>
+              <index_select>
+                <index>'MC_TABLE_GROUP'</index>
+                <field name='table'>TEMP.table</field>
+                <cursor>TEMP.gcsr</cursor>
+                <then>
+                  <do>TEMP.group = OBJECT(TEMP.gcsr).group</do>
+                </then>
+                <else>
+                  <do>TEMP.group = GLOBAL.load_group_min</do>
+                </else>
+              </index_select>
+              <index_insert>
+                <index>'MC_LOAD_COMMANDS'</index>
+                <field name='group'>TEMP.group</field>
+                <field name='datafile'>TEMP.file</field>
+                <field name='table'>TEMP.table</field>
+                <field name='database'>TEMP.db</field>
+                <field name='command'>TEMP.cmd</field>
+                <field name='dbms'>TEMP.dbms</field>
+                <field name='outputfile'>TEMP.out</field>
+                <field name='logfile'>TEMP.log</field>
+                <field name='errorfile'>TEMP.bad</field>
+                <field name='status'>0</field>
+              </index_insert>
+            </loop>
+            <else>
+              <index_insert>
+                <index>'MC_LOAD_REPORT'</index>
+                <field name='database'>TEMP.db</field>
+                <field name='table'>TEMP.table</field>
+                <field name='file'>TEMP.file</field>
+                <field name='errored'>''</field>
+                <field name='status'>'File was skipped.'</field>
+                <field name='rows'>''</field>
+              </index_insert>
+            </else>
+          </index_select>
+        </then>
+      </if>
+    </loop>
+  </glob_select>
+</proc>
+
+<proc name="load_files">
+  <do>GLOBAL.current_group = GLOBAL.load_group_min</do>
+  <while>
+    <condition>GLOBAL.current_group LTE GLOBAL.load_group_max</condition>
+    <loop>
+      <!-- Map/reduce the files to load -->
+      <call_proc_for_current_object>
+        <name>'mc_map_reduce'</name>
+        <param name='producer_proc'>'load_producer'</param>
+        <param name='consumer_proc'>'load_consumer'</param>
+        <param name='reducer_proc'>'load_reducer'</param>
+      </call_proc_for_current_object>
+      <do>GLOBAL.current_group += 1</do>
+    </loop>
+  </while>
+
+  <!-- Print a control report -->
+  <do>TEMP.report = GLOBAL.migration_directory ~ GLOBAL.path_separator ~ 'load_report.csv'</do>
+  <print_record>
+    <file>TEMP.report</file>
+    <field_delim>','</field_delim>
+    <record_delim>'\r\n'</record_delim>
+    <data>
+      <field>'Database'</field>
+      <field>'Table'</field>
+      <field>'File Name'</field>
+      <field>'Rows Loaded'</field>
+      <field>'Rows Errored'</field>
+      <field>'Status'</field>
+    </data>
+  </print_record>
+  <index_select>
+    <index>'MC_LOAD_REPORT'</index>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <print_record>
+        <file>TEMP.report</file>
+        <field_delim>','</field_delim>
+        <record_delim>'\r\n'</record_delim>
+        <data>
+          <field>OBJECT(TEMP.csr).database</field>
+          <field>OBJECT(TEMP.csr).table</field>
+          <field>OBJECT(TEMP.csr).file</field>
+          <field>OBJECT(TEMP.csr).rows</field>
+          <field>OBJECT(TEMP.csr).errored</field>
+          <field>OBJECT(TEMP.csr).status</field>
+        </data>
+      </print_record>
+    </loop>
+  </index_select>
+</proc>
+
+<proc name='load_producer'>
+  <!-- TODO: should sort each group to run largest files first -->
+  <if>
+    <condition>GLOBAL.parallel_load eq ''</condition>
+    <then>
+      <do>GLOBAL.parallel_load = '0'</do>
+    </then>
+  </if>
+
+  <while>
+    <condition>1</condition>
+    <loop>
+      <do>TEMP.found_work = '0'</do>
+      <index_select>
+        <index>'MC_LOAD_COMMANDS'</index>
+        <field name='group'>GLOBAL.current_group</field>
+        <cursor>TEMP.gcsr</cursor>
+        <loop>
+          <do>TEMP.do_this_table = '0'</do>
+          <index_insert_if_none>
+            <index>'MC_TABLE_LOCKS'</index>
+            <field name='database'>OBJECT(TEMP.gcsr).database</field>
+            <field name='table'>OBJECT(TEMP.gcsr).table</field>
+            <field name='locked'>'0'</field>
+          </index_insert_if_none>
+          <if>
+            <condition>OBJECT(TEMP.gcsr).status eq '0'</condition>
+            <then>
+              <if>
+                <condition>GLOBAL.parallel_load eq '1'</condition>
+                <then>
+                  <do>TEMP.do_this_table = '1'</do>
+                </then>
+                <else>
+                  <index_get>
+                    <index>'MC_TABLE_LOCKS'</index>
+                    <field name='database'>OBJECT(TEMP.gcsr).database</field>
+                    <field name='table'>OBJECT(TEMP.gcsr).table</field>
+                    <field name='locked'>TEMP.locked</field>
+                  </index_get>
+                  <if>
+                    <condition>TEMP.locked eq '0'</condition>
+                    <then>
+                      <do>index_update('MC_TABLE_LOCKS', database=>OBJECT(TEMP.gcsr).database, table=>OBJECT(TEMP.gcsr).table, locked=>'1')</do>
+                      <do>TEMP.do_this_table = '1'</do>
+                    </then>
+                  </if>
+                </else>
+              </if>
+              <if>
+                <condition>TEMP.do_this_table eq '1'</condition>
+                <then>
+                  <do>index_update('MC_LOAD_COMMANDS', group=>GLOBAL.current_group, datafile=>OBJECT(TEMP.gcsr).datafile, status=>'1')</do>
+                  <do>TEMP.found_work = '1'</do>
+                  <pipe_row>TEMP.gcsr</pipe_row>
+                </then>
+              </if>
+            </then>
+          </if>
+        </loop>
+      </index_select>
+      <if>
+        <condition>TEMP.found_work eq '0'</condition>
+        <then>
+          <pipe_row>''</pipe_row>
+        </then>
+      </if>
+    </loop>
+  </while>
+</proc>
+
+<proc name='load_consumer'>
+  <do>TEMP.last_command_no = ''</do>
+  <print>'Running load command: ' ~ OBJECT.command</print>
+  <system_command_select>
+    <command>OBJECT.command</command>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <if>
+        <condition>TEMP.last_command_no ne OBJECT(TEMP.csr).command_no and OBJECT(TEMP.csr).command_no ne ''</condition>
+        <then>
+          <do>TEMP.last_command_no = OBJECT(TEMP.csr).command_no</do>
+        </then>
+      </if>
+    </loop>
+  </system_command_select>
+</proc>
+
+<proc name='load_reducer'>
+  <!-- Make sure this table is unlocked, and mark the file done -->
+  <do>index_update('MC_TABLE_LOCKS', database=>OBJECT.database, table=>OBJECT.table, locked=>'0')</do>
+  <do>index_update('MC_LOAD_COMMANDS', group=>OBJECT.group, datafile=>OBJECT.datafile, status=>'2')</do>
+
+  <do>TEMP.rows = 0</do>
+  <do>TEMP.errored = 0</do>
+  <do>TEMP.status = ''</do>
+  <do>TEMP.someerrors = ''</do>
+  <do>TEMP.failure = ''</do>
+  <file_info>
+    <filename>OBJECT.errorfile</filename>
+    <size>TEMP.error_size</size>
+  </file_info>
+  <if>
+    <condition>TEMP.error_size GT 0</condition>
+    <then>
+      <do>TEMP.someerrors ~= '1'</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.outputfile ne ''</condition>
+    <then>
+      <file_select>
+        <input_file>OBJECT.outputfile</input_file>
+        <format field_delim='_XXX_' trim='true'>
+          <field name='line' length='1024'/>
+        </format>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <if>
+            <condition>OBJECT.dbms eq 'sql'</condition>
+            <then>
+              <match>
+                <input>OBJECT(TEMP.csr).line</input>
+                <regex>'(is not recognized as an internal or external command)|(BCP copy in failed)'</regex>
+                <ignore_case>'1'</ignore_case>
+                <success>TEMP.failed</success>
+              </match>
+              <if>
+                <condition>TEMP.failed eq '1'</condition>
+                <then>
+                  <do>TEMP.failure = '1'</do>
+                </then>
+              </if>
+              <match>
+                <input>OBJECT(TEMP.csr).line</input>
+                <regex>'^Error'</regex>
+                <ignore_case>'1'</ignore_case>
+                <success>TEMP.error</success>
+              </match>
+              <if>
+                <condition>TEMP.error eq '1'</condition>
+                <then>
+                  <do>TEMP.errored += 1</do>
+                </then>
+              </if>
+              <match>
+                <input>OBJECT(TEMP.csr).line</input>
+                <regex>'(\d+)\s+rows?\s+copied'</regex>
+                <success>TEMP.copied</success>
+                <capture>TEMP.rowscopied</capture>
+              </match>
+              <if>
+                <condition>TEMP.copied eq '1'</condition>
+                <then>
+                  <do>TEMP.rows = TEMP.rowscopied</do>
+                </then>
+              </if>
+            </then>
+          </if>
+        </loop>
+      </file_select>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.logfile ne ''</condition>
+    <then>
+      <file_info>
+        <filename>OBJECT.logfile</filename>
+        <size>TEMP.log_size</size>
+      </file_info>
+      <if>
+        <condition>TEMP.log_size GT 0</condition>
+        <then>
+          <file_select>
+            <input_file>OBJECT.logfile</input_file>
+            <format field_delim='_XXX_' trim='true'>
+              <field name='line' length='1024'/>
+            </format>
+            <cursor>TEMP.csr</cursor>
+            <loop>
+              <match>
+                <input>OBJECT(TEMP.csr).line</input>
+                <regex>'(\d+)\s+Rows? not loaded'</regex>
+                <ignore_case>'1'</ignore_case>
+                <success>TEMP.error</success>
+                <capture>TEMP.rowserrored</capture>
+              </match>
+              <if>
+                <condition>TEMP.error eq '1'</condition>
+                <then>
+                  <do>TEMP.errored += TEMP.rowserrored</do>
+                </then>
+              </if>
+              <match>
+                <input>OBJECT(TEMP.csr).line</input>
+                <regex>'(\d+)\s+Rows? successfully loaded'</regex>
+                <success>TEMP.copied</success>
+                <capture>TEMP.rowscopied</capture>
+              </match>
+              <if>
+                <condition>TEMP.copied eq '1'</condition>
+                <then>
+                  <do>TEMP.rows = TEMP.rowscopied</do>
+                </then>
+              </if>
+            </loop>
+          </file_select>
+        </then>
+      </if>
+    </then>
+  </if>
+  <if>
+    <condition>TEMP.someerrors eq '1' or TEMP.errored GT 0</condition>
+    <then>
+      <do>TEMP.status ~= 'Some rows errored. '</do>
+    </then>
+  </if>
+  <if>
+    <condition>TEMP.failure eq '1'</condition>
+    <then>
+      <do>TEMP.status ~= 'The command failed. '</do>
+    </then>
+  </if>
+  <index_insert>
+    <index>'MC_LOAD_REPORT'</index>
+    <field name='database'>OBJECT.database</field>
+    <field name='table'>OBJECT.table</field>
+    <field name='file'>OBJECT.datafile</field>
+    <field name='errored'>TEMP.errored</field>
+    <field name='status'>TEMP.status</field>
+    <field name='rows'>TEMP.rows</field>
+  </index_insert>
+</proc>
+
+</procs>

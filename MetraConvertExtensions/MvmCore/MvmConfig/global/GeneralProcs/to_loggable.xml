@@ -1,0 +1,57 @@
+<!-- ====================================================================== -->
+<!-- Given an object ID, construct a string suitable for logging.           -->
+<!-- You can also pass a log level that will be examined.  If the logging   -->
+<!-- level indicates that your string will never be logged, the produce     -->
+<!-- the logging string quickly, and don't put individual fields into       -->
+<!-- the string.                                                            -->
+<!--                                                                        -->
+<!-- Input:                                                                 -->
+<!--   object_id     - object to produce string for                         -->
+<!--   log_level     - log level to consider, if won't log make cheap string-->
+<!--                                                                        -->
+<!-- Output:                                                                -->
+<!--   result        - a string suitable for logging.                       -->
+<!-- ====================================================================== -->
+
+<proc name='to_loggable'>
+  <param name='object_id' default='"not_set"'/>
+  <param name='log_level' default='"debug"'/>
+  <param name='result' mode='out'/>
+  <do> TEMP.result='' </do>
+
+  <!-- Check if we should bother constructing the string? -->
+  <do> TEMP.given_level = 0 </do>
+  <do> TEMP.current_level = 0 </do>
+
+  <if> <condition>TEMP.log_level eq 'error'</condition> <then>   <do> TEMP.given_level = '"1"' </do> </then> </if>
+  <if> <condition>TEMP.log_level eq 'warning'</condition> <then> <do> TEMP.given_level = '"2"' </do> </then> </if>
+  <if> <condition>TEMP.log_level eq 'info'</condition> <then>    <do> TEMP.given_level = '"3"' </do> </then> </if>
+  <if> <condition>TEMP.log_level eq 'debug'</condition> <then>   <do> TEMP.given_level = '"4"' </do> </then> </if>
+
+  <if> <condition>OBJECT(GLOBAL.logger).log_level eq 'error'</condition> <then>   <do> TEMP.current_level = '"1"' </do> </then> </if>
+  <if> <condition>OBJECT(GLOBAL.logger).log_level eq 'warning'</condition> <then> <do> TEMP.current_level = '"2"' </do> </then> </if>
+  <if> <condition>OBJECT(GLOBAL.logger).log_level eq 'info'</condition> <then>    <do> TEMP.current_level = '"3"' </do> </then> </if>
+  <if> <condition>OBJECT(GLOBAL.logger).log_level eq 'debug'</condition> <then>   <do> TEMP.current_level = '"4"' </do> </then> </if>
+
+  <!-- If we weren't given the object id, assume it's the current object -->
+  <if> <condition>TEMP.object_id eq 'not_set'</condition> <then> <do>TEMP.object_id=OBJECT.object_id</do> </then> </if>
+  
+  <do>
+     TEMP.result~='ObjectID:'~TEMP.object_id~'|ObjectType:'~OBJECT(TEMP.object_id).object_type~
+  </do>
+
+  <!-- This really isn't quite right.  We should also (just?) consider the level of MTLog -->
+  <if> <condition>TEMP.given_level gt TEMP.current_level</condition> <then> <return></return> </then> </if>
+
+  <!-- Concatenate to our result all the fields -->
+  <object_field_value_select>
+    <object_id>TEMP.object_id</object_id>
+    <cursor_field>'field'</cursor_field>
+    <cursor_value>'value'</cursor_value>
+    <cursor>TEMP.c1</cursor>
+    <loop>
+      <do> TEMP.result~='|'~OBJECT(TEMP.c1).field~':'~OBJECT(TEMP.c1).value~ </do>
+    </loop>
+  </object_field_value_select>
+
+</proc>

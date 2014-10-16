@@ -1,0 +1,1423 @@
+<proc name="pass_1_28">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <if>
+    <condition>OBJECT.id_type eq ''</condition>
+    <then>
+      <do>OBJECT.id_type = 'IndependentAccount'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_type'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'mc/id_type'</namespace>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.c_createdby eq ''</condition>
+    <then>
+      <do>OBJECT.c_createdby = 'MIG'</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.c_createddate eq ''</condition>
+    <then>
+      <do>OBJECT.c_createddate = GLOBAL.mvm_startup_date</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.c_modifiedby eq ''</condition>
+    <then>
+      <do>OBJECT.c_modifiedby = 'MIG'</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.c_modifieddate eq ''</condition>
+    <then>
+      <do>OBJECT.c_modifieddate = GLOBAL.mvm_startup_date</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.c_migrationdate eq ''</condition>
+    <then>
+      <do>OBJECT.c_migrationdate = GLOBAL.mvm_startup_date</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.c_legacystartdate eq ''</condition>
+    <then>
+      <do>OBJECT.c_legacystartdate = OBJECT.vt_start</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.c_legacyenddate eq ''</condition>
+    <then>
+      <do>OBJECT.c_legacyenddate = OBJECT.vt_end</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.c_legacyaccountidentifier eq ''</condition>
+    <then>
+      <do>OBJECT.c_legacyaccountidentifier = OBJECT.nm_login</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.day_of_month eq ''</condition>
+    <then>
+      <do>OBJECT.day_of_month = 31</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.id_acc eq ''</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'sequence_get_next_id_acc'</name>
+        <param name="value">TEMP.GeNsYm291__MC_SEQUENCE</param>
+      </call_proc_for_current_object>
+      <do>OBJECT.id_acc = TEMP.GeNsYm291__MC_SEQUENCE</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_acc'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.id_dm_acc eq ''</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'sequence_get_next_id_dm_acc'</name>
+        <param name="value">TEMP.GeNsYm292__MC_SEQUENCE</param>
+      </call_proc_for_current_object>
+      <do>OBJECT.id_dm_acc = TEMP.GeNsYm292__MC_SEQUENCE</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_dm_acc'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.id_profile eq ''</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'sequence_get_next_id_profile'</name>
+        <param name="value">TEMP.GeNsYm293__MC_SEQUENCE</param>
+      </call_proc_for_current_object>
+      <do>OBJECT.id_profile = TEMP.GeNsYm293__MC_SEQUENCE</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_profile'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'1'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.id_acc_ext eq ''</condition>
+    <then>
+      <get_guid>TEMP.GeNsYm294__MC_GUID</get_guid>
+      <do>OBJECT.id_acc_ext = TEMP.GeNsYm294__MC_GUID</do>
+    </then>
+    <else>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.tx_lang_code eq ''</condition>
+    <then>
+      <do>OBJECT.tx_lang_code = 'US'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'tx_lang_code'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'global/languagecode'</namespace>
+        <nullable>'1'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.nm_space eq ''</condition>
+    <then>
+      <do>OBJECT.nm_space = 'mt'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'nm_space'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'mc/nm_space'</namespace>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.parent_nm_space eq ''</condition>
+    <then>
+      <do>OBJECT.parent_nm_space = OBJECT.nm_space</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.id_site eq ''</condition>
+    <then>
+      <do>OBJECT.id_site = ((OBJECT.nm_space ~ '/') ~ OBJECT.tx_lang_code)</do>
+      <validate_field>
+        <field>'id_site'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'mc/t_localized_site'</namespace>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_site'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'mc/t_localized_site'</namespace>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.c_billable eq ''</condition>
+    <then>
+      <do>TEMP.GeNsYm295__MC_MAPPING = ''</do>
+      <to_lower>
+        <input>'mc/payer_account_types'</input>
+        <output>TEMP.lowerarg1</output>
+      </to_lower>
+      <to_lower>
+        <input>OBJECT.id_type</input>
+        <output>TEMP.lowerarg2</output>
+      </to_lower>
+      <index_select>
+        <index>'MC_MAPPINGS'</index>
+        <field name="namespace">TEMP.lowerarg1</field>
+        <field name="from">TEMP.lowerarg2</field>
+        <cursor>TEMP.ecsr</cursor>
+        <then>
+          <do>TEMP.GeNsYm295__MC_MAPPING = OBJECT(TEMP.ecsr).to</do>
+        </then>
+        <else>
+          <do>OBJECT._mc_error ~= 'Failed lookup with [' ~ TEMP.lowerarg1 ~ ':' ~ TEMP.lowerarg2 ~ ']. '</do>
+        </else>
+      </index_select>
+      <do>OBJECT.c_billable = TEMP.GeNsYm295__MC_MAPPING</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'c_billable'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'char'</datatype>
+        <length>'1'</length>
+        <nullable>'1'</nullable>
+        <default>'1'</default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.id_payee eq ''</condition>
+    <then>
+      <do>OBJECT.id_payee = OBJECT.id_acc</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.id_payer eq ''</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'lookup_nearest_payer'</name>
+        <param name="value">TEMP.GeNsYm296__MC_PROC</param>
+      </call_proc_for_current_object>
+      <do>OBJECT.id_payer = TEMP.GeNsYm296__MC_PROC</do>
+      <validate_field>
+        <field>'id_payer'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_payer'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.status eq ''</condition>
+    <then>
+      <do>OBJECT.status = 'AC'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'status'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'mc/account_states'</namespace>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.dt_crt eq ''</condition>
+    <then>
+      <do>OBJECT.dt_crt = GLOBAL.mvm_startup_day</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'dt_crt'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'datetime'</datatype>
+        <format>'yyyy-MM-dd HH:mm:ss'</format>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.vt_start eq ''</condition>
+    <then>
+      <do>OBJECT.vt_start = OBJECT.dt_crt</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.vt_end eq ''</condition>
+    <then>
+      <do>OBJECT.vt_end = GLOBAL.maxdate</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'vt_end'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'datetime'</datatype>
+        <format>'yyyy-MM-dd HH:mm:ss'</format>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.tt_start eq ''</condition>
+    <then>
+      <do>OBJECT.tt_start = OBJECT.vt_start</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.tt_end eq ''</condition>
+    <then>
+      <do>OBJECT.tt_end = GLOBAL.maxdate</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'tt_end'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'datetime'</datatype>
+        <format>'yyyy-MM-dd HH:mm:ss'</format>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.nm_tag eq ''</condition>
+    <then>
+      <do>OBJECT.nm_tag = 'timeZoneID'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'nm_tag'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'nvarchar'</datatype>
+        <length>'32'</length>
+        <nullable>'0'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.val_tag eq ''</condition>
+    <then>
+      <do>OBJECT.val_tag = 22</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'val_tag'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'nvarchar'</datatype>
+        <length>'80'</length>
+        <nullable>'1'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.id_audit eq ''</condition>
+    <then>
+      <do>OBJECT.id_audit = 0</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.id_usage_cycle eq ''</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'lookup_usage_cycle'</name>
+        <param name="value">TEMP.GeNsYm297__MC_PROC</param>
+      </call_proc_for_current_object>
+      <do>OBJECT.id_usage_cycle = TEMP.GeNsYm297__MC_PROC</do>
+      <validate_field>
+        <field>'id_usage_cycle'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_usage_cycle'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.c_usagecycletype eq ''</condition>
+    <then>
+      <do>OBJECT.c_usagecycletype = 'Monthly'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'c_usagecycletype'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'metratech.com/billingcycle/usagecycletype'</namespace>
+        <nullable>'1'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.c_currency eq ''</condition>
+    <then>
+      <do>OBJECT.c_currency = 'USD'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'c_currency'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'nvarchar'</datatype>
+        <length>'10'</length>
+        <nullable>'1'</nullable>
+        <default>'USD'</default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.c_folder eq ''</condition>
+    <then>
+      <do>OBJECT.c_folder = 1</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'c_folder'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'char'</datatype>
+        <length>'1'</length>
+        <nullable>'1'</nullable>
+        <default>'0'</default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.c_invoicemethod eq ''</condition>
+    <then>
+      <do>OBJECT.c_invoicemethod = 'Other'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'c_invoicemethod'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'metratech.com/enumbilling/invoicedeliverymethod'</namespace>
+        <nullable>'1'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.c_language eq ''</condition>
+    <then>
+      <do>OBJECT.c_language = OBJECT.tx_lang_code</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.c_statusreason eq ''</condition>
+    <then>
+      <do>OBJECT.c_statusreason = 'None'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'c_statusreason'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'metratech.com/accountcreation/statusreason'</namespace>
+        <nullable>'1'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.c_statusreasonother eq ''</condition>
+    <then>
+      <do>OBJECT.c_statusreasonother = 'No other reason'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'c_statusreasonother'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'nvarchar'</datatype>
+        <length>'255'</length>
+        <nullable>'1'</nullable>
+        <default>'None'</default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.c_securityanswer eq ''</condition>
+    <then>
+      <do>OBJECT.c_securityanswer = 'None'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'c_securityanswer'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'nvarchar'</datatype>
+        <length>'255'</length>
+        <nullable>'1'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.c_securityquestion eq ''</condition>
+    <then>
+      <do>OBJECT.c_securityquestion = 'None'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'c_securityquestion'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'metratech.com/accountcreation/securityquestion'</namespace>
+        <nullable>'1'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.c_paymentmethod eq ''</condition>
+    <then>
+      <do>OBJECT.c_paymentmethod = 'Cheque'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'c_paymentmethod'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'metratech.com/accountcreation/paymentmethod'</namespace>
+        <nullable>'1'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.c_timezoneid eq ''</condition>
+    <then>
+      <do>OBJECT.c_timezoneid = '(GMT-05:00) Eastern Time (US &amp; Canada)'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'c_timezoneid'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'global/timezoneid'</namespace>
+        <nullable>'1'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </else>
+  </if>
+  <call_proc_for_current_object>
+    <name>'set_tx_password'</name>
+    <param name="value">TEMP.GeNsYm298__MC_PROC</param>
+  </call_proc_for_current_object>
+  <do>OBJECT.tx_password = TEMP.GeNsYm298__MC_PROC</do>
+  <validate_field>
+    <field>'tx_password'</field>
+    <object_id>OBJECT.object_id</object_id>
+    <datatype>'nvarchar'</datatype>
+    <length>'1024'</length>
+    <nullable>'0'</nullable>
+    <default>
+    </default>
+    <output_field>'_mc_error'</output_field>
+  </validate_field>
+  <if>
+    <condition>OBJECT.id_policy eq ''</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'sequence_get_next_id_policy'</name>
+        <param name="value">TEMP.GeNsYm299__MC_SEQUENCE</param>
+      </call_proc_for_current_object>
+      <do>OBJECT.id_policy = TEMP.GeNsYm299__MC_SEQUENCE</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_policy'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.policy_type eq ''</condition>
+    <then>
+      <do>OBJECT.policy_type = 'A'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'policy_type'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'varchar'</datatype>
+        <length>'1'</length>
+        <nullable>'1'</nullable>
+        <default>
+        </default>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.t_policy_role__id_role eq ''</condition>
+    <then>
+      <do>OBJECT.t_policy_role__id_role = 'subscriber (metraview)'</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'t_policy_role__id_role'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'enum'</datatype>
+        <namespace>'mc/id_role_names'</namespace>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+        <replace>0</replace>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.b_children eq ''</condition>
+    <then>
+      <do>OBJECT.b_children = 'N'</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.full_tx_path eq ''</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'get_full_tx_path'</name>
+        <param name="value">TEMP.GeNsYm300__MC_PROC</param>
+      </call_proc_for_current_object>
+      <do>OBJECT.full_tx_path = TEMP.GeNsYm300__MC_PROC</do>
+    </then>
+  </if>
+  <do>OBJECT(OBJECT._mc_parent).b_children = 'Y'</do>
+  <call_proc_for_current_object>
+    <name>'check_nm_login_uniqueness'</name>
+    <param name="value">TEMP.GeNsYm301__MC_PROC</param>
+  </call_proc_for_current_object>
+  <do>OBJECT.nm_login_check = TEMP.GeNsYm301__MC_PROC</do>
+  <if>
+    <condition>OBJECT._mc_error ne ''</condition>
+    <then>
+      <return />
+    </then>
+  </if>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'50'</feedback_name>
+    <object_type>'PARENT_CAPABILITY_INSTANCE'</object_type>
+    <object_id>TEMP.GeNsYm302__mc</object_id>
+    <inherit_parent>0</inherit_parent>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_field_value_select>
+    <object_id>OBJECT.object_id</object_id>
+    <cursor_field>'field'</cursor_field>
+    <cursor_value>'value'</cursor_value>
+    <where>regex_match('account_segment[0-9]+', OBJECT.field) eq '1'</where>
+    <cursor>TEMP.ocsr</cursor>
+    <loop>
+      <if>
+        <condition>starts_with(OBJECT(TEMP.ocsr).field, '_mc_') ne '1'</condition>
+        <then>
+          <set_object_field>
+            <input>OBJECT(TEMP.ocsr).value</input>
+            <object_id>TEMP.GeNsYm302__mc</object_id>
+            <field_name>OBJECT(TEMP.ocsr).field</field_name>
+          </set_object_field>
+        </then>
+      </if>
+    </loop>
+  </object_field_value_select>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm302__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm302__mc).id_acc eq ''</condition>
+    <then>
+      <do>OBJECT(TEMP.GeNsYm302__mc).id_acc = OBJECT.id_acc</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm302__mc).id_policy eq ''</condition>
+    <then>
+      <do>OBJECT(TEMP.GeNsYm302__mc).id_policy = OBJECT.id_policy</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT(TEMP.GeNsYm302__mc).full_tx_path eq ''</condition>
+    <then>
+      <do>OBJECT(TEMP.GeNsYm302__mc).full_tx_path = OBJECT.full_tx_path</do>
+    </then>
+  </if>
+  <do>OBJECT(TEMP.GeNsYm302__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm302__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm302__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm302__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm302__mc)._mc_record_type_id = 50</do>
+  <do>OBJECT(TEMP.GeNsYm302__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm302__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm302__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm302__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm302__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 'PARENT_CAPABILITY_INSTANCE' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm302__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm302__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm302__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm302__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <select>
+    <index_select>
+      <index>'MC_T_USAGE_INTERVAL'</index>
+      <field name="id_usage_cycle">OBJECT.id_usage_cycle</field>
+    </index_select>
+    <cursor>TEMP.GeNsYm78__mc</cursor>
+    <loop>
+      <do>OBJECT(TEMP.GeNsYm78__mc).id_acc = OBJECT.id_acc</do>
+      <do>OBJECT(TEMP.GeNsYm78__mc).id_usage_interval = OBJECT.id_usage_interval</do>
+      <do>OBJECT(TEMP.GeNsYm78__mc).tx_status = OBJECT.tx_status</do>
+      <do>OBJECT(TEMP.GeNsYm78__mc).dt_effective = OBJECT.dt_effective</do>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm78__mc).id_acc eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm78__mc).id_acc = OBJECT.id_acc</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm78__mc).id_usage_interval eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm78__mc).id_usage_interval = OBJECT(TEMP.GeNsYm78__mc).id_interval</do>
+          <validate_field>
+            <field>'id_usage_interval'</field>
+            <object_id>TEMP.GeNsYm78__mc</object_id>
+            <datatype>'int'</datatype>
+            <length>'10'</length>
+            <scale>'0'</scale>
+            <nullable>'0'</nullable>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </then>
+        <else>
+          <validate_field>
+            <field>'id_usage_interval'</field>
+            <object_id>TEMP.GeNsYm78__mc</object_id>
+            <datatype>'int'</datatype>
+            <length>'10'</length>
+            <scale>'0'</scale>
+            <nullable>'0'</nullable>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </else>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm78__mc).tx_status eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm78__mc).tx_status = OBJECT(TEMP.GeNsYm78__mc).tx_interval_status</do>
+          <validate_field>
+            <field>'tx_status'</field>
+            <object_id>TEMP.GeNsYm78__mc</object_id>
+            <datatype>'char'</datatype>
+            <length>'1'</length>
+            <nullable>'0'</nullable>
+            <default>
+            </default>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </then>
+        <else>
+          <validate_field>
+            <field>'tx_status'</field>
+            <object_id>TEMP.GeNsYm78__mc</object_id>
+            <datatype>'char'</datatype>
+            <length>'1'</length>
+            <nullable>'0'</nullable>
+            <default>
+            </default>
+            <output_field>'_mc_error'</output_field>
+          </validate_field>
+        </else>
+      </if>
+      <do>OBJECT(TEMP.GeNsYm78__mc)._mc_file_id = OBJECT._mc_file_id</do>
+      <do>OBJECT(TEMP.GeNsYm78__mc)._mc_line_no = OBJECT._mc_line_no</do>
+      <do>OBJECT(TEMP.GeNsYm78__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+      <do>OBJECT(TEMP.GeNsYm78__mc)._mc_record_length = OBJECT._mc_record_length</do>
+      <do>OBJECT(TEMP.GeNsYm78__mc)._mc_record_type_id = 2</do>
+      <do>OBJECT(TEMP.GeNsYm78__mc)._mc_parent = OBJECT.object_id</do>
+      <do>OBJECT(TEMP.GeNsYm78__mc)._mc_level = OBJECT._mc_level + 1</do>
+      <do>OBJECT(TEMP.GeNsYm78__mc)._mc_first_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm78__mc)._mc_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm78__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_acc_usage_interval' ~ GLOBAL.spawn_child_no</do>
+      <do>GLOBAL.spawn_child_no += 1</do>
+      <do>OBJECT(TEMP.GeNsYm78__mc)._mc_spawned = '1'</do>
+      <sorted_object_file_write>
+        <file>TEMP.infile</file>
+        <object_id>TEMP.GeNsYm78__mc</object_id>
+        <key_field>'_mc_sort_key'</key_field>
+      </sorted_object_file_write>
+    </loop>
+  </select>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'3'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_ACCOUNT'</object_type>
+    <object_id>TEMP.GeNsYm303__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm303__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm303__mc).id_acc = OBJECT.id_acc</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc).id_acc_ext = OBJECT.id_acc_ext</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc).id_type = OBJECT.id_type</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc).dt_crt = OBJECT.dt_crt</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc)._mc_record_type_id = 3</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_account' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm303__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm303__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm303__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm303__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'4'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_ACCOUNT_MAPPER'</object_type>
+    <object_id>TEMP.GeNsYm304__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm304__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm304__mc).nm_login = OBJECT.nm_login</do>
+  <do>OBJECT(TEMP.GeNsYm304__mc).nm_space = OBJECT.nm_space</do>
+  <do>OBJECT(TEMP.GeNsYm304__mc).id_acc = OBJECT.id_acc</do>
+  <do>OBJECT(TEMP.GeNsYm304__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm304__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm304__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm304__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm304__mc)._mc_record_type_id = 4</do>
+  <do>OBJECT(TEMP.GeNsYm304__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm304__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm304__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm304__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm304__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_account_mapper' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm304__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm304__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm304__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm304__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'5'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_ACCOUNT_STATE'</object_type>
+    <object_id>TEMP.GeNsYm305__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm305__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm305__mc).id_acc = OBJECT.id_acc</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc).status = OBJECT.status</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc).vt_start = OBJECT.vt_start</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc).vt_end = OBJECT.vt_end</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc)._mc_record_type_id = 5</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_account_state' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm305__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm305__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm305__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm305__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'6'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_ACC_USAGE_CYCLE'</object_type>
+    <object_id>TEMP.GeNsYm306__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm306__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm306__mc).id_acc = OBJECT.id_acc</do>
+  <do>OBJECT(TEMP.GeNsYm306__mc).id_usage_cycle = OBJECT.id_usage_cycle</do>
+  <do>OBJECT(TEMP.GeNsYm306__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm306__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm306__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm306__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm306__mc)._mc_record_type_id = 6</do>
+  <do>OBJECT(TEMP.GeNsYm306__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm306__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm306__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm306__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm306__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_acc_usage_cycle' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm306__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm306__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm306__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm306__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'7'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_DM_ACCOUNT'</object_type>
+    <object_id>TEMP.GeNsYm307__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm307__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm307__mc).id_dm_acc = OBJECT.id_dm_acc</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc).id_acc = OBJECT.id_acc</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc).vt_start = OBJECT.vt_start</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc).vt_end = OBJECT.vt_end</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc)._mc_record_type_id = 7</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_dm_account' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm307__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm307__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm307__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm307__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'8'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_PROFILE'</object_type>
+    <object_id>TEMP.GeNsYm308__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm308__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm308__mc).id_profile = OBJECT.id_profile</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc).nm_tag = OBJECT.nm_tag</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc).val_tag = OBJECT.val_tag</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc).tx_desc = OBJECT.tx_desc</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc)._mc_record_type_id = 8</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_profile' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm308__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm308__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm308__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm308__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'9'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_SITE_USER'</object_type>
+    <object_id>TEMP.GeNsYm309__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm309__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm309__mc).nm_login = OBJECT.nm_login</do>
+  <do>OBJECT(TEMP.GeNsYm309__mc).id_site = OBJECT.id_site</do>
+  <do>OBJECT(TEMP.GeNsYm309__mc).id_profile = OBJECT.id_profile</do>
+  <do>OBJECT(TEMP.GeNsYm309__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm309__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm309__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm309__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm309__mc)._mc_record_type_id = 9</do>
+  <do>OBJECT(TEMP.GeNsYm309__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm309__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm309__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm309__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm309__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_site_user' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm309__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm309__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm309__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm309__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'10'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_USER_CREDENTIALS'</object_type>
+    <object_id>TEMP.GeNsYm310__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm310__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm310__mc).nm_login = OBJECT.nm_login</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc).nm_space = OBJECT.nm_space</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc).tx_password = OBJECT.tx_password</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc).dt_expire = OBJECT.dt_expire</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc).dt_last_login = OBJECT.dt_last_login</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc).dt_last_logout = OBJECT.dt_last_logout</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc).num_failures_since_login = OBJECT.num_failures_since_login</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc).dt_auto_reset_failures = OBJECT.dt_auto_reset_failures</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc).b_enabled = OBJECT.b_enabled</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc)._mc_record_type_id = 10</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_user_credentials' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm310__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm310__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm310__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm310__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'11'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_PAYMENT_REDIRECTION'</object_type>
+    <object_id>TEMP.GeNsYm311__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm311__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm311__mc).id_payer = OBJECT.id_payer</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc).id_payee = OBJECT.id_payee</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc).vt_start = OBJECT.vt_start</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc).vt_end = OBJECT.vt_end</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc)._mc_record_type_id = 11</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_payment_redirection' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm311__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm311__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm311__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm311__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'12'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_PRINCIPAL_POLICY'</object_type>
+    <object_id>TEMP.GeNsYm312__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm312__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm312__mc).id_policy = OBJECT.id_policy</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc).id_acc = OBJECT.id_acc</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc).id_role = OBJECT.id_role</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc).policy_type = OBJECT.policy_type</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc).tx_name = OBJECT.tx_name</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc).tx_desc = OBJECT.tx_desc</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc)._mc_record_type_id = 12</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_principal_policy' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm312__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm312__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm312__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm312__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'13'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_ACCOUNT_STATE_HISTORY'</object_type>
+    <object_id>TEMP.GeNsYm313__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm313__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm313__mc).id_acc = OBJECT.id_acc</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc).status = OBJECT.status</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc).vt_start = OBJECT.vt_start</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc).vt_end = OBJECT.vt_end</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc).tt_start = OBJECT.tt_start</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc).tt_end = OBJECT.tt_end</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc)._mc_record_type_id = 13</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_account_state_history' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm313__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm313__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm313__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm313__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'14'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_PAYMENT_REDIR_HISTORY'</object_type>
+    <object_id>TEMP.GeNsYm314__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm314__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm314__mc).id_payer = OBJECT.id_payer</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc).id_payee = OBJECT.id_payee</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc).vt_start = OBJECT.vt_start</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc).vt_end = OBJECT.vt_end</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc).tt_start = OBJECT.tt_start</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc).tt_end = OBJECT.tt_end</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc)._mc_record_type_id = 14</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_payment_redir_history' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm314__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm314__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm314__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm314__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'15'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_POLICY_ROLE'</object_type>
+    <object_id>TEMP.GeNsYm315__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm315__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm315__mc).id_policy = OBJECT.id_policy</do>
+  <do>OBJECT(TEMP.GeNsYm315__mc).t_policy_role__id_role = OBJECT.t_policy_role__id_role</do>
+  <do>OBJECT(TEMP.GeNsYm315__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm315__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm315__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm315__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm315__mc)._mc_record_type_id = 15</do>
+  <do>OBJECT(TEMP.GeNsYm315__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm315__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm315__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm315__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm315__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_policy_role' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm315__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm315__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm315__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm315__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+  <spawn>
+    <internal_type>'format_array'</internal_type>
+    <feedback_name>'17'</feedback_name>
+    <object_type>'MC_TABLE_NETMETER_T_AV_INTERNAL'</object_type>
+    <object_id>TEMP.GeNsYm316__mc</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <object_ref_get>
+    <object_id>TEMP.GeNsYm316__mc</object_id>
+    <target>TEMP.x</target>
+  </object_ref_get>
+  <do>OBJECT(TEMP.GeNsYm316__mc).id_acc = OBJECT.id_acc</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_taxexempt = OBJECT.c_taxexempt</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_taxexemptid = OBJECT.c_taxexemptid</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_timezoneid = OBJECT.c_timezoneid</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_paymentmethod = OBJECT.c_paymentmethod</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_securityquestion = OBJECT.c_securityquestion</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_securityquestiontext = OBJECT.c_securityquestiontext</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_securityanswer = OBJECT.c_securityanswer</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_invoicemethod = OBJECT.c_invoicemethod</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_usagecycletype = OBJECT.c_usagecycletype</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_language = OBJECT.c_language</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_statusreason = OBJECT.c_statusreason</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_statusreasonother = OBJECT.c_statusreasonother</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_currency = OBJECT.c_currency</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_pricelist = OBJECT.c_pricelist</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_billable = OBJECT.c_billable</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_folder = OBJECT.c_folder</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_division = OBJECT.c_division</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_taxvendor = OBJECT.c_taxvendor</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_metrataxcountryeligibility = OBJECT.c_metrataxcountryeligibility</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_metrataxcountryzone = OBJECT.c_metrataxcountryzone</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_metrataxhasoverrideband = OBJECT.c_metrataxhasoverrideband</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_metrataxoverrideband = OBJECT.c_metrataxoverrideband</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_taxserviceaddresspcode = OBJECT.c_taxserviceaddresspcode</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_taxexemptreason = OBJECT.c_taxexemptreason</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_taxexemptstartdate = OBJECT.c_taxexemptstartdate</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_taxexemptenddate = OBJECT.c_taxexemptenddate</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc).c_taxregistryreference = OBJECT.c_taxregistryreference</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc)._mc_file_id = OBJECT._mc_file_id</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc)._mc_line_no = OBJECT._mc_line_no</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc)._mc_record_length = OBJECT._mc_record_length</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc)._mc_record_type_id = 17</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc)._mc_parent = OBJECT.object_id</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc)._mc_level = OBJECT._mc_level + 1</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc)._mc_first_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc)._mc_pass = '1'</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 't_av_internal' ~ GLOBAL.spawn_child_no</do>
+  <do>GLOBAL.spawn_child_no += 1</do>
+  <do>OBJECT(TEMP.GeNsYm316__mc)._mc_spawned = '1'</do>
+  <!--<print>'spawned object ' ~ OBJECT(TEMP.GeNsYm316__mc)._mc_sort_key</print>-->
+  <sorted_object_file_write>
+    <file>TEMP.infile</file>
+    <object_id>TEMP.GeNsYm316__mc</object_id>
+    <key_field>'_mc_sort_key'</key_field>
+  </sorted_object_file_write>
+  <object_ref_remove>
+    <object_id>TEMP.GeNsYm316__mc</object_id>
+    <ref_count>TEMP.temp</ref_count>
+  </object_ref_remove>
+</proc>

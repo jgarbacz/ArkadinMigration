@@ -1,0 +1,37 @@
+<proc name="pass_write_30">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <validate_field>
+    <field>'c_subbilling'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumglobal/subsidiaryname'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <validate_field>
+    <field>'c_paymenttermle'</field>
+    <datatype>'enum'</datatype>
+    <namespace>'metratech.com/enumbilling/paymentterm'</namespace>
+    <nullable>'0'</nullable>
+    <output_field>'_mc_error'</output_field>
+    <replace>1</replace>
+  </validate_field>
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_av_legalentity.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_acc">OBJECT.id_acc</field>
+      <field name="c_subbilling">OBJECT.c_subbilling</field>
+      <field name="c_paymenttermle">OBJECT.c_paymenttermle</field>
+      <field name="c_commercialregistrationnumber">OBJECT.c_commercialregistrationnumber</field>
+      <field name="c_taxregistrationnumber">OBJECT.c_taxregistrationnumber</field>
+      <field name="c_billingcurrency">OBJECT.c_billingcurrency</field>
+    </data>
+  </print_record>
+</proc>

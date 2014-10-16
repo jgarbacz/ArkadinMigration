@@ -1,0 +1,36 @@
+<proc name="pass_write_201">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_invoice.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_invoice">OBJECT.id_invoice</field>
+      <field name="namespace">OBJECT.namespace</field>
+      <field name="invoice_string">OBJECT.invoice_string</field>
+      <field name="id_interval">OBJECT.id_interval</field>
+      <field name="id_acc">OBJECT.id_acc</field>
+      <field name="invoice_amount">OBJECT.invoice_amount</field>
+      <field name="invoice_date">OBJECT.invoice_date</field>
+      <field name="invoice_due_date">OBJECT.invoice_due_date</field>
+      <field name="id_invoice_num">OBJECT.id_invoice_num</field>
+      <field name="invoice_currency">OBJECT.invoice_currency</field>
+      <field name="payment_ttl_amt">OBJECT.payment_ttl_amt</field>
+      <field name="postbill_adj_ttl_amt">OBJECT.postbill_adj_ttl_amt</field>
+      <field name="ar_adj_ttl_amt">OBJECT.ar_adj_ttl_amt</field>
+      <field name="tax_ttl_amt">OBJECT.tax_ttl_amt</field>
+      <field name="current_balance">OBJECT.current_balance</field>
+      <field name="id_payer">OBJECT.id_payer</field>
+      <field name="id_payer_interval">OBJECT.id_payer_interval</field>
+      <field name="sample_flag">OBJECT.sample_flag</field>
+      <field name="balance_forward_date">OBJECT.balance_forward_date</field>
+      <field name="div_currency">OBJECT.div_currency</field>
+      <field name="div_amount">OBJECT.div_amount</field>
+    </data>
+  </print_record>
+</proc>

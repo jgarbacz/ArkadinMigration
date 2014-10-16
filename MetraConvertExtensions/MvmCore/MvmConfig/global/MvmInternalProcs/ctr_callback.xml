@@ -1,0 +1,17 @@
+<proc name='ctr_callback'>
+  <!-- print>'START: oid='~OBJECT.object_id~' in ctr_callback ctr='~OBJECT.ctr</print -->
+  <atomic_decrement>
+    <object_id>OBJECT.object_id</object_id>
+    <field_name>'ctr'</field_name>
+    <output>TEMP.ctr</output>
+  </atomic_decrement>
+  <if>
+    <condition>TEMP.ctr==0</condition>
+    <then>
+      <callback>OBJECT.callback</callback>
+      <!-- print>'REMOVE ctr oid='~OBJECT.object_id~''</print -->
+      <remove_object_from_cache>OBJECT.object_id</remove_object_from_cache>
+    </then>
+  </if>
+  <!-- print>'END: ctr_callback'</print -->
+</proc>

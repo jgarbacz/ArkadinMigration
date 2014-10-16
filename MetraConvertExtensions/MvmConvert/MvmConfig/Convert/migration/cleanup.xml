@@ -1,0 +1,82 @@
+<procs>
+
+  <proc name="clean_db">
+    <db_execute>
+      <login_object>GLOBAL.target_login</login_object>
+      <statement>
+        "alter table t_user_credentials drop constraint fk1_t_user_credentials"
+      </statement>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute>
+    <print>'Dropped t_user_credentials foreign key'</print>
+
+    <db_execute>
+      <login_object>GLOBAL.target_login</login_object>
+      <statement type="oracle">
+        "
+        delete from t_user_credentials where nm_login || '||' || nm_space in
+        (select nm_login || '||' || nm_space from t_account_mapper where id_acc >= 200)
+        "
+      </statement>
+      <statement type="sql">
+        "
+        delete from t_user_credentials where nm_login + '||' + nm_space in
+        (select nm_login + '||' + nm_space from t_account_mapper where id_acc >= 200)
+        "
+      </statement>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute>
+    <print>'Deleted ' ~ TEMP.num_rows ~ ' rows from t_user_credentials'</print>
+
+    <db_execute>
+      <login_object>GLOBAL.target_login</login_object>
+      <statement>
+        "delete from t_account_mapper where id_acc >= 200"
+      </statement>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute>
+    <print>'Deleted ' ~ TEMP.num_rows ~ ' rows from t_account_mapper'</print>
+
+    <db_execute>
+      <login_object>GLOBAL.target_login</login_object>
+      <statement>
+        "delete from t_site_user where id_profile > 1015"
+      </statement>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute>
+    <print>'Deleted ' ~ TEMP.num_rows ~ ' rows from t_site_user'</print>
+
+    <db_execute>
+      <login_object>GLOBAL.target_login</login_object>
+      <statement type="oracle">
+        "
+        ALTER TABLE t_user_credentials ADD CONSTRAINT fk1_t_user_credentials FOREIGN KEY(nm_login, nm_space)
+        REFERENCES t_account_mapper (nm_login, nm_space)
+        "
+      </statement>
+      <statement type="sql">
+        "
+        ALTER TABLE [dbo].[t_user_credentials]  WITH NOCHECK ADD CONSTRAINT [fk1_t_user_credentials] FOREIGN KEY([nm_login], [nm_space])
+        REFERENCES [dbo].[t_account_mapper] ([nm_login], [nm_space])
+        "
+      </statement>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute>
+    <print>'Added t_user_credentials foreign key'</print>
+
+    <if>
+      <condition>OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+      <then>
+        <db_execute>
+          <login_object>GLOBAL.target_login</login_object>
+          <statement type="sql">
+            "ALTER TABLE [dbo].[t_user_credentials] CHECK CONSTRAINT [fk1_t_user_credentials]"
+          </statement>
+          <num_rows>TEMP.num_rows</num_rows>
+        </db_execute>
+        <print>'Checked t_user_credentials foreign key'</print>
+      </then>
+    </if>
+  </proc>
+
+</procs>

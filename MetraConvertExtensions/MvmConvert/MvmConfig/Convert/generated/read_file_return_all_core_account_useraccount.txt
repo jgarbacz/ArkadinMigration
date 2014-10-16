@@ -1,0 +1,134 @@
+<proc name="read_file_return_all_core_account_useraccount">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="pipe_cursor" />
+  <param name="filename" />
+  <do>TEMP.linecount = 0</do>
+  <file_select>
+    <input_file>TEMP.filename</input_file>
+    <record_offset_tag>'_mc_record_offset'</record_offset_tag>
+    <record_length_tag>'_mc_record_length'</record_length_tag>
+    <encoding>'UTF-8'</encoding>
+    <cursor_type>'220'</cursor_type>
+    <format field_delim="`|" record_delim="&lt;&#xD;&#xA;" trim="true">
+      <field name="nm_login" />
+      <field name="c_legacysystemname" />
+      <field name="parent_nm_login" />
+      <field name="payer_account" />
+      <field name="dt_crt" />
+      <field name="vt_end" />
+      <field name="status" />
+      <field name="tx_password" />
+      <field name="c_createdby" />
+      <field name="c_createddate" />
+      <field name="c_modifiedby" />
+      <field name="c_modifieddate" />
+      <field name="c_orderstatus" />
+      <field name="c_custpartnerextid" />
+      <field name="c_customernodename" />
+      <field name="c_commentc" />
+      <field name="c_loginu" />
+      <field name="c_billingcodeu" />
+      <field name="c_selfcarerelation" />
+      <field name="c_selfcarerole" />
+      <field name="c_moderator" />
+      <field name="c_salesforceidu" />
+      <field name="c_userdispatch1" />
+      <field name="c_userdispatch2" />
+      <field name="c_effectivemgmtsubsidiary" />
+      <field name="c_logousername" />
+      <field name="c_billingrefu" />
+      <field name="c_ismigrated" />
+    </format>
+    <cursor>TEMP.dfcsr</cursor>
+    <loop>
+      <do>TEMP.linecount += 1</do>
+      <do>OBJECT(TEMP.dfcsr)._mc_record_type_id = 220</do>
+      <do>OBJECT(TEMP.dfcsr)._mc_line_no = TEMP.linecount</do>
+      <do>OBJECT(TEMP.dfcsr).parent_nm_space = 'mt'</do>
+      <do>OBJECT(TEMP.dfcsr).nm_space = 'mt'</do>
+      <do>OBJECT(TEMP.dfcsr).vt_start = dt_crt</do>
+      <do>OBJECT(TEMP.dfcsr).tt_start = dt_crt</do>
+      <do>OBJECT(TEMP.dfcsr).tt_end = vt_end</do>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_createdby eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_createdby = MIG</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_modifiedby eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_modifiedby = MIG</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_orderstatus eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_orderstatus = 'Unlock'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_selfcarerole eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_selfcarerole = 'User'</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_moderator eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_moderator = 0</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.dfcsr).c_ismigrated eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.dfcsr).c_ismigrated = '0'</do>
+        </then>
+      </if>
+      <do>OBJECT(TEMP.dfcsr).c_billable = '1'</do>
+      <do>OBJECT(TEMP.dfcsr).c_currency = 'USD'</do>
+      <do>OBJECT(TEMP.dfcsr).c_folder = '0'</do>
+      <do>OBJECT(TEMP.dfcsr).c_metrataxhasoverrideband = '0'</do>
+      <do>OBJECT(TEMP.dfcsr).c_statusreasonother = 'None'</do>
+      <do>OBJECT(TEMP.dfcsr).c_taxexemptreason = 'NotExempt'</do>
+      <do>OBJECT(TEMP.dfcsr).c_communicationoptin = '0'</do>
+      <pipe_row>TEMP.dfcsr</pipe_row>
+    </loop>
+  </file_select>
+  <if>
+    <condition>TEMP.linecount EQ 0</condition>
+    <then>
+      <file_info>
+        <filename>TEMP.filename</filename>
+        <size>TEMP.filesize</size>
+      </file_info>
+      <if>
+        <condition>TEMP.filesize GT 3</condition>
+        <then>
+          <fatal>'Error: could not read any data from file ' ~ TEMP.filename ~ '; are delimiters configured correctly?'</fatal>
+        </then>
+      </if>
+    </then>
+  </if>
+  <do>TEMP.current_count = 0</do>
+  <index_get>
+    <index>'MC_RECORD_COUNT'</index>
+    <field name="record_type">'core_account_useraccount'</field>
+    <field name="count">TEMP.count</field>
+    <then>
+      <do>TEMP.current_count = TEMP.count</do>
+    </then>
+    <else>
+      <index_insert>
+        <index>'MC_RECORD_COUNT'</index>
+        <field name="record_type">'core_account_useraccount'</field>
+        <field name="count">TEMP.linecount</field>
+        <field name="display_record_type">'ACCOUNT_USERACCOUNT'</field>
+      </index_insert>
+    </else>
+  </index_get>
+  <do>TEMP.current_count += TEMP.linecount</do>
+  <do>TEMP.new_count = index_update('MC_RECORD_COUNT', record_type=&gt;'core_account_useraccount', count=&gt;TEMP.current_count)</do>
+</proc>

@@ -1,0 +1,21 @@
+<proc name="sync_all_msixdef">
+   <do>TEMP.glob='D:\MetraTech\RMP\Extensions\*\config\ParamTable\*\*.msixdef'</do>
+    <print>'Running glob_select for: '~TEMP.glob</print>
+    <glob_select>
+      <glob>TEMP.glob</glob>
+	  <cursor_value>'glob'</cursor_value>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <print>'GLOB='~OBJECT(TEMP.csr).glob</print>
+		<call_proc_for_current_object>
+            <name>'sync_msixdef_with_db'</name>
+            <param name='input'>OBJECT(TEMP.csr).glob</param>
+            <param name='name'>OBJECT(TEMP.csr).glob</param>
+          </call_proc_for_current_object>
+      </loop>
+      <else>
+        <print>'No matches'</print>
+      </else>
+    </glob_select>
+</proc>
+

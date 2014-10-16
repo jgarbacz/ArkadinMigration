@@ -1,0 +1,1364 @@
+<procs>
+
+<proc name="setup_defaults">
+  <call_proc_for_current_object>
+    <name>'generate_mapping_procs'</name>
+  </call_proc_for_current_object>
+</proc>
+
+<proc name="generate_mapping_procs">
+  <do>TEMP.set_parent_ref = ''</do>
+  <do>TEMP.prepare_next_pass = ''</do>
+  <do>TEMP.prelude = TEMP.set_parent_ref ~ TEMP.prepare_next_pass</do>
+
+  <define_memory_index>
+    <index>'MC_RECORD_PASSES'</index>
+    <use_nested_keys>'1'</use_nested_keys>
+    <key_field>'record_type'</key_field>
+    <key_field>'pass'</key_field>
+  </define_memory_index>
+
+  <index_select>
+    <index>'MC_RECORD_TYPES'</index>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <index_select>
+        <index>'MC_RECORD_EVENTS'</index>
+        <field name='record_type'>OBJECT(TEMP.csr).record_type</field>
+        <!--<order_by direction='desc' type='numeric'>OBJECT.pass</order_by>-->
+        <order_by direction='desc'>OBJECT.pass</order_by>
+        <cursor>TEMP.rcsr</cursor>
+        <loop>
+          <index_insert_if_none>
+            <index>'MC_RECORD_PASSES'</index>
+            <field name='record_type'>OBJECT(TEMP.csr).record_type</field>
+            <field name='pass'>OBJECT(TEMP.rcsr).pass</field>
+          </index_insert_if_none>
+          <index_insert_if_none>
+            <index>'MC_RECORD_FINAL_PASS'</index>
+            <field name='record_type_id'>OBJECT(TEMP.csr).record_type_id</field>
+            <field name='pass'>OBJECT(TEMP.rcsr).pass</field>
+          </index_insert_if_none>
+        </loop>
+      </index_select>
+
+      <do>TEMP.first = '1'</do>
+      <index_select>
+        <index>'MC_RECORD_PASSES'</index>
+        <field name='record_type'>OBJECT(TEMP.csr).record_type</field>
+        <cursor>TEMP.pcsr</cursor>
+        <loop>
+          <if>
+            <condition>OBJECT(TEMP.csr).table eq ''</condition>
+            <then>
+              <call_proc_for_object>
+                <name>'generate_rtype_mapping'</name>
+                <object_id>TEMP.csr</object_id>
+                <param name='record_type'>OBJECT(TEMP.csr).record_type</param>
+                <param name='record_type_id'>OBJECT(TEMP.csr).record_type_id</param>
+                <param name='phase'>OBJECT(TEMP.csr).phase</param>
+                <param name='stage'>OBJECT(TEMP.csr).stage</param>
+                <param name='pass'>OBJECT(TEMP.pcsr).pass</param>
+                <param name='next_pass'>OBJECT(TEMP.pcsr).pass + 1</param>
+                <param name='first'>TEMP.first</param>
+                <param name='write'>''</param>
+                <param name='set_parent_ref'>TEMP.prelude</param>
+                <param name='procname'>TEMP.objprocname</param>
+              </call_proc_for_object>
+            </then>
+          </if>
+          <do>TEMP.first = ''</do>
+        </loop>
+      </index_select>
+
+      <if>
+        <condition>OBJECT(TEMP.csr).table ne ''</condition>
+        <then>
+          <do>TEMP.next_stage = ''</do>
+          <index_get>
+            <index>'MC_STAGES'</index>
+            <field name='phase'>OBJECT(TEMP.csr).phase</field>
+            <field name='stage'>OBJECT(TEMP.csr).stage</field>
+            <field name='next_stage'>TEMP.next_stage</field>
+          </index_get>
+          <call_proc_for_object>
+            <name>'generate_rtype_printing'</name>
+            <object_id>TEMP.csr</object_id>
+            <param name='record_type'>OBJECT(TEMP.csr).record_type</param>
+            <param name='record_type_id'>OBJECT(TEMP.csr).record_type_id</param>
+            <param name='database'>OBJECT(TEMP.csr).database</param>
+            <param name='table'>OBJECT(TEMP.csr).table</param>
+            <param name='printed'>OBJECT(TEMP.csr).printed</param>
+            <param name='phase'>OBJECT(TEMP.csr).phase</param>
+            <param name='next_stage'>TEMP.next_stage</param>
+            <param name='pass'>'write'</param>
+            <param name='procname'>TEMP.objprocname</param>
+          </call_proc_for_object>
+        </then>
+      </if>
+    </loop>
+  </index_select>
+
+  <index_drop>
+    <index>'MC_RECORD_PASSES'</index>
+  </index_drop>
+
+  <!--
+  <index_select>
+    <index>'MC_RECORD_EVENTS'</index>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <print_record>
+        <file>'C:\record_events.txt'</file>
+        <field_delim>'`|'</field_delim>
+        <record_delim>'||\r\n'</record_delim>
+        <data>
+          <field>OBJECT(TEMP.csr).record_type</field>
+          <field>OBJECT(TEMP.csr).event_id</field>
+          <field>OBJECT(TEMP.csr).event_type</field>
+          <field>OBJECT(TEMP.csr).spawn_type</field>
+          <field>OBJECT(TEMP.csr).spawn_table</field>
+          <field>OBJECT(TEMP.csr).inherit</field>
+          <field>OBJECT(TEMP.csr).cursor_variable</field>
+        </data>
+      </print_record>
+      <index_select>
+        <index>'MC_RECORD_EVENT_MAPPINGS'</index>
+        <field name='record_type'>OBJECT(TEMP.csr).record_type</field>
+        <field name='event_id'>OBJECT(TEMP.csr).event_id</field>
+        <cursor>TEMP.ecsr</cursor>
+        <loop>
+          <print_record>
+            <file>'C:\record_event_mappings.txt'</file>
+            <field_delim>'`|'</field_delim>
+            <record_delim>'||\r\n'</record_delim>
+            <data>
+              <field>OBJECT(TEMP.ecsr).record_type</field>
+              <field>OBJECT(TEMP.ecsr).event_id</field>
+              <field>OBJECT(TEMP.ecsr).expression</field>
+              <field>OBJECT(TEMP.ecsr).override</field>
+            </data>
+          </print_record>
+        </loop>
+      </index_select>
+    </loop>
+  </index_select>
+  -->
+
+</proc>
+
+<proc name="generate_events">
+  <param name='record_type' />
+  <param name='phase' />
+  <param name='stage' />
+  <param name='pass' />
+  <param name='next_pass' />
+  <param name='first' />
+  <param name='proctext' mode='out' />
+  <param name='transformed' mode='out' />
+
+  <!-- FIXME: mvmscript doesn't seem to support ?: ternary operator -->
+  <do>GLOBAL.map_counter = 1</do>
+  <do>TEMP.proctext = ''</do>
+  <do>TEMP.transformed = ''</do>
+  <do>TEMP.saw_create_record = ''</do>
+  <do>TEMP.event_ctr = 0</do>
+  <do>TEMP.field_mapping_counter = 0</do>
+  <do>TEMP.total_event_count = index_count('MC_RECORD_EVENTS', record_type=>TEMP.record_type, pass=>TEMP.pass)</do>
+  <do>TEMP.next_event_count = index_count('MC_RECORD_EVENTS', record_type=>TEMP.record_type, pass=>TEMP.next_pass)</do>
+
+  <do>TEMP.validations = ''</do>
+  <index_select_keys>
+    <index>'MC_RECORD_VALIDATION'</index>
+    <!--<field name='record_type'>TEMP.record_type</field>-->
+    <cursor>TEMP.kcsr</cursor>
+    <loop>
+      <index_select>
+        <index>'MC_RECORD_VALIDATION'</index>
+        <field name='record_type'>TEMP.record_type</field>
+        <field name='identifier'>OBJECT(TEMP.kcsr).identifier</field>
+        <cursor>TEMP.vcsr</cursor>
+        <then>
+          <proc_select>
+            <name>'table_fields'</name>
+            <param name='database'>OBJECT(TEMP.vcsr).validate_db</param>
+            <param name='table'>OBJECT(TEMP.vcsr).validate_table</param>
+            <param name='field'>OBJECT(TEMP.vcsr).validate_field</param>
+            <cursor>TEMP.tfcsr</cursor>
+            <then>
+              <do>TEMP.runtime_check = ''</do>
+              <call_proc_for_object>
+                <name>'validate_field'</name>
+                <object_id>TEMP.tfcsr</object_id>
+                <param name='identifier'>OBJECT(TEMP.kcsr).identifier</param>
+                <param name='cursor'>''</param>
+                <param name='output'>TEMP.runtime_check</param>
+              </call_proc_for_object>
+              <do>TEMP.validations ~= TEMP.runtime_check</do>
+            </then>
+          </proc_select>
+        </then>
+      </index_select>
+    </loop>
+  </index_select_keys>
+
+  <do>TEMP.spawn_ctr = 0</do>
+  <do>TEMP.total_spawns = 0</do>
+  <index_select>
+    <index>'MC_RECORD_EVENTS'</index>
+    <field name='record_type'>TEMP.record_type</field>
+    <field name='pass'>TEMP.pass</field>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <if>
+        <condition>OBJECT(TEMP.csr).event_type eq 'create_record'</condition>
+        <then>
+          <do>TEMP.total_spawns += 1</do>
+        </then>
+      </if>
+    </loop>
+  </index_select>
+
+  <index_select>
+    <index>'MC_RECORD_EVENTS'</index>
+    <field name='record_type'>TEMP.record_type</field>
+    <field name='pass'>TEMP.pass</field>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <do>TEMP.event_ctr += 1</do>
+      <do>TEMP.spawned_type_id = ''</do>
+      <do>TEMP.spawned_stage = ''</do>
+      <index_get>
+        <index>'MC_RECORD_TYPES'</index>
+        <field name='record_type'>OBJECT(TEMP.csr).spawn_type</field>
+        <field name='record_type_id'>TEMP.spawned_type_id</field>
+        <field name='stage'>TEMP.spawned_stage</field>
+      </index_get>
+
+      <if>
+        <condition>OBJECT(TEMP.csr).event_type eq 'create_record'</condition>
+        <then>
+          <do>TEMP.spawn_ctr += 1</do>
+        </then>
+      </if>
+
+      <!--
+      Bail out if errored the first time we see create_record; this does what we want in the common case
+      of one big field_mapping section before all the spawns.  Can get fancier later if needed.
+      -->
+      <do>TEMP.children = ''</do>
+      <if>
+        <condition>OBJECT(TEMP.csr).event_type eq 'create_record'</condition>
+        <then>
+          <if>
+            <condition>TEMP.saw_create_record ne '1'</condition>
+            <then>
+              <do>
+                TEMP.proctext ~= "<![CDATA[
+                  <if>
+                    <condition>OBJECT._mc_error ne ''</condition>
+                    <then>
+                      <return/>
+                    </then>
+                  </if>
+                ]]>"
+              </do>
+            </then>
+          </if>
+          <do>TEMP.saw_create_record = '1' = </do>
+
+          <!--
+          We can't set _mc_sort_key "correctly" at this point, since the primary key fields on the spawned object
+          often won't have been set yet.  So just set it to a guaranteed-unique number which will sort after the parent
+          and before any subsequent children of the parent.
+          -->
+          <do>TEMP.spawn_name = ''</do>
+          <if>
+            <condition>OBJECT(TEMP.csr).spawn_table eq ''</condition>
+            <then>
+              <do>TEMP.spawn_name = OBJECT(TEMP.csr).spawn_type</do>
+              <do>TEMP.children = "'" ~ OBJECT(TEMP.csr).spawn_type ~ "' ~ GLOBAL.spawn_child_no"</do>
+            </then>
+            <else>
+              <do>TEMP.spawn_name = OBJECT(TEMP.csr).spawn_table</do>
+              <do>TEMP.children = "'" ~ OBJECT(TEMP.csr).spawn_table ~ "' ~ GLOBAL.spawn_child_no"</do>
+            </else>
+          </if>
+          <if>
+            <condition>TEMP.pass eq '1' or TEMP.pass eq '3' or TEMP.pass eq '5'</condition>
+            <then>
+              <do>TEMP.children = "'" ~ TEMP.spawn_name ~ "' ~ GLOBAL.spawn_child_no"</do>
+            </then>
+            <condition>TEMP.pass eq '2' or TEMP.pass eq '4' or TEMP.pass eq '6'</condition>
+            <then>
+              <do>TEMP.children = "'" ~ TEMP.spawn_name ~ "' ~ GLOBAL.spawn_child_no"</do>
+              <!--<do>TEMP.children = "GLOBAL.spawn_child_reverse_no ~ '" ~ TEMP.spawn_name ~ "'"</do>-->
+            </then>
+          </if>
+          <do>GLOBAL.spawn_child_no += 1</do>
+        </then>
+      </if>
+
+      <!-- Previously inherit was true/false, but now it can also be a regex of fields to pass down -->
+      <do>TEMP.inherit = ''</do>
+      <do>TEMP.post_inherit = ''</do>
+      <do>TEMP.cursor_inherit = ''</do>
+      <if>
+        <condition>(OBJECT(TEMP.csr).inherit eq '1' or OBJECT(TEMP.csr).inherit eq '0') and OBJECT(TEMP.csr).spawn_table eq ''</condition>
+        <then>
+          <do>TEMP.inherit = "<![CDATA[ <inherit_parent>" ~ OBJECT(TEMP.csr).inherit ~ "</inherit_parent> ]]>"</do>
+          <do>TEMP.post_inherit = "<![CDATA[ <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ").object_type = '" ~ OBJECT(TEMP.csr).spawn_type ~ "'</do> ]]>"</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.csr).inherit ne '0'</condition>
+        <then>
+          <do>TEMP.where_filter = ''</do>
+          <if>
+            <condition>OBJECT(TEMP.csr).inherit ne '1'</condition>
+            <then>
+              <do>TEMP.inherit = "<![CDATA[ <inherit_parent>0</inherit_parent> ]]>"</do>
+              <do>TEMP.where_filter = "<![CDATA[ <where>regex_match('" ~ OBJECT(TEMP.csr).inherit ~ "', OBJECT.field) eq '1'</where> ]]>"</do>
+            </then>
+          </if>
+          <do>
+            TEMP.cursor_inherit = "<![CDATA[
+              <object_field_value_select>
+                <object_id>OBJECT.object_id</object_id>
+                <cursor_field>'field'</cursor_field>
+                <cursor_value>'value'</cursor_value>
+                " ~ TEMP.where_filter ~ "
+                <cursor>TEMP.ocsr</cursor>
+                <loop>
+                  <if>
+                    <condition>starts_with(OBJECT(TEMP.ocsr).field, '_mc_') ne '1'</condition>
+                    <then>
+                      <set_object_field>
+                        <input>OBJECT(TEMP.ocsr).value</input>
+                        <object_id>" ~ OBJECT(TEMP.csr).cursor_variable ~ "</object_id>
+                        <field_name>OBJECT(TEMP.ocsr).field</field_name>
+                      </set_object_field>
+                    </then>
+                  </if>
+                </loop>
+              </object_field_value_select>
+            ]]>"
+          </do>
+          <if>
+            <condition>OBJECT(TEMP.csr).inherit ne '1'</condition>
+            <then>
+              <do>TEMP.post_inherit = TEMP.cursor_inherit</do>
+            </then>
+          </if>
+        </then>
+      </if>
+
+      <do>TEMP.mappings = ''</do>
+      <do>TEMP.table_field_copies = ''</do>
+      <if>
+        <condition>OBJECT(TEMP.csr).spawn_table ne ''</condition>
+        <then>
+          <proc_select>
+            <name>'table_fields'</name>
+            <param name='database'>OBJECT(TEMP.csr).spawn_database</param>
+            <param name='table'>OBJECT(TEMP.csr).spawn_table</param>
+            <param name='field'>''</param>
+            <cursor>TEMP.tfcsr</cursor>
+            <loop>
+              <do>TEMP.identifier = OBJECT(TEMP.tfcsr).alias ne '' ? OBJECT(TEMP.tfcsr).alias : OBJECT(TEMP.tfcsr).field</do>
+              <do>
+                TEMP.table_field_copies ~= "<![CDATA[
+                  <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")." ~ TEMP.identifier ~ " = OBJECT." ~ TEMP.identifier ~ "</do>
+                ]]>"
+              </do>
+            </loop>
+          </proc_select>
+        </then>
+      </if>
+
+      <select>
+        <index_select>
+          <index>'MC_RECORD_EVENT_MAPPINGS'</index>
+          <field name='record_type'>OBJECT(TEMP.csr).record_type</field>
+          <field name='event_id'>OBJECT(TEMP.csr).event_id</field>
+        </index_select>
+        <order_by type='numeric'>OBJECT.mapping_id</order_by>
+        <cursor>TEMP.mcsr</cursor>
+        <loop>
+          <do>TEMP.condition = ''</do>
+          <do>TEMP.else_clause = ''</do>
+          <if>
+            <condition>OBJECT(TEMP.mcsr).condition ne ''</condition>
+            <then>
+              <do>
+                TEMP.condition ~= "<![CDATA[
+                  <if>
+                    <condition>" ~ OBJECT(TEMP.mcsr).condition ~ "</condition>
+                    <then>
+                ]]>"
+              </do>
+            </then>
+            <condition>OBJECT(TEMP.mcsr).assigned_variable ne '' and OBJECT(TEMP.mcsr).override ne '1'</condition>
+            <then>
+              <do>
+                TEMP.condition ~= "<![CDATA[
+                  <if>
+                    <condition>" ~ OBJECT(TEMP.mcsr).assigned_variable ~ " eq ''</condition>
+                    <then>
+                ]]>"
+              </do>
+              <do>TEMP.nullcondition = '1'</do>
+            </then>
+          </if>
+          <do>TEMP.mappings ~= TEMP.condition ~ OBJECT(TEMP.mcsr).expression</do>
+          <if>
+            <condition>OBJECT(TEMP.mcsr).validate_db ne ''</condition>
+            <then>
+              <proc_select>
+                <name>'table_fields'</name>
+                <param name='database'>OBJECT(TEMP.mcsr).validate_db</param>
+                <param name='table'>OBJECT(TEMP.mcsr).validate_table</param>
+                <param name='field'>OBJECT(TEMP.mcsr).validate_field</param>
+                <cursor>TEMP.tfcsr</cursor>
+                <then>
+                  <call_proc_for_object>
+                    <name>'validate_field'</name>
+                    <object_id>TEMP.tfcsr</object_id>
+                    <param name='identifier'>OBJECT(TEMP.mcsr).assigned_field</param>
+                    <param name='cursor'>OBJECT(TEMP.mcsr).assigned_object_id</param>
+                    <param name='output'>TEMP.runtime_check</param>
+                  </call_proc_for_object>
+                  <if>
+                    <condition>TEMP.nullcondition eq '1'</condition>
+                    <then>
+                      <do>TEMP.else_clause = "<![CDATA[ <else> ]]>" ~ TEMP.runtime_check ~ "<![CDATA[ </else> ]]>"</do>
+                    </then>
+                  </if>
+                  <if>
+                    <condition>OBJECT(TEMP.mcsr).validate eq 'setup'</condition>
+                    <then>
+                      <call_proc_for_object>
+                        <name>'validate_field'</name>
+                        <object_id>TEMP.tfcsr</object_id>
+                        <param name='identifier'>'__' ~ OBJECT(TEMP.mcsr).assigned_field</param>
+                        <param name='cursor'>''</param>
+                        <param name='output'>TEMP.setup_check</param>
+                      </call_proc_for_object>
+                      <do>TEMP.procname = 'temp_proc_' ~ GLOBAL.proc_counter</do>
+                      <do>GLOBAL.proc_counter += 1</do>
+                      <!-- 
+                      Change by TCF May 2014.
+                      This is a total hack. The proc above, which outputs TEMP.setup_check, will sometimes
+                      output it in a way that it contains a "default" node. This has been removed from the
+                      latest version of MVM for validate_field (MValidateField), so this will throw a nasty
+                      error. This is a cheap but effective way of dealing with the problem.
+                      -->
+                      <if>
+                          <condition>GLOBAL.mvmversionmajor GTE 7</condition>
+                          <then>
+                              <do>TEMP.setup_check = replace(TEMP.setup_check, "<![CDATA[<default>]]>", "<![CDATA[<!--<default>]]>")</do>
+                              <do>TEMP.setup_check = replace(TEMP.setup_check, "<![CDATA[</default>]]>", "<![CDATA[</default>-->]]>")</do>
+                          </then>
+                      </if>
+                      <do>
+                        TEMP.myproc = "<![CDATA[
+                          <proc name='" ~ TEMP.procname ~ "'>
+                            <set_object_field>
+                              <input>" ~ OBJECT(TEMP.mcsr).assigned_constant ~ "</input>
+                              <object_id>OBJECT.object_id</object_id>
+                              <field_name>'__" ~ OBJECT(TEMP.mcsr).assigned_field ~ "'</field_name>
+                            </set_object_field>
+                            " ~ TEMP.setup_check ~ "
+                          </proc>
+                        ]]>"
+                      </do>
+                      <execute_immediate>TEMP.myproc</execute_immediate>
+                      <do>OBJECT(TEMP.tfcsr)._mc_error = ''</do>
+                      <call_dynamic_proc_for_object>
+                        <name>TEMP.procname</name>
+                        <object_id>TEMP.tfcsr</object_id>
+                      </call_dynamic_proc_for_object>
+                      <if>
+                        <condition>OBJECT(TEMP.tfcsr)._mc_error ne ''</condition>
+                        <then>
+                          <fatal>'Error: constant default [' ~ OBJECT(TEMP.mcsr).expression ~ '] failed validation: ' ~ OBJECT(TEMP.tfcsr)._mc_error</fatal>
+                        </then>
+                      </if>
+                    </then>
+                    <condition>OBJECT(TEMP.mcsr).validate eq 'run'</condition>
+                    <then>
+                      <do>TEMP.mappings ~= TEMP.runtime_check</do>
+                    </then>
+                  </if>
+                </then>
+              </proc_select>
+            </then>
+          </if>
+          <if>
+            <condition>TEMP.condition ne ''</condition>
+            <then>
+              <do>
+                TEMP.mappings ~= "<![CDATA[
+                    </then>
+                    " ~ TEMP.else_clause ~ "
+                  </if>
+                ]]>"
+              </do>
+            </then>
+          </if>
+        </loop>
+      </select>
+
+      <!-- FIXME: is _mc_first_pass obsolete now with _mc_pass? -->
+      <do>
+        TEMP.set_mc_fields = "<![CDATA[
+          <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_file_id = OBJECT._mc_file_id</do>
+          <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_line_no = OBJECT._mc_line_no</do>
+          <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_record_offset = OBJECT._mc_record_offset</do>
+          <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_record_length = OBJECT._mc_record_length</do>
+          <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_record_type_id = " ~ TEMP.spawned_type_id ~ "</do>
+          <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_parent = OBJECT.object_id</do>
+          <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_level = OBJECT._mc_level + 1</do>
+          <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_first_pass = '1'</do>
+          <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_pass = '1'</do>
+        ]]>"
+      </do>
+      <if>
+        <condition>TEMP.children ne '' and (TEMP.pass eq '1' or TEMP.pass eq '3' or TEMP.pass eq '5')</condition>
+        <then>
+          <do>
+            TEMP.set_mc_fields ~= "<![CDATA[
+              <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_sort_key = OBJECT._mc_sort_key ~ '" ~ GLOBAL.internal_escaped_delim ~ GLOBAL.internal_escaped_delim ~ "' ~ " ~ TEMP.children ~ "</do>
+              <do>GLOBAL.spawn_child_no += 1</do>
+            ]]>"
+          </do>
+        </then>
+        <condition>TEMP.children ne '' and (TEMP.pass eq '2' or TEMP.pass eq '4' or TEMP.pass eq '6')</condition>
+        <then>
+          <!--<do>
+            TEMP.set_mc_fields ~= "<![CDATA[
+              <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_sort_key = string_immediately_before(OBJECT._mc_sort_key) ~ " ~ TEMP.children ~ "</do>
+              <do>GLOBAL.spawn_child_reverse_no -= 1</do>
+            ]]>"
+          </do>-->
+          <do>
+            TEMP.set_mc_fields ~= "<![CDATA[
+              <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_sort_key = OBJECT._mc_sort_key ~ '" ~ GLOBAL.internal_escaped_delim ~ GLOBAL.internal_escaped_delim ~ "' ~ " ~ TEMP.children ~ "</do>
+              <do>GLOBAL.spawn_child_no += 1</do>
+            ]]>"
+          </do>
+        </then>
+      </if>
+
+      <do>TEMP.postcondition = ''</do>
+      <if>
+        <condition>OBJECT(TEMP.csr).condition ne ''</condition>
+        <then>
+          <do>
+            TEMP.proctext ~= "<![CDATA[
+              <if>
+                <condition>" ~ OBJECT(TEMP.csr).condition ~ "</condition>
+                <then>
+            ]]>"
+          </do>
+          <do>
+            TEMP.postcondition = "<![CDATA[
+                </then>
+              </if>
+            ]]>"
+          </do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.csr).event_type eq 'create_record' and OBJECT(TEMP.csr).from_cursor ne '' and TEMP.stage eq TEMP.spawned_stage</condition>
+        <then>
+          <!-- Spawn object(s) from within a cursor loop -->
+          <do>
+            TEMP.proctext ~= "<![CDATA[
+              <select>
+                " ~ OBJECT(TEMP.csr).from_cursor ~ "
+                <loop>
+                  " ~ TEMP.cursor_inherit ~ "
+                  " ~ TEMP.table_field_copies ~ TEMP.mappings ~ "
+                  " ~ TEMP.set_mc_fields ~ "
+                  <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_spawned = '1'</do>
+                  <sorted_object_file_write>
+                    <file>TEMP.infile</file>
+                    <object_id>" ~ OBJECT(TEMP.csr).cursor_variable ~ "</object_id>
+                    <key_field>'_mc_sort_key'</key_field>
+                  </sorted_object_file_write>
+                </loop>
+              </select>
+            ]]>"
+          </do>
+        </then>
+        <condition>OBJECT(TEMP.csr).event_type eq 'create_record' and OBJECT(TEMP.csr).from_cursor eq '' and TEMP.stage eq TEMP.spawned_stage</condition>
+        <then>
+          <!-- Spawn a single object -->
+          <if>
+            <!-- Make sure no spawns (i.e. events other than field mapping sections) have happened, and it's the last spawn event, and there's nothing in the next pass -->
+            <!-- FIXME: for _mc_transformed check to work, need to make sure there are no events in *any* *future* pass, not just the next one -->
+            <condition>(TEMP.field_mapping_counter + 1) EQ TEMP.event_ctr and TEMP.total_spawns EQ TEMP.spawn_ctr and TEMP.next_event_count EQ 0 and TEMP.first eq '1'</condition>
+            <then>
+              <do>TEMP.transformed = '1'</do>
+              <do>
+                TEMP.proctext ~= "<![CDATA[
+                  " ~ TEMP.mappings ~ "
+                  <do>OBJECT._mc_record_type_id = " ~ TEMP.spawned_type_id ~ "</do>
+                  <do>OBJECT._mc_transformed = '1'</do>
+                  <do>TEMP.myprocname = 'pass_" ~ TEMP.pass ~ "_' ~ OBJECT._mc_record_type_id</do>
+                  <get_proc_text>
+                    <name>TEMP.myprocname</name>
+                    <success>TEMP.success</success>
+                  </get_proc_text>
+                  <if>
+                    <condition>TEMP.success eq '1'</condition>
+                    <then>
+                      <call_dynamic_proc_for_object>
+                        <name>TEMP.myprocname</name>
+                        <object_id>OBJECT.object_id</object_id>
+                        <param name='infile'>TEMP.infile</param>
+                        <param name='outfile'>TEMP.outfile</param>
+                      </call_dynamic_proc_for_object>
+                      <do>OBJECT._mc_transformed = ''</do>
+                    </then>
+                  </if>
+                ]]>"
+              </do>
+            </then>
+            <else>
+              <do>
+                TEMP.proctext ~= "<![CDATA[
+                  <spawn>
+                    <internal_type>'format_array'</internal_type>
+                    <feedback_name>'" ~ TEMP.spawned_type_id ~ "'</feedback_name>
+                    <object_type>'" ~ OBJECT(TEMP.csr).spawn_type ~ "'</object_type>
+                    <object_id>" ~ OBJECT(TEMP.csr).cursor_variable ~ "</object_id>
+                    " ~ TEMP.inherit ~ "
+                    <pin_to_proc>0</pin_to_proc>
+                  </spawn>
+                  " ~ TEMP.post_inherit ~ "
+                  <object_ref_get>
+                    <object_id>" ~ OBJECT(TEMP.csr).cursor_variable ~ "</object_id>
+                    <target>TEMP.x</target>
+                  </object_ref_get>
+                  " ~ TEMP.table_field_copies ~ TEMP.mappings ~ "
+                  " ~ TEMP.set_mc_fields ~ "
+                  <do>OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_spawned = '1'</do>
+				  <!--<print>'spawned object ' ~ OBJECT(" ~ OBJECT(TEMP.csr).cursor_variable ~ ")._mc_sort_key</print>-->
+                  <sorted_object_file_write>
+                    <file>TEMP.infile</file>
+                    <object_id>" ~ OBJECT(TEMP.csr).cursor_variable ~ "</object_id>
+                    <key_field>'_mc_sort_key'</key_field>
+                  </sorted_object_file_write>
+                  <object_ref_remove>
+                    <object_id>" ~ OBJECT(TEMP.csr).cursor_variable ~ "</object_id>
+                    <ref_count>TEMP.temp</ref_count>
+                  </object_ref_remove>
+                ]]>"
+              </do>
+            </else>
+          </if>
+        </then>
+        <condition>OBJECT(TEMP.csr).event_type eq 'create_record' and OBJECT(TEMP.csr).from_cursor ne '' and TEMP.stage ne TEMP.spawned_stage</condition>
+        <then>
+          <!-- Spawn object(s) within a loop for the next stage -->
+          <do>
+            TEMP.proctext ~= "<![CDATA[
+              <select>
+                " ~ OBJECT(TEMP.csr).from_cursor ~ "
+                <loop>
+                  " ~ TEMP.cursor_inherit ~ "
+                  " ~ TEMP.table_field_copies ~ TEMP.mappings ~ "
+                  " ~ TEMP.set_mc_fields ~ "
+                  <call_proc_for_object>
+                    <name>'clean_object'</name>
+                    <object_id>" ~ OBJECT(TEMP.csr).cursor_variable ~ "</object_id>
+                  </call_proc_for_object>
+                  <sorted_object_file_write>
+                    <file>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ '" ~ TEMP.phase ~ '.' ~ TEMP.spawned_stage ~ '.' ~ OBJECT(TEMP.csr).spawn_type ~ "' ~ '.' ~ GLOBAL.input_filename ~ GLOBAL.node_id</file>
+                    <object_id>" ~ OBJECT(TEMP.csr).cursor_variable ~ "</object_id>
+                    <in_order>'forward'</in_order>
+                    <key_field>'_mc_sort_key'</key_field>
+                  </sorted_object_file_write>
+                </loop>
+              </select>
+            ]]>"
+          </do>
+        </then>
+        <condition>OBJECT(TEMP.csr).event_type eq 'create_record' and OBJECT(TEMP.csr).from_cursor eq '' and TEMP.stage ne TEMP.spawned_stage</condition>
+        <then>
+          <!-- Spawn a single object for the next stage -->
+          <do>
+            TEMP.proctext ~= "<![CDATA[
+              <spawn>
+                <internal_type>'format_array'</internal_type>
+                <feedback_name>'" ~ TEMP.spawned_type_id ~ "'</feedback_name>
+                <object_type>'" ~ OBJECT(TEMP.csr).spawn_type ~ "'</object_type>
+                <object_id>" ~ OBJECT(TEMP.csr).cursor_variable ~ "</object_id>
+                " ~ TEMP.inherit ~ "
+                <pin_to_proc>0</pin_to_proc>
+              </spawn>
+              " ~ TEMP.post_inherit ~ "
+              <object_ref_get>
+                <object_id>" ~ OBJECT(TEMP.csr).cursor_variable ~ "</object_id>
+                <target>TEMP.x</target>
+              </object_ref_get>
+              " ~ TEMP.table_field_copies ~ TEMP.mappings ~ "
+              " ~ TEMP.set_mc_fields ~ "
+              <call_proc_for_object>
+                <name>'clean_object'</name>
+                <object_id>" ~ OBJECT(TEMP.csr).cursor_variable ~ "</object_id>
+              </call_proc_for_object>
+              <sorted_object_file_write>
+                <file>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ '" ~ TEMP.phase ~ '.' ~ TEMP.spawned_stage ~ '.' ~ OBJECT(TEMP.csr).spawn_type ~ "' ~ '.' ~ GLOBAL.input_filename ~ GLOBAL.node_id</file>
+                <object_id>" ~ OBJECT(TEMP.csr).cursor_variable ~ "</object_id>
+                <in_order>'forward'</in_order>
+                <key_field>'_mc_sort_key'</key_field>
+              </sorted_object_file_write>
+              <object_ref_remove>
+                <object_id>" ~ OBJECT(TEMP.csr).cursor_variable ~ "</object_id>
+                <ref_count>TEMP.temp</ref_count>
+              </object_ref_remove>
+            ]]>"
+          </do>
+        </then>
+        <else>
+          <!-- Just a field_mappings section, no record spawning -->
+          <do>TEMP.proctext ~= TEMP.table_field_copies ~ TEMP.mappings</do>
+          <do>TEMP.field_mapping_counter += 1</do>
+        </else>
+      </if>
+      <do>TEMP.proctext ~= TEMP.postcondition</do>
+    </loop>
+  </index_select>
+
+  <if>
+    <condition>TEMP.validations ne ''</condition>
+    <then>
+      <do>
+        TEMP.proctext ~= "<![CDATA[
+          <if>
+            <condition>OBJECT._mc_first_pass ne ''</condition>
+            <then>
+              " ~ TEMP.validations ~ "
+              <do>OBJECT._mc_first_pass = ''</do>
+            </then>
+          </if>
+        ]]>"
+      </do>
+    </then>
+  </if>
+</proc>
+
+<proc name="generate_rtype_mapping">
+  <param name='record_type' />
+  <param name='record_type_id' />
+  <param name='phase' />
+  <param name='stage' />
+  <param name='pass' />
+  <param name='next_pass' />
+  <param name='first' />
+  <param name='write' />
+  <param name='set_parent_ref' />
+  <param name='procname' mode='out' />
+
+  <do>TEMP.procname = 'pass_' ~ TEMP.pass ~ '_' ~ TEMP.record_type_id</do>
+  <do>TEMP.altprocname = 'pass_' ~ TEMP.pass ~ '_' ~ TEMP.record_type ~ '_' ~ TEMP.record_type_id</do>
+  <do>TEMP.proctext = ''</do>
+  <call_proc_for_current_object>
+    <name>'generate_events'</name>
+    <param name='record_type'>TEMP.record_type</param>
+    <param name='phase'>TEMP.phase</param>
+    <param name='stage'>TEMP.stage</param>
+    <param name='pass'>TEMP.pass</param>
+    <param name='next_pass'>TEMP.next_pass</param>
+    <param name='first'>TEMP.first</param>
+    <param name='proctext'>TEMP.proctext</param>
+    <param name='transformed'>TEMP.transformed</param>
+  </call_proc_for_current_object>
+
+  <if>
+    <condition>TEMP.write eq '1' or TEMP.proctext eq ''</condition>
+    <then>
+      <return/>
+    </then>
+  </if>
+
+  <!-- 
+  Change by TCF May 2014.
+  This is a total hack. The proc above, which outputs TEMP.proctext, will sometimes
+  output it in a way that it contains a "default" node. This has been removed from the
+  latest version of MVM for validate_field (MValidateField), so this will throw a nasty
+  error. This is a cheap but effective way of dealing with the problem.
+  -->
+  <if>
+      <condition>GLOBAL.mvmversionmajor GTE 7</condition>
+      <then>
+          <do>TEMP.proctext = replace(TEMP.proctext, "<![CDATA[<default>]]>", "<![CDATA[<!--<default>]]>")</do>
+          <do>TEMP.proctext = replace(TEMP.proctext, "<![CDATA[</default>]]>", "<![CDATA[</default>-->]]>")</do>
+      </then>
+  </if>
+  <do>
+    TEMP.proctext = "<![CDATA[
+      <proc name='" ~ TEMP.procname ~ "'>
+        <param name='infile' />
+        <param name='outfile' />
+        " ~ TEMP.set_parent_ref ~ "
+        " ~ TEMP.proctext ~ "
+      </proc>
+    ]]>"
+  </do>
+
+  <call_proc_for_current_object>
+    <name>'generate_print_proc'</name>
+    <param name='procname'>TEMP.procname</param>
+    <param name='proc'>TEMP.proctext</param>
+    <param name='altprocname'>TEMP.altprocname</param>
+  </call_proc_for_current_object>
+</proc>
+
+<proc name="generate_rtype_printing">
+  <param name='record_type' />
+  <param name='record_type_id' />
+  <param name='database' />
+  <param name='table' />
+  <param name='printed' />
+  <param name='phase' />
+  <param name='next_stage' />
+  <param name='pass' />
+  <param name='procname' mode='out' />
+
+  <!--
+  If it's a db table record type in the final stage, print to db
+  If it's a non-table in a non-final stage, print to next stage's inbox
+  Otherwise the print proc does nothing
+  -->
+
+  <do>TEMP.procname = 'pass_' ~ TEMP.pass ~ '_' ~ TEMP.record_type_id</do>
+  <do>TEMP.altprocname = 'pass_' ~ TEMP.pass ~ '_' ~ TEMP.record_type ~ '_' ~ TEMP.record_type_id</do>
+  <do>
+    TEMP.proctext = "<![CDATA[
+      <proc name='" ~ TEMP.procname ~ "'>
+        <param name='infile' />
+        <param name='outfile' />
+    ]]>"
+  </do>
+  <if>
+    <condition>TEMP.table ne '' and TEMP.printed eq '1' and TEMP.next_stage eq ''</condition>
+    <then>
+      <do>TEMP.enumtext = ''</do>
+      <do>TEMP.fieldtext = ''</do>
+      <proc_select>
+        <name>'table_fields'</name>
+        <param name='database'>TEMP.database</param>
+        <param name='table'>TEMP.table</param>
+        <param name='field'>''</param>
+        <cursor>TEMP.fcsr</cursor>
+        <loop>
+          <do>TEMP.fieldstr = OBJECT(TEMP.fcsr).alias ne '' ? OBJECT(TEMP.fcsr).alias : OBJECT(TEMP.fcsr).field</do>
+          <do>
+            TEMP.fieldtext ~= "<![CDATA[
+              <field name='" ~ OBJECT(TEMP.fcsr).field ~ "'>OBJECT." ~ TEMP.fieldstr ~ "</field>
+            ]]>"
+          </do>
+          <if>
+            <condition>OBJECT(TEMP.fcsr).enum ne ''</condition>
+            <then>
+              <!-- TODO: can get smarter here, and push enum conversion forward to the last time the field is touched -->
+              <!-- TODO: could also generate a direct index_get call, which will be a little faster -->
+              <call_proc_for_object>
+                <name>'validate_field'</name>
+                <object_id>TEMP.fcsr</object_id>
+                <param name='identifier'>TEMP.fieldstr</param>
+                <param name='cursor'>''</param>
+                <param name='output'>TEMP.enumcheck</param>
+                <param name='replace_enum'>1</param>
+              </call_proc_for_object>
+              <do>TEMP.enumtext ~= TEMP.enumcheck</do>
+            </then>
+          </if>
+        </loop>
+      </proc_select>
+      <!-- 
+      Modification by TCF May 2014.
+      The "print_table" module is hard-coded to output data in ANSI format, rather
+      than Unicode. All print_table is doing is wrapping print_record, so I am able 
+      to get around this limitation by calling print_record directly.
+      Note that these changes map to changes made in load.xml.
+      -->
+        <!--<do>
+        TEMP.proctext ~= TEMP.enumtext ~ "<![CDATA[
+          <print_table>
+            <login_object>GLOBAL.target_login</login_object>
+            <name>'" ~ TEMP.table ~ "'</name>
+            <charset>'" ~ GLOBAL.charset ~ "'</charset>
+            <output_dir>'" ~ GLOBAL.table_directory ~ "'</output_dir>
+            " ~ TEMP.fieldtext ~ "
+          </print_table>
+        ]]>"
+      </do>-->
+        <!-- TODO: Add conditional logic so you can specify ANSI or Unicode by input parameter -->
+      <if>
+        <condition>GLOBAL.run_mode Eq 'Unicode'</condition>
+        <then>
+            <do>
+                TEMP.proctext ~= TEMP.enumtext ~ "<![CDATA[
+                <print_record>
+                    <file>'" ~ GLOBAL.table_directory ~ "\" ~ TEMP.table ~ ".NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+                    <field_delim>GLOBAL.field_delim</field_delim>
+                    <record_delim>GLOBAL.record_delim</record_delim>
+                    <encoding>'Unicode'</encoding>
+                    <data>
+                        " ~ TEMP.fieldtext ~ "
+                    </data>
+                </print_record>
+                ]]>"
+                <!--TEMP.proctext ~= TEMP.enumtext ~ "<![CDATA[
+                <print_record>
+                    <file>'" ~ GLOBAL.table_directory ~ "\" ~ TEMP.table ~ ".NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+                    <field_delim>GLOBAL.field_delim</field_delim>
+                    <record_delim>GLOBAL.record_delim</record_delim>
+                    <data>
+                        " ~ TEMP.fieldtext ~ "
+                    </data>
+                </print_record>
+                ]]>"-->
+            </do>
+        </then>
+        <else>
+            <do>
+                TEMP.proctext ~= TEMP.enumtext ~ "<![CDATA[
+                <print_table>
+                    <login_object>GLOBAL.target_login</login_object>
+                    <name>'" ~ TEMP.table ~ "'</name>
+                    <charset>'" ~ GLOBAL.charset ~ "'</charset>
+                    <output_dir>'" ~ GLOBAL.table_directory ~ "'</output_dir>
+                    " ~ TEMP.fieldtext ~ "
+                    </print_table>
+                ]]>"
+            </do>
+        </else>
+      </if>
+    </then>
+    <else>
+      <return/>
+    </else>
+  </if>
+  <do>
+    TEMP.proctext ~= "<![CDATA[
+      </proc>
+    ]]>"
+  </do>
+
+  <call_proc_for_current_object>
+    <name>'generate_print_proc'</name>
+    <param name='procname'>TEMP.procname</param>
+    <param name='proc'>TEMP.proctext</param>
+    <param name='altprocname'>TEMP.altprocname</param>
+  </call_proc_for_current_object>
+</proc>
+
+<proc name="set_tx_password">
+  <param name='value' mode='out' />
+
+  <do>TEMP.password = OBJECT.tx_password eq '' ? OBJECT.nm_login : OBJECT.tx_password</do>
+  <call_dotnet_static_method>
+    <assembly>''</assembly>
+    <type>'MVM.MetranetEncryption'</type>
+    <method>'PasswordHash'</method>
+    <field name='nmLogin'>OBJECT.nm_login</field>
+    <field name='nmSpace'>OBJECT.nm_space</field>
+    <field name='password'>TEMP.password</field>
+    <result>TEMP.value</result>
+  </call_dotnet_static_method>
+  <if>
+    <condition>TEMP.value eq ''</condition>
+    <then>
+      <do>TEMP.value = TEMP.password</do>
+    </then>
+  </if>
+</proc>
+
+<proc name="lookup_ancestor_field">
+  <param name='field' />
+  <param name='value' mode='out' />
+
+  <do>TEMP.value = ''</do>
+  <do>TEMP.ancestor = OBJECT._mc_parent</do>
+  <while>
+    <condition>TEMP.ancestor ne ''</condition>
+    <loop>
+      <get_object_field>
+        <object_id>TEMP.ancestor</object_id>
+        <field_name>TEMP.field</field_name>
+        <output>TEMP.value</output>
+      </get_object_field>
+      <if>
+        <condition>TEMP.value ne ''</condition>
+        <then>
+          <return/>
+        </then>
+      </if>
+      <do>TEMP.ancestor = OBJECT(TEMP.ancestor)._mc_parent</do>
+    </loop>
+  </while>
+</proc>
+
+<!-- This is just a stopgap to support finding the nearest ancestor matching payer_nm_login/payer_nm_space -->
+<proc name="lookup_ancestor_field2">
+  <param name='fieldname1' />
+  <param name='fieldname2' />
+  <param name='value1' />
+  <param name='value2' />
+  <param name='value_field' />
+  <param name='value' mode='out' />
+
+  <do>TEMP.value = ''</do>
+  <do>TEMP.ancestor = OBJECT._mc_parent</do>
+  <while>
+    <condition>TEMP.ancestor ne ''</condition>
+    <loop>
+      <get_object_field>
+        <object_id>TEMP.ancestor</object_id>
+        <field_name>TEMP.fieldname1</field_name>
+        <output>TEMP.fieldvalue1</output>
+      </get_object_field>
+      <get_object_field>
+        <object_id>TEMP.ancestor</object_id>
+        <field_name>TEMP.fieldname2</field_name>
+        <output>TEMP.fieldvalue2</output>
+      </get_object_field>
+      <if>
+        <condition>(TEMP.fieldname1 eq '' or TEMP.fieldvalue1 eq TEMP.value1) and (TEMP.fieldname2 eq '' or TEMP.fieldvalue2 eq TEMP.value2)</condition>
+        <then>
+          <get_object_field>
+            <object_id>TEMP.ancestor</object_id>
+            <field_name>TEMP.value_field</field_name>
+            <output>TEMP.value</output>
+          </get_object_field>
+          <return/>
+        </then>
+      </if>
+      <do>TEMP.ancestor = OBJECT(TEMP.ancestor)._mc_parent</do>
+    </loop>
+  </while>
+</proc>
+
+<proc name="lookup_ancestor_field1">
+  <param name='fieldname1' />
+  <param name='value1' />
+  <param name='value_field' />
+  <param name='value' mode='out' />
+
+  <do>TEMP.value = ''</do>
+  <do>TEMP.ancestor = OBJECT._mc_parent</do>
+  <while>
+    <condition>TEMP.ancestor ne ''</condition>
+    <loop>
+      <get_object_field>
+        <object_id>TEMP.ancestor</object_id>
+        <field_name>TEMP.fieldname1</field_name>
+        <output>TEMP.fieldvalue1</output>
+      </get_object_field>
+      <if>
+        <condition>TEMP.fieldname1 eq '' or TEMP.fieldvalue1 eq TEMP.value1</condition>
+        <then>
+          <get_object_field>
+            <object_id>TEMP.ancestor</object_id>
+            <field_name>TEMP.value_field</field_name>
+            <output>TEMP.value</output>
+          </get_object_field>
+          <return/>
+        </then>
+      </if>
+      <do>TEMP.ancestor = OBJECT(TEMP.ancestor)._mc_parent</do>
+    </loop>
+  </while>
+</proc>
+
+<proc name="lookup_nearest_payer">
+  <param name='value' mode='out' />
+
+  <to_lower>
+    <input>OBJECT.id_type</input>
+    <output>TEMP.id_type</output>
+  </to_lower>
+
+  <if>
+    <condition>OBJECT.payer_nm_login ne ''</condition>
+    <then>
+      <do>TEMP.payer_nm_space = OBJECT.payer_nm_space</do>
+      <if>
+        <condition>OBJECT.payer_nm_space eq ''</condition>
+        <then>
+          <do>TEMP.payer_nm_space = OBJECT.nm_space</do>
+        </then>
+      </if>
+      <call_proc_for_current_object>
+        <name>'lookup_ancestor_field2'</name>
+        <param name='fieldname1'>'nm_login'</param>
+        <param name='fieldname2'>'nm_space'</param>
+        <param name='value1'>OBJECT.payer_nm_login</param>
+        <param name='value2'>OBJECT.payer_nm_space</param>
+        <param name='value_field'>'id_acc'</param>
+        <param name='value'>TEMP.value</param>
+      </call_proc_for_current_object>
+      <if>
+        <condition>TEMP.value ne ''</condition>
+        <then>
+          <return/>
+        </then>
+      </if>
+    </then>
+  </if>
+
+  <index_get>
+    <index>'MC_MAPPINGS'</index>
+    <field name="namespace">'mc/payer_account_types'</field>
+    <field name="from">TEMP.id_type</field>
+    <field name="to">TEMP.to</field>
+    <then>
+      <if>
+        <condition>TEMP.to eq '1'</condition>
+        <then>
+          <do>TEMP.value = OBJECT.id_acc</do>
+        </then>
+        <else>
+          <call_proc_for_current_object>
+            <name>'lookup_ancestor_field'</name>
+            <param name='field'>'id_payer'</param>
+            <param name='value'>TEMP.value</param>
+          </call_proc_for_current_object>
+        </else>
+      </if>
+    </then>
+    <else>
+      <do>OBJECT._mc_error ~= 'Field failed payer lookup with id_type=[' ~ OBJECT.id_type ~ ']. '</do>
+    </else>
+  </index_get>
+
+  <if>
+    <condition>TEMP.value eq ''</condition>
+    <then>
+      <!-- Otherwise default it to pay for itself -->
+      <do>TEMP.value = OBJECT.id_acc</do>
+    </then>
+  </if>
+</proc>
+
+<proc name="clear_hierarchy_references">
+  <index_clear>
+    <index>'MC_HIERARCHY_REFERENCES'</index>
+  </index_clear>
+</proc>
+
+<proc name="store_hierarchy_reference">
+  <param name='record_type' />
+  <param name='key' />
+  <param name='object' />
+  <param name='value' mode='out' />
+  <index_insert>
+    <index>'MC_HIERARCHY_REFERENCES'</index>
+    <field name="record_type">TEMP.record_type</field>
+    <field name="key">TEMP.key</field>
+    <field name="object">TEMP.object</field>
+  </index_insert>
+</proc>
+
+<proc name="lookup_hierarchy_reference">
+  <param name='record_type' />
+  <param name='key' />
+  <param name='value' mode='out' />
+
+    <print>'I am about to look up hierarchy reference'</print>
+    <print>'My record_type is ' ~ TEMP.record_type</print>
+    <print>'My key is ' ~ TEMP.key</print>
+    
+
+  <index_get>
+    <index>'MC_HIERARCHY_REFERENCES'</index>
+    <field name="record_type">TEMP.record_type</field>
+    <field name='key'>TEMP.key</field>
+    <field name='object'>TEMP.value</field>
+    <else>
+      <do>TEMP.query = ''</do>
+      <index_get>
+        <index>'MC_PARENT_QUERIES'</index>
+        <field name="record_type">TEMP.record_type</field>
+        <field name="query">TEMP.query</field>
+      </index_get>
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query>TEMP.query</query>
+        <cursor>TEMP.dbcsr</cursor>
+        <then>
+          <do>OBJECT(TEMP.dbcsr)._mc_from_db = '1'</do>
+          <do>OBJECT(TEMP.dbcsr)._mc_base_key = OBJECT._mc_parent_key</do>
+          <do>OBJECT(TEMP.dbcsr)._mc_level = OBJECT._mc_level - 1</do>
+          <do>TEMP.value = TEMP.dbcsr</do>
+          <index_insert>
+            <index>'MC_HIERARCHY_REFERENCES'</index>
+            <field name="record_type">TEMP.record_type</field>
+            <field name='key'>TEMP.key</field>
+            <field name='object'>TEMP.dbcsr</field>
+          </index_insert>
+        </then>
+        <else>
+          <do>TEMP.value = ''</do>
+          <do>OBJECT._mc_error ~= 'Could not find hierarchy reference ' ~ TEMP.key ~ ' in database. '</do>
+          <return/>
+        </else>
+      </db_select>
+    </else>
+  </index_get>
+</proc>
+
+<proc name="check_nm_login_uniqueness">
+  <param name='value' mode='out' />
+  <index_get>
+    <index>'MC_NM_LOGINS'</index>
+    <field name="nm_login">OBJECT.nm_login</field>
+    <field name="nm_space">OBJECT.nm_space</field>
+    <then>
+      <do>OBJECT._mc_error ~= 'Nm_login/nm_space combination already exists in database: ' ~ OBJECT.nm_login ~ '/' ~ OBJECT.nm_space</do>
+        <print>'FOUND A DUPE! The account is ' ~ OBJECT.nm_login</print>
+    </then>
+  </index_get>
+</proc>
+
+<proc name='account_segment_value'>
+  <param name='field_value'/>
+  <do>OBJECT.param_value = '/' ~ TEMP.field_value ~ '/-'</do>
+</proc>
+
+<proc name='select_numbered_fields'>
+  <param name='field_name' />
+  <param name='proc_name' />
+  <param name='pipe_if_no_matches' />
+  <param name='pipe_cursor' />
+
+		
+  <do>TEMP.i = 1</do>
+  <do>TEMP.continue = 1</do>
+  <while>
+    <condition>TEMP.continue</condition>
+    <loop>
+      <object_field_exists>
+        <object_id>OBJECT.object_id</object_id>
+        <field_name>TEMP.field_name ~ TEMP.i</field_name>
+        <output>TEMP.exists</output>
+      </object_field_exists>
+      <if>
+        <condition>TEMP.exists</condition>
+        <then>
+          <spawn>
+            <object_type>'NUMBERED'</object_type>
+            <object_id>TEMP.oid</object_id>
+          </spawn>
+          <get_object_field>
+            <object_id>OBJECT.object_id</object_id>
+            <field_name>TEMP.field_name ~ TEMP.i</field_name>
+            <output>TEMP.value</output>
+          </get_object_field>
+          <call_dynamic_proc_for_object>
+            <name>TEMP.proc_name</name>
+            <object_id>TEMP.oid</object_id>
+            <param name='field_value'>TEMP.value</param>
+          </call_dynamic_proc_for_object>
+          <do>TEMP.i += 1</do>
+          <pipe_row>TEMP.csr</pipe_row>
+        </then>
+        <else>
+          <do>TEMP.continue = ''</do>
+        </else>
+      </if>
+    </loop>
+  </while>
+  <if>
+    <condition>TEMP.i EQ 1 and TEMP.pipe_if_no_matches eq '1'</condition>
+    <then>
+      <spawn>
+        <object_type>'NUMBERED'</object_type>
+        <object_id>TEMP.oid</object_id>
+      </spawn>
+      <pipe_row>TEMP.oid</pipe_row>
+    </then>
+  </if>
+</proc>
+
+<proc name="store_rate_schedule">
+  <param name='value' mode='out' />
+  <do>TEMP.value = ''</do>
+  <index_get>
+    <index>'MC_RATE_SCHEDULES'</index>
+    <field name='key'>OBJECT.rate_schedule_key</field>
+    <field name='id_sched'>OBJECT.id_sched</field>
+    <field name='count'>TEMP.count</field>
+    <then>
+      <do>TEMP.ctr = index_update('MC_RATE_SCHEDULES', key=>OBJECT.rate_schedule_key, count=>TEMP.count+1)</do>
+    </then>
+    <else>
+      <call_proc_for_current_object>
+        <name>'sequence_get_next_id_base_props'</name>
+        <param name='value'>OBJECT.id_sched</param>
+      </call_proc_for_current_object>
+      <index_insert>
+        <index>'MC_RATE_SCHEDULES'</index>
+        <field name="key">OBJECT.rate_schedule_key</field>
+        <field name='id_sched'>OBJECT.id_sched</field>
+        <field name="count">1</field>
+      </index_insert>
+      <do>TEMP.value = '1'</do>
+    </else>
+  </index_get>
+</proc>
+
+<proc name="get_rate_schedule_order">
+  <param name='value' mode='out' />
+  <index_get>
+    <index>'MC_RATE_SCHEDULES'</index>
+    <field name='key'>OBJECT.rate_schedule_key</field>
+    <field name='id_sched'>TEMP.id_sched</field>
+    <field name='count'>TEMP.value</field>
+    <then>
+      <do>TEMP.ctr = index_update('MC_RATE_SCHEDULES', key=>OBJECT.rate_schedule_key, count=>TEMP.value-1)</do>
+    </then>
+    <else>
+      <do>TEMP.value = 999</do>
+    </else>
+  </index_get>
+</proc>
+
+<proc name="clear_rate_schedules">
+  <index_clear>
+    <index>'MC_RATE_SCHEDULES'</index>
+  </index_clear>
+</proc>
+
+<proc name="lookup_usage_cycle">
+  <param name='value' mode='out' />
+
+  <join>
+    <delim>'|'</delim>
+    <input>ltrim(OBJECT.day_of_month, '0')</input>
+    <input>ltrim(OBJECT.day_of_week, '0')</input>
+    <input>ltrim(OBJECT.first_day_of_month, '0')</input>
+    <input>ltrim(OBJECT.second_day_of_month, '0')</input>
+    <input>ltrim(OBJECT.start_day, '0')</input>
+    <input>ltrim(OBJECT.start_month, '0')</input>
+    <input>ltrim(OBJECT.start_year, '0')</input>
+    <output>TEMP.key</output>
+  </join>
+  <index_get>
+    <index>'MC_MAPPINGS'</index>
+    <field name="namespace">'mc/usage_cycles'</field>
+    <field name="from">TEMP.key</field>
+    <field name="to">TEMP.value</field>
+    <else>
+      <do>OBJECT._mc_error ~= 'Failed usage cycle lookup with fields=[' ~ TEMP.key ~ ']. '</do>
+    </else>
+  </index_get>
+</proc>
+
+</procs>

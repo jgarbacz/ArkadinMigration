@@ -1,0 +1,130 @@
+<procs>
+
+  <proc name="create_triggers">
+    <call_proc_for_current_object>
+      <name>'setup_enviroment'</name>
+    </call_proc_for_current_object>
+    <call_proc_for_current_object>
+      <name>'table_fields'</name>
+      <param name='database'>''</param>
+      <param name='table'>''</param>
+      <param name='field'>''</param>
+      <param name='pipe_cursor'>''</param>
+    </call_proc_for_current_object>
+    <!--
+    create table MVM_TRIGGER_LOG (
+      table_name varchar(100),
+      change_date datetime,
+      change_type varchar(100),
+      modifications text
+    );
+    -->
+
+    <!-- Put triggers on tables matching these patterns -->
+    <do>TEMP.table_match = '^t_.*$'</do>
+    <do>TEMP.table_nomatch = ''</do>
+
+    <do>TEMP.db = 'NETMETER'</do>
+
+    <do>TEMP.ctr = 1</do>
+    <db_select>
+      <login_object>GLOBAL.target_login</login_object>
+      <query type='sql'>
+        "select lower(table_name) as tbl from INFORMATION_SCHEMA.TABLES
+        where table_type = 'BASE TABLE' and table_catalog = $${TEMP.db}"
+      </query>
+      <query type='oracle'>"select lower(table_name) as tbl from USER_TABLES"</query>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <match_static>
+          <input>OBJECT(TEMP.csr).tbl</input>
+          <regex>TEMP.table_match</regex>
+          <ignore_case>'1'</ignore_case>
+          <success>TEMP.ismatch</success>
+        </match_static>
+        <do>TEMP.isnomatch = ''</do>
+        <if>
+          <condition>TEMP.table_nomatch ne ''</condition>
+          <then>
+            <match_static>
+              <input>OBJECT(TEMP.csr).tbl</input>
+              <regex>TEMP.table_nomatch</regex>
+              <ignore_case>'1'</ignore_case>
+              <success>TEMP.isnomatch</success>
+            </match_static>
+          </then>
+        </if>
+        <if>
+          <condition>TEMP.ismatch eq '1' and TEMP.isnomatch ne '1'</condition>
+          <then>
+            <do>TEMP.fields = ''</do>
+            <do>TEMP.trigger = 'MVM_TRIGGER_' ~ TEMP.ctr</do>
+            <proc_select>
+              <name>'table_fields'</name>
+              <param name='database'>TEMP.db</param>
+              <param name='table'>OBJECT(TEMP.csr).tbl</param>
+              <param name='field'>''</param>
+              <cursor>TEMP.fcsr</cursor>
+              <loop>
+                <if>
+                  <condition>OBJECT(TEMP.fcsr).type ne 'text' and OBJECT(TEMP.fcsr).type ne 'ntext' and OBJECT(TEMP.fcsr).type ne 'image'</condition>
+                  <then>
+                    <if>
+                      <condition>TEMP.fields ne ''</condition>
+                      <then>
+                        <do>TEMP.fields ~= " + ',' + "</do>
+                      </then>
+                    </if>
+                    <do>TEMP.fields ~= 'convert(varchar,' ~ OBJECT(TEMP.fcsr).field ~ ')'</do>
+                  </then>
+                </if>
+              </loop>
+            </proc_select>
+            <do>
+              TEMP.trigtext = "<![CDATA[
+                create trigger " ~ TEMP.trigger ~ " on " ~ OBJECT(TEMP.csr).tbl ~ " for insert, update, delete not for replication
+                as
+                set nocount on;
+                insert into MVM_TRIGGER_LOG (table_name, change_date, change_type, modifications)
+                select '" ~ OBJECT(TEMP.csr).tbl ~ "', GETDATE(), 'delete', " ~ TEMP.fields ~ "
+                from deleted;
+                insert into MVM_TRIGGER_LOG (table_name, change_date, change_type, modifications)
+                select '" ~ OBJECT(TEMP.csr).tbl ~ "', GETDATE(), 'insert', " ~ TEMP.fields ~ "
+                from inserted;
+              ]]>"
+            </do>
+            <print>'Creating trigger on ' ~ OBJECT(TEMP.csr).tbl</print>
+            <db_execute_dynamic>
+              <login_object>GLOBAL.target_login</login_object>
+              <statement>TEMP.trigtext</statement>
+              <num_rows>TEMP.num_rows</num_rows>
+            </db_execute_dynamic>
+          </then>
+        </if>
+        <do>TEMP.ctr += 1</do>
+      </loop>
+    </db_select>
+  </proc>
+
+  <proc name="drop_triggers">
+    <call_proc_for_current_object>
+      <name>'setup_enviroment'</name>
+    </call_proc_for_current_object>
+    <db_select>
+      <login_object>GLOBAL.target_login</login_object>
+      <query type='sql'>"select o.name as tbl, t.name as trig from sys.triggers t inner join sys.objects o on t.parent_id = o.object_id where t.name like 'MVM_TRIGGER%'"</query>
+      <query type='oracle'>"select lower(table_name) as tbl, trigger_name as trig from USER_TRIGGERS where trigger_name like 'MVM_TRIGGER%'"</query>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <print>'Dropping trigger on ' ~ OBJECT(TEMP.csr).tbl</print>
+        <do>TEMP.trigtext = 'drop trigger ' ~ OBJECT(TEMP.csr).trig</do>
+        <db_execute_dynamic>
+          <login_object>GLOBAL.target_login</login_object>
+          <statement>TEMP.trigtext</statement>
+          <num_rows>TEMP.num_rows</num_rows>
+        </db_execute_dynamic>
+      </loop>
+    </db_select>
+  </proc>
+
+</procs>

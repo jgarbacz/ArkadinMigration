@@ -1,0 +1,53 @@
+<procs>
+
+  <proc name='sync_msix_defs'>
+    <!--<initialize namespace='global'>
+      <if>
+        <condition>OBJECT(GLOBAL.target_login).database_type ne ''</condition>
+        <then>
+          <get_rmp_dir>TEMP.rmp_dir</get_rmp_dir>
+          <call_proc_for_current_object>
+            <name>'synchronize'</name>
+            <param name='label'>'PARAMTABLES'</param>
+            <param name='glob'>TEMP.rmp_dir~'\Extensions\*\config\ParamTable\*\*.msixdef'</param>
+            <param name='add_new_proc'>'sync_msixdef_with_db'</param>
+            <param name='add_changed_proc'>'sync_msixdef_with_db'</param>
+          </call_proc_for_current_object>
+        </then>
+      </if>
+    </initialize>-->
+  </proc>
+
+  <proc name="sync_msixdef_with_db">
+    <param name="input"/>
+    <param name="name"/>
+    <info switch="log_sync">'sync_msixdef_with_db: '~TEMP.name</info>
+    <do>TEMP.row_counter=0</do>
+    <mt_msixdef_select>
+      <file>TEMP.name</file>
+      <cursor>TEMP.c</cursor>
+      <loop>
+        <do>TEMP.table_name=OBJECT(TEMP.c).paramtable_name</do>
+        <do>TEMP.row_counter+=1</do>
+        <if>
+          <condition>TEMP.row_counter eq 1</condition>
+          <then>
+            <info switch="log_sync">'deleting: '~TEMP.name</info>
+            <db_execute_dynamic>
+              <login_object>GLOBAL.target_login</login_object>
+              <statement>"delete from mvm_param_table_props where paramtable_name='"~TEMP.table_name~"'"</statement>
+            </db_execute_dynamic>
+          </then>
+        </if>
+        <db_insert>
+          <login_object>GLOBAL.target_login</login_object>
+          <name>'mvm_param_table_props'</name>
+          <object_id>TEMP.c</object_id>
+        </db_insert>
+      </loop>
+    </mt_msixdef_select>
+  </proc>
+
+
+
+</procs>

@@ -1,0 +1,32 @@
+<proc name="pass_1_261">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <if>
+    <condition>OBJECT._mc_error ne ''</condition>
+    <then>
+      <return />
+    </then>
+  </if>
+  <do>OBJECT._mc_record_type_id = 190</do>
+  <do>OBJECT._mc_transformed = '1'</do>
+  <do>TEMP.myprocname = 'pass_1_' ~ OBJECT._mc_record_type_id</do>
+  <get_proc_text>
+    <name>TEMP.myprocname</name>
+    <success>TEMP.success</success>
+  </get_proc_text>
+  <if>
+    <condition>TEMP.success eq '1'</condition>
+    <then>
+      <call_dynamic_proc_for_object>
+        <name>TEMP.myprocname</name>
+        <object_id>OBJECT.object_id</object_id>
+        <param name="infile">TEMP.infile</param>
+        <param name="outfile">TEMP.outfile</param>
+      </call_dynamic_proc_for_object>
+      <do>OBJECT._mc_transformed = ''</do>
+    </then>
+  </if>
+</proc>

@@ -1,0 +1,14 @@
+ <proc name='send_remote_proc_results_to_caller' work_type='finally'>
+   <!-- print>
+      'send remote results:'
+      ~' caller_process_id='~TEMP.caller_process_id
+      ~' work_id='~TEMP.work_id
+      ~' remote_proc_name='~TEMP.remote_proc_name
+      ~' remote_proc_namespace='~TEMP.remote_proc_namespace
+      ~' include_object_fields_in_output='~TEMP.include_object_fields_in_output
+      ~' object_id='~OBJECT.object_id
+      ~' object_type='~OBJECT.object_type
+    </print -->
+    <send_remote_results/>
+  </proc>
+

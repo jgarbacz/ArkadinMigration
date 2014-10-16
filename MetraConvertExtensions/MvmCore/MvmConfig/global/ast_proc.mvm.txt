@@ -1,0 +1,81 @@
+proc main() {
+	// LOOP 2x
+	VAR.ctr=1;
+	println('COUNTER='~99);
+	label(LOOP_LABEL);
+		println('COUNTER='~VAR.ctr);
+		// inner loop
+
+		if(VAR.ctr==1) OBJECT.one="one";
+		else if(VAR.ctr==2)OBJECT.one=1;
+		else if(VAR.ctr==3)OBJECT.one="oneagain";
+
+		// we're returning a int but still thinking it is a string
+		System.Console.WriteLine(MVM.Echo.echo(OBJECT.one)); 
+		//MVM.Echo.echo(OBJECT.one);
+
+		// inner loop
+		VAR.ctr=VAR.ctr+1;
+	if(VAR.ctr!=5) goto(LOOP_LABEL);
+	println("COMPLETE");
+
+/*
+
+	// TEST 9: test just if works
+	VAR.testval='a';
+	System.Console.WriteLine("testing just if");
+	if(VAR.testval.Equals("a"))
+		System.Console.WriteLine("if alone WORKS");
+	System.Console.WriteLine("done testing just if");
+
+
+	// TEST 8: test if else works
+	System.Console.WriteLine("testing if/else");
+	VAR.testval='a';
+	if(VAR.testval.Equals("b")){
+		System.Console.WriteLine("b");
+	}
+	else if(VAR.testval.Equals("a")){
+		System.Console.WriteLine("a");
+	}else{
+		System.Console.WriteLine("none");
+	}
+	System.Console.WriteLine("done testing if/else");
+
+	// TEST 7: GIVE RIGHT ERROR MSG
+	VAR.d=new System.DateTime(1977,10,1);
+	VAR.x=MVM.ModuleContext.add(1,VAR.d.ToString());
+
+	// TEST 6: WORKS
+	VAR.hello='hello '~' '~'world'~101;
+	System.Console.WriteLine(VAR.hello);
+
+	// TEST 5: WORKS
+	VAR.birthday=new System.DateTime(1977,5,30);
+	System.Console.WriteLine(VAR.birthday.ToString());
+
+	// TEST 4: WORKS
+	VAR.regex = new System.Text.RegularExpressions.Regex("^a+");
+	System.Console.WriteLine(VAR.regex.IsMatch("abc"));
+	System.Console.WriteLine(VAR.regex.IsMatch("cba"));
+
+	// TEST 3: WORKS chain instance methods
+	System.Console.WriteLine(
+		System.DateTime.Parse("5/1/1977")
+		.AddMonths(3)
+		.AddDays(2)
+	);
+
+	// TEST 2: WORKS
+	VAR.x=System.DateTime.Parse("5/1/1977");
+	System.Console.WriteLine(VAR.x.ToString());
+	VAR.y=VAR.x.AddDays(10);
+	System.Console.WriteLine(VAR.y.ToString());
+
+	// TEST 1 WORKS: static method,instance method, instance property read/write
+	VAR.my_junk=MVM.Junk.GetJunk();
+	VAR.my_junk.Field="new field value";
+	System.Console.WriteLine(VAR.my_junk.Field);
+	VAR.my_junk.TestMethod();
+*/
+}

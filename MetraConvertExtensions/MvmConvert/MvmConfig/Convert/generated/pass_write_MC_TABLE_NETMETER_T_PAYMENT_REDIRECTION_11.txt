@@ -1,0 +1,19 @@
+<proc name="pass_write_11">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <print_record>
+    <file>'D:\MetraTech\RMP\MetraConvert\MetraConvertData\table_output\t_payment_redirection.NetMeter.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+    <field_delim>GLOBAL.field_delim</field_delim>
+    <record_delim>GLOBAL.record_delim</record_delim>
+    <encoding>'Unicode'</encoding>
+    <data>
+      <field name="id_payer">OBJECT.id_payer</field>
+      <field name="id_payee">OBJECT.id_payee</field>
+      <field name="vt_start">OBJECT.vt_start</field>
+      <field name="vt_end">OBJECT.vt_end</field>
+    </data>
+  </print_record>
+</proc>

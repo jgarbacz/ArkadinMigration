@@ -1,0 +1,51 @@
+<proc name="indexing_ACCOUNT_USERACCOUNT">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <!-- Insert child->parent into local index -->
+  <if>
+    <condition>(OBJECT.nm_login ne '' and OBJECT.nm_space ne '') and (OBJECT.parent_nm_login ne '' and OBJECT.parent_nm_space ne '')</condition>
+    <then>
+      <!-- Duplicate children will be noticed later once we're going through the sorted object list -->
+      <index_insert>
+        <index>'MC_CHILD_PARENT_MAP'</index>
+        <field name="child_keys">OBJECT.nm_login ~ "	`|" ~ OBJECT.nm_space</field>
+        <field name="child_namespace">'ACCOUNT'</field>
+        <field name="child_sort_key">''</field>
+        <field name="parent_keys">OBJECT.parent_nm_login ~ "	`|" ~ OBJECT.parent_nm_space</field>
+        <field name="parent_namespace">'ACCOUNT'</field>
+      </index_insert>
+      <do>TEMP.count = 1</do>
+      <index_get>
+        <index>'MC_CHILD_COUNT'</index>
+        <field name="parent_keys">OBJECT.parent_nm_login ~ "	`|" ~ OBJECT.parent_nm_space</field>
+        <field name="parent_namespace">'ACCOUNT'</field>
+        <field name="child_count">TEMP.child_count</field>
+        <then>
+          <do>TEMP.count = TEMP.child_count + 1</do>
+        </then>
+      </index_get>
+      <index_remove>
+        <index>'MC_CHILD_COUNT'</index>
+        <field name="parent_keys">OBJECT.parent_nm_login ~ "	`|" ~ OBJECT.parent_nm_space</field>
+        <field name="parent_namespace">'ACCOUNT'</field>
+      </index_remove>
+      <index_insert>
+        <index>'MC_CHILD_COUNT'</index>
+        <field name="parent_keys">OBJECT.parent_nm_login ~ "	`|" ~ OBJECT.parent_nm_space</field>
+        <field name="parent_namespace">'ACCOUNT'</field>
+        <field name="child_count">TEMP.count</field>
+      </index_insert>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.nm_login ne '' and OBJECT.nm_space ne ''</condition>
+    <then>
+      <index_insert_if_none>
+        <index>'MC_PARENT_LOOKUP'</index>
+        <field name="parent_keys">OBJECT.nm_login ~ "	`|" ~ OBJECT.nm_space</field>
+        <field name="parent_namespace">'ACCOUNT'</field>
+      </index_insert_if_none>
+    </then>
+  </if>
+</proc>

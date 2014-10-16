@@ -1,0 +1,1420 @@
+<procs>
+
+<!-- TODO: truncation of fields over max length mainly for t_av_contact -->
+<!-- TODO: looking up cycle based on: day of week, day of month, first day of month, second day of month, start day, start month, start year -->
+<!-- FIXME: add account validations (parent account should be an allowable type, etc) in one of the run_after files -->
+
+<!-- This proc generates MN table data files from the input files -->
+<proc name="migrate">
+  <do>GLOBAL.mode = 'migrate'</do>
+
+  <print>'Just entered migrate'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+  <c>Initial setup</c>
+  <call_proc_for_current_object>
+    <name>'setup_all'</name>
+  </call_proc_for_current_object>
+
+  <print>'Finished setup_all'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+  <c>Input file cleanup</c>
+  <if>
+    <condition>GLOBAL.clean ne ''</condition>
+    <then>
+      <print>'Cleaning input data directories'</print>
+      <call_proc_for_current_object>
+        <name>'clean_input'</name>
+      </call_proc_for_current_object>
+    </then>
+  </if>
+
+  <call_proc_for_current_object>
+    <name>'setup_input_files'</name>
+  </call_proc_for_current_object>
+
+  <print>'Finished setup_input_files'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+  <if>
+    <condition>GLOBAL.print_input_file ne ''</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'print_input_file'</name>
+        <param name='file'>GLOBAL.print_input_file</param>
+        <param name='num_lines'>GLOBAL.num_lines</param>
+      </call_proc_for_current_object>
+      <return/>
+    </then>
+  </if>
+
+  <c>Run the desired phase</c>
+  <call_proc_for_current_object>
+    <name>'run_phase'</name>
+    <param name='phase'>GLOBAL.phase</param>
+  </call_proc_for_current_object>
+
+  <c>Write the control report</c>
+  <call_proc_for_current_object>
+    <name>'write_control_report'</name>
+  </call_proc_for_current_object>
+
+  <c>Shut down slave processes</c>
+  <call_proc_for_current_object>
+    <name>'shutdown'</name>
+  </call_proc_for_current_object>
+
+</proc>
+
+<proc name="run_phase">
+  <param name='phase' />
+
+  <!-- Validate the input phase -->
+  <index_select> <!-- TODO: index_get -->
+    <index>'MC_PHASES'</index>
+    <field name='phase'>TEMP.phase</field>
+    <cursor>TEMP.csr</cursor>
+    <else>
+      <fatal>'Unknown phase: [' ~ TEMP.phase ~ ']'</fatal>
+    </else>
+  </index_select>
+
+  <print>'Running phase ' ~ TEMP.phase</print>
+
+  <c>Main migration</c>
+  <call_proc_for_current_object>
+    <name>'run_migration'</name>
+    <param name='phase'>TEMP.phase</param>
+  </call_proc_for_current_object>
+</proc>
+
+<proc name="setup_migrate">
+  <print>'Setup records...'</print>
+  <call_proc_for_current_object>
+    <name>'setup_records'</name>
+  </call_proc_for_current_object>
+  <print>'setup_records ran and finished from setup_migrate'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+  <call_proc_for_current_object>
+    <name>'generate_find_ancestors'</name>
+  </call_proc_for_current_object>
+  <print>'generate_find_ancestors ran and finished from setup_migrate'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+  <print>'Setup sequences...'</print>
+  <call_proc_for_current_object>
+    <name>'setup_sequences'</name>
+  </call_proc_for_current_object>
+  <print>'setup_sequences ran and finished from setup_migrate'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+  <call_proc_for_current_object>
+    <name>'setup_processing'</name>
+  </call_proc_for_current_object>
+  <print>'setup_processing ran and finished from setup_migrate'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+  <print>'Setup defaults...'</print>
+  <call_proc_for_current_object>
+    <name>'setup_defaults'</name>
+  </call_proc_for_current_object>
+  <print>'setup_defaults ran and finished from setup_migrate'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+  <do>GLOBAL.error_workbook = GLOBAL.migration_directory ~ GLOBAL.path_separator ~ 'migration_errors.csv'</do>
+  <do>GLOBAL.error_worksheet = 'Migration Errors'</do>
+
+  <c>Write an empty error log with column headers</c>
+  <print_record>
+    <file>GLOBAL.error_workbook</file>
+    <field_delim>','</field_delim>
+    <record_delim>'\r\n'</record_delim>
+    <data>
+      <field>'File Name'</field>
+      <field>'Line Number'</field>
+      <field>'Record Type'</field>
+      <field>'Message'</field>
+    </data>
+  </print_record>
+  <!--
+  <try>
+    <config>
+      <xl_open_workbook>GLOBAL.error_workbook</xl_open_workbook>
+      <xl_delete_worksheet>
+        <workbook>GLOBAL.error_workbook</workbook>
+        <worksheet>GLOBAL.error_worksheet</worksheet>
+      </xl_delete_worksheet>
+
+      <c> Put the field names in the header</c>
+      <xl_append_field>
+        <workbook>GLOBAL.error_workbook</workbook>
+        <worksheet>GLOBAL.error_worksheet</worksheet>
+        <field>'File Name'</field>
+      </xl_append_field>
+      <xl_append_field>
+        <workbook>GLOBAL.error_workbook</workbook>
+        <worksheet>GLOBAL.error_worksheet</worksheet>
+        <field>'Line Number'</field>
+      </xl_append_field>
+      <xl_append_field>
+        <workbook>GLOBAL.error_workbook</workbook>
+        <worksheet>GLOBAL.error_worksheet</worksheet>
+        <field>'Record Type'</field>
+      </xl_append_field>
+      <xl_append_field>
+        <workbook>GLOBAL.error_workbook</workbook>
+        <worksheet>GLOBAL.error_worksheet</worksheet>
+        <field>'Message'</field>
+      </xl_append_field>
+    </config>
+    <finally>
+      <xl_close_workbook>GLOBAL.error_workbook</xl_close_workbook>
+    </finally>
+  </try>
+  -->
+</proc>
+
+<proc name="setup_input_files">
+  <c>Check for input files, and assign them to record types</c>
+  <define_memory_index>
+    <index>'MC_DATAFILES'</index>
+    <use_nested_keys>'1'</use_nested_keys>
+    <key_field>'record_type'</key_field>
+    <field>'filename'</field>
+    <field>'file_id'</field>
+  </define_memory_index>
+  <define_memory_index>
+    <index>'MC_DATAFILES_BY_NAME'</index>
+    <unique>'1'</unique>
+    <key_field>'filename'</key_field>
+    <field>'record_type'</field>
+  </define_memory_index>
+  <define_memory_index>
+    <index>'MC_DATAFILES_BY_ID'</index>
+    <unique>'1'</unique>
+    <key_field>'file_id'</key_field>
+    <field>'record_type'</field>
+    <field>'display_record_type'</field>
+    <field>'filename'</field>
+  </define_memory_index>
+
+  <do>TEMP.datafile_count = 0</do>
+  <glob_select>
+    <glob>GLOBAL.input_directory ~ GLOBAL.path_separator ~ '*'</glob>
+    <cursor_value>'glob'</cursor_value>
+    <cursor>TEMP.filecsr</cursor>
+    <loop>
+      <index_select>
+        <index>'MC_RECORD_TYPES'</index>
+        <cursor>TEMP.reccsr</cursor>
+        <loop>
+          <match>
+            <input>OBJECT(TEMP.filecsr).glob</input>
+            <regex>OBJECT(TEMP.reccsr).file_regex</regex>
+            <ignore_case>'1'</ignore_case>
+            <success>TEMP.matched</success>
+          </match>
+          <if>
+            <condition>OBJECT(TEMP.reccsr).file_regex ne '' and TEMP.matched eq '1'</condition>
+            <then>
+              <do>TEMP.datafile_count += 1</do>
+                
+              <!-- Insert into the datafiles index, but error if it's already there -->
+              <index_select> <!-- TODO: index_get -->
+                <index>'MC_DATAFILES_BY_NAME'</index>
+                <field name='filename'>OBJECT(TEMP.filecsr).glob</field>
+                <cursor>TEMP.dfcsr</cursor>
+                <then>
+                  <fatal>'Error: datafile ' ~ OBJECT(TEMP.filecsr).glob ~ ' matches multiple record types (' ~ OBJECT(TEMP.dfcsr).record_type ~ ',' ~ OBJECT(TEMP.reccsr).record_type ~ ')'</fatal>
+                </then>
+              </index_select>
+              <index_insert>
+                <index>'MC_DATAFILES'</index>
+                <field name='filename'>OBJECT(TEMP.filecsr).glob</field>
+                <field name='file_id'>TEMP.datafile_count</field>
+                <field name='record_type'>OBJECT(TEMP.reccsr).record_type</field>
+              </index_insert>
+              <index_insert>
+                <index>'MC_DATAFILES_BY_ID'</index>
+                <field name='file_id'>TEMP.datafile_count</field>
+                <field name='record_type'>OBJECT(TEMP.reccsr).record_type</field>
+                <field name='display_record_type'>OBJECT(TEMP.reccsr).display_record_type</field>
+                <field name='filename'>OBJECT(TEMP.filecsr).glob</field>
+              </index_insert>
+              <index_insert>
+                <index>'MC_DATAFILES_BY_NAME'</index>
+                <field name='filename'>OBJECT(TEMP.filecsr).glob</field>
+                <field name='record_type'>OBJECT(TEMP.reccsr).record_type</field>
+              </index_insert>
+
+              <!-- Also read the first line from the file and make sure it looks valid for that record type -->
+              <!-- TODO: not doing first line validation at the moment
+              <call_dynamic_proc_for_current_object>
+                <name>'read_validate_one_' ~ OBJECT(TEMP.reccsr).record_type</name>
+                <param name='filename'>OBJECT(TEMP.filecsr).glob</param>
+              </call_dynamic_proc_for_current_object>
+              -->
+            </then>
+          </if>
+        </loop>
+      </index_select>
+    </loop>
+  </glob_select>
+
+  <index_select> <!-- TODO: index_get -->
+    <index>'MC_DATAFILES'</index>
+    <cursor>TEMP.dfcsr</cursor>
+    <else>
+      <warning>'Warning: no input files found, so there is nothing to do!'</warning>
+      <return/>
+    </else>
+  </index_select>
+</proc>
+
+<proc name="push_migration_data">
+  <do>TEMP.my_batch_id = ''</do>
+    <startup_cluster>GLOBAL.mvm_cluster_name</startup_cluster>
+    <print>'I just started the cluster ' ~ GLOBAL.mvm_cluster_name</print>
+    
+  <slave_node_id_select>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <push_index>
+        <process_id>OBJECT(TEMP.csr).node_id</process_id>
+        <clear_source>0</clear_source>
+        <source>
+          <index>'MC_GENERATED_PROCS'</index>
+        </source>
+        <target>
+          <index>'MC_GENERATED_PROCS'</index>
+        </target>
+      </push_index>
+      <push_index>
+        <process_id>OBJECT(TEMP.csr).node_id</process_id>
+        <clear_source>0</clear_source>
+        <source>
+          <index>'MC_STAGE_INPUT_RECORDS'</index>
+        </source>
+        <target>
+          <index>'MC_STAGE_INPUT_RECORDS'</index>
+        </target>
+      </push_index>
+      <push_index>
+        <process_id>OBJECT(TEMP.csr).node_id</process_id>
+        <clear_source>0</clear_source>
+        <source>
+          <index>'MC_RECORD_FINAL_PASS'</index>
+        </source>
+        <target>
+          <index>'MC_RECORD_FINAL_PASS'</index>
+        </target>
+      </push_index>
+      <push_index>
+        <process_id>OBJECT(TEMP.csr).node_id</process_id>
+        <clear_source>0</clear_source>
+        <source>
+          <index>'MC_PARENT_QUERIES'</index>
+        </source>
+        <target>
+          <index>'MC_PARENT_QUERIES'</index>
+        </target>
+      </push_index>
+
+      <!-- Add parameters as needed and push them -->
+      <index_insert_if_none>
+        <index>'MC_GLOBAL_PARAMETERS'</index>
+        <field name='parameter'>'field_delim'</field>
+        <field name='value'>GLOBAL.field_delim</field>
+      </index_insert_if_none>
+      <index_insert_if_none>
+        <index>'MC_GLOBAL_PARAMETERS'</index>
+        <field name='parameter'>'record_delim'</field>
+        <field name='value'>GLOBAL.record_delim</field>
+      </index_insert_if_none>
+      <push_index>
+        <process_id>OBJECT(TEMP.csr).node_id</process_id>
+        <clear_source>0</clear_source>
+        <source>
+          <index>'MC_GLOBAL_PARAMETERS'</index>
+        </source>
+        <target>
+          <index>'MC_GLOBAL_PARAMETERS'</index>
+        </target>
+      </push_index>
+
+      <remote_queue_proc>
+        <name>'setup_slave'</name>
+        <process_id>OBJECT(TEMP.csr).node_id</process_id>
+        <batch_id>TEMP.my_batch_id</batch_id>
+      </remote_queue_proc>
+    </loop>
+  </slave_node_id_select>
+
+  <wait_for_batch_complete>TEMP.my_batch_id</wait_for_batch_complete>
+</proc>
+
+<!-- This proc processes the hierarchy-sorted input data -->
+<proc name="run_migration">
+  <param name='phase' />
+
+  <print>'Migration phase ' ~ TEMP.phase</print>
+
+  <c>Loop through the stages within this phase</c>
+  <index_select>
+    <index>'MC_STAGES'</index>
+    <field name='phase'>TEMP.phase</field>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+
+      <c>Sort the input files into the order we want</c>
+      <call_proc_for_current_object>
+        <name>'sort_input'</name>
+        <param name='phase'>TEMP.phase</param>
+        <param name='stage'>OBJECT(TEMP.csr).stage</param>
+      </call_proc_for_current_object>
+      <print>'run_migration:index_select : Done sort for phase ' ~ TEMP.phase ~ ' and stage ' ~ OBJECT(TEMP.csr).stage</print>
+      <call_proc_for_current_object>
+          <name>'print_internals'</name>
+      </call_proc_for_current_object>
+
+      <!-- Process the chunks in parallel in largest-first order -->
+      <map_reduce>
+        <producer_queue_length>GLOBAL.producer_queue_length</producer_queue_length>
+        <producer_proc>
+          <name>'sorted_chunk_producer'</name>
+          <param name='phase'>TEMP.phase</param>
+          <param name='stage'>OBJECT(TEMP.csr).stage</param>
+        </producer_proc>
+        <consumer_proc>
+          <name>'migration_consumer'</name>
+          <include_object_fields_in_output>1</include_object_fields_in_output>
+        </consumer_proc>
+        <reducer_proc>
+          <name>'migration_reducer'</name>
+        </reducer_proc>
+      </map_reduce>
+      <print>'run_migration:map_reduce : Migration for phase ' ~ TEMP.phase ~ ', stage ' ~ OBJECT(TEMP.csr).stage ~ ' took ' ~ TEMP.ms</print>
+      <call_proc_for_current_object>
+          <name>'print_internals'</name>
+      </call_proc_for_current_object>
+    </loop>
+    <else>
+      <print>'No stages found for phase ' ~ TEMP.phase</print>
+    </else>
+  </index_select>
+
+  <print>'Finished with phase ' ~ TEMP.phase</print>
+</proc>
+
+<proc name='merge_stage_input_files'>
+  <param name='phase' />
+  <param name='stage' />
+  <param name='which' />
+
+  <index_select>
+    <index>'MC_STAGE_INPUT_RECORDS'</index>
+    <field name='phase'>TEMP.phase</field>
+    <field name='stage'>TEMP.stage</field>
+    <cursor>TEMP.rcsr</cursor>
+    <loop>
+      <!-- FIXME this should not be needed if the input file(s) are read by the same kid -->
+      <sorted_object_file_close>
+        <file>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ TEMP.phase ~ '.' ~ TEMP.stage ~ '.' ~ OBJECT(TEMP.rcsr).record_type ~ '.' ~ GLOBAL.input_filename ~ GLOBAL.node_id</file>
+      </sorted_object_file_close>
+    </loop>
+  </index_select>
+</proc>
+
+<proc name='sorted_chunk_producer'>
+  <param name="phase" />
+  <param name="stage" />
+
+  <!--
+  TODO: we can also use additional information here to make better chunking decisions:
+  - total number of records in the entire sort file
+  - total number of top-level (_mc_level == 1) records in the sort file
+  - MC_CHILD_COUNT index which tells us number of descendents under a given node
+  -->
+
+  <do>TEMP.sorted_chunk_no = 1</do>
+  <do>TEMP.basefile = GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ TEMP.phase ~ '.' ~ TEMP.stage ~ '.' ~ GLOBAL.sort_filename</do>
+
+  <!-- Bail out if we don't see any files -->
+  <glob_select>
+    <glob>TEMP.basefile ~ '*'</glob>
+    <cursor_value>'filename'</cursor_value>
+    <cursor>TEMP.filecsr</cursor>
+    <else>
+      <return/>
+    </else>
+  </glob_select>
+
+  <print>'Prior to sorted_object_file_select'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+  <!-- The producer will chunk up the big file of sorted input data -->
+  <do>TEMP.outfile = TEMP.basefile ~ '.cut' ~ TEMP.sorted_chunk_no</do>
+  <do>TEMP.last_top = ''</do>
+  <do>TEMP.cutover = ''</do>
+  <do>TEMP.rowcount = 0</do>
+  <do>TEMP.threshold = 100</do>
+  <sorted_object_file_select>
+    <name>TEMP.basefile</name>
+    <input_file_match>TEMP.basefile ~ '*'</input_file_match>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <do>TEMP.rowcount += 1</do>
+      <if>
+        <condition>TEMP.rowcount GTE TEMP.threshold</condition>
+        <then>
+          <do>TEMP.cutover = '1'</do>
+        </then>
+      </if>
+      <do>TEMP.sort_key = OBJECT(TEMP.csr)._mc_sort_key</do>
+      <if>
+        <condition>OBJECT(TEMP.csr)._mc_chunking_remove_from_end GT 0</condition>
+        <then>
+          <do>TEMP.sort_key = substr(OBJECT(TEMP.csr)._mc_sort_key, 0, '-1' * OBJECT(TEMP.csr)._mc_chunking_remove_from_end)</do>
+        </then>
+      </if>
+      <if>
+        <condition>TEMP.cutover eq '1' and OBJECT(TEMP.csr)._mc_level eq '1' and TEMP.sort_key ne TEMP.last_top</condition>
+        <then>
+          <!-- Start a new output file -->
+          <spawn>
+            <object_type>'CHUNKFILE'</object_type>
+            <object_id>TEMP.oid</object_id>
+            <pin_to_proc>0</pin_to_proc>
+          </spawn>
+          <do>OBJECT(TEMP.oid).sorted_chunk_no = TEMP.sorted_chunk_no</do>
+          <do>OBJECT(TEMP.oid).sortfilename = TEMP.outfile</do>
+          <do>OBJECT(TEMP.oid).phase = TEMP.phase</do>
+          <do>OBJECT(TEMP.oid).stage = TEMP.stage</do>
+          <sorted_object_file_close>
+            <file>TEMP.outfile</file>
+          </sorted_object_file_close>
+          <pipe_row>TEMP.oid</pipe_row>
+          <do>TEMP.cutover = ''</do>
+          <do>TEMP.rowcount = 0</do>
+          <do>TEMP.sorted_chunk_no += 1</do>
+          <do>TEMP.outfile = TEMP.basefile ~ '.cut' ~ TEMP.sorted_chunk_no</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.csr)._mc_level eq '1'</condition>
+        <then>
+          <do>TEMP.last_top = TEMP.sort_key</do>
+        </then>
+      </if>
+      <do>OBJECT(TEMP.csr)._mc_pass = 1</do>
+      <do>OBJECT(TEMP.csr)._mc_first_pass = '1'</do>
+      <sorted_object_file_write>
+        <file>TEMP.outfile</file>
+        <object_id>TEMP.csr</object_id>
+        <in_order>'forward'</in_order>
+        <key_field>'_mc_sort_key'</key_field>
+      </sorted_object_file_write>
+    </loop>
+  </sorted_object_file_select>
+
+  <print>'After sorted_object_file_select'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+   
+  <!-- Finish off whatever is left -->
+  <spawn>
+    <object_type>'CHUNKFILE'</object_type>
+    <object_id>TEMP.oid</object_id>
+    <pin_to_proc>0</pin_to_proc>
+  </spawn>
+  <do>OBJECT(TEMP.oid).sorted_chunk_no = TEMP.sorted_chunk_no</do>
+  <do>OBJECT(TEMP.oid).sortfilename = TEMP.outfile</do>
+  <do>OBJECT(TEMP.oid).phase = TEMP.phase</do>
+  <do>OBJECT(TEMP.oid).stage = TEMP.stage</do>
+  <sorted_object_file_close>
+    <file>TEMP.outfile</file>
+  </sorted_object_file_close>
+  <pipe_row>TEMP.oid</pipe_row>
+
+  <print>'Finished with sorted_chunk_producer'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+</proc>
+
+<proc name='migration_consumer'>
+  <print>'Entered migration_consumer'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+    
+  <do>GLOBAL.sorted_chunk_no = OBJECT.sorted_chunk_no</do>
+
+  <do>TEMP.inputfile = OBJECT.sortfilename</do>
+  <do>TEMP.outputfile = OBJECT.sortfilename ~ '.swapout'</do>
+  <do>TEMP.reverse = ''</do>
+
+  <!--<print>'MEMFLAGSTART: migration_consumer (init)'</print>-->
+
+  <call_proc_for_current_object>
+    <name>'clear_ancestors'</name>
+    <param name='level'>1</param>
+    <param name='outputfile'>TEMP.outputfile</param>
+    <param name='write'>0</param>
+  </call_proc_for_current_object>
+
+  <print>'Just called clear_ancestors'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+  <do>TEMP.pass = 1</do>
+  <do>TEMP.write = ''</do>
+  <do>TEMP.break = ''</do>
+  <while>
+    <condition>TEMP.pass LT 9 and TEMP.break eq ''</condition>
+    <loop>
+      <do>GLOBAL.all_objects_done = '1'</do>
+      <do>TEMP.last_level = 0</do>
+      <!-- Loop through the objects in our sorted file -->
+      <sorted_object_file_select>
+        <name>TEMP.inputfile</name>
+        <input_file_match>TEMP.inputfile ~ '*'</input_file_match>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <!--
+          <if>
+            <condition>OBJECT(TEMP.csr)._mc_level GT (TEMP.last_level + 1)</condition>
+            <then>
+              <print>'Incorrect sort order detected!'</print>
+            </then>
+          </if>
+          <do>TEMP.last_level = OBJECT(TEMP.csr)._mc_level</do>
+          -->
+
+          <do>TEMP.have_error = ''</do>
+          <index_get>
+            <index>'MC_OBJECT_ERRORS'</index>
+            <field name='file_id'>OBJECT(TEMP.csr)._mc_file_id</field>
+            <field name='file_offset'>OBJECT(TEMP.csr)._mc_record_offset</field>
+            <then>
+              <do>TEMP.have_error = '1'</do>
+            </then>
+            <else>
+              <index_get>
+                <index>'MC_OBJECT_ERRORS_BY_OID'</index>
+                <field name='object_id'>OBJECT(TEMP.csr)._mc_parent</field>
+                <then>
+                  <do>TEMP.have_error = '1'</do>
+                </then>
+              </index_get>
+            </else>
+          </index_get>
+
+          <if>
+            <condition>OBJECT(TEMP.csr)._mc_parent eq '' and OBJECT(TEMP.csr)._mc_transformed eq ''</condition>
+            <then>
+              <!-- Check for duplicates by inspecting the existing ancestor index -->
+              <index_get>
+                <index>'MC_OBJECT_ANCESTORS'</index>
+                <field name='level'>OBJECT(TEMP.csr)._mc_level</field>
+                <field name='object'>TEMP.object</field>
+                <then>
+                  <if>
+                    <!-- FIXME: test detection of duplicate objects (both for dupe children and dupe top-level entities) -->
+                    <condition>OBJECT(TEMP.object)._mc_sort_key eq OBJECT(TEMP.csr)._mc_sort_key</condition>
+                    <then>
+                      <do>OBJECT(TEMP.csr)._mc_error ~= 'Duplicate object detected in pass ' ~ OBJECT(TEMP.csr)._mc_pass ~ ': ' ~ OBJECT(TEMP.csr)._mc_sort_key ~ '. '</do>
+                    </then>
+                  </if>
+                </then>
+              </index_get>
+
+              <!-- Set the new object's parent reference -->
+              <do>TEMP._mc_parent = ''</do>
+              <index_get>
+                <index>'MC_OBJECT_ANCESTORS'</index>
+                <field name='level'>OBJECT(TEMP.csr)._mc_level - 1</field>
+                <field name='object'>TEMP._mc_parent</field>
+              </index_get>
+
+              <if>
+                <condition>OBJECT(TEMP.csr)._mc_level GT 1</condition>
+                <then>
+                  <do>OBJECT(TEMP.csr)._mc_parent = TEMP._mc_parent</do>
+                </then>
+                <condition>OBJECT(TEMP.csr)._mc_level eq '1' and TEMP._mc_parent ne '' and OBJECT(TEMP.csr)._mc_parent_key eq OBJECT(TEMP._mc_parent)._mc_base_key</condition>
+                <then>
+                  <do>OBJECT(TEMP.csr)._mc_parent = TEMP._mc_parent</do>
+                </then>
+                <condition>OBJECT(TEMP.csr)._mc_unknown_parent eq '1' and TEMP.have_error eq ''</condition>
+                <then>
+                  <!-- The parent might already be loaded in the database, so check for it -->
+                  <!-- TODO: make sure we don't do PARENT/ANCESTOR defaulting up to a non-selected field (currently it will just give null but should be error) -->
+                    <call_dynamic_proc_for_object>
+                    <name>'find_ancestor_' ~ OBJECT(TEMP.csr)._mc_record_type_id</name>
+                    <object_id>TEMP.csr</object_id>
+                    <param name='error'>OBJECT(TEMP.csr)._mc_error</param>
+                  </call_dynamic_proc_for_object>
+                </then>
+                <else>
+                  <print>'Unexpected: no available parent for object ' ~ OBJECT(TEMP.csr)._mc_sort_key</print>
+                </else>
+              </if>
+            </then>
+          </if>
+
+          <if>
+            <condition>OBJECT(TEMP.csr)._mc_transformed eq '' and TEMP.write ne '1'</condition>
+            <then>
+              <!-- FIXME: Inline clear_ancestors manually for performance (get rid of this) -->
+              <do>TEMP.actr = GLOBAL.ancestor_count</do>
+              <while>
+                <condition>TEMP.actr ne '' and TEMP.actr GTE OBJECT(TEMP.csr)._mc_level</condition>
+                <loop>
+                  <index_get>
+                    <index>'MC_OBJECT_ANCESTORS'</index>
+                    <field name='level'>TEMP.actr</field>
+                    <field name='object'>TEMP.object</field>
+                    <then>
+                      <do>TEMP.mypass = ''</do>
+                      <index_get>
+                        <index>'MC_RECORD_FINAL_PASS'</index>
+                        <field name='record_type_id'>OBJECT(TEMP.object)._mc_record_type_id</field>
+                        <field name='pass'>TEMP.mypass</field>
+                      </index_get>
+                      <if>
+                        <condition>TEMP.mypass eq ''</condition>
+                        <then>
+                          <do>TEMP.mypass = '1'</do>
+                        </then>
+                      </if>
+                      <if>
+                        <condition>TEMP.mypass eq OBJECT(TEMP.object)._mc_pass</condition>
+                        <then>
+                          <do>OBJECT(TEMP.object)._mc_pass = 'done'</do>
+                        </then>
+                      </if>
+                      <if>
+                        <condition>OBJECT(TEMP.object)._mc_pass ne 'done'</condition>
+                        <then>
+                          <do>OBJECT(TEMP.object)._mc_pass += 1</do>
+                          <do>GLOBAL.all_objects_done = ''</do>
+                        </then>
+                      </if>
+                      <sorted_object_file_write>
+                        <file>TEMP.outputfile</file>
+                        <object_id>TEMP.object</object_id>
+                        <in_order>''</in_order>
+                        <key_field>'_mc_sort_key'</key_field>
+                      </sorted_object_file_write>
+                    </then>
+                  </index_get>
+                  <index_remove>
+                    <index>'MC_OBJECT_ANCESTORS'</index>
+                    <num_rows>TEMP.numrows</num_rows>
+                    <field name='level'>TEMP.actr</field>
+                  </index_remove>
+                  <do>TEMP.actr -= 1</do>
+                  <if>
+                    <condition>TEMP.numrows ne '1'</condition>
+                    <then>
+                      <do>TEMP.actr = ''</do>
+                    </then>
+                  </if>
+                </loop>
+              </while>
+              <do>GLOBAL.ancestor_count = OBJECT(TEMP.csr)._mc_level - 1</do>
+              <index_insert>
+                <index>'MC_OBJECT_ANCESTORS'</index>
+                <field name='level'>OBJECT(TEMP.csr)._mc_level</field>
+                <field name='object'>TEMP.csr</field>
+              </index_insert>
+              <do>GLOBAL.ancestor_count = OBJECT(TEMP.csr)._mc_level</do>
+            </then>
+          </if>
+
+          <!-- Call the proc for this pass -->
+          <do>TEMP.current_pass = OBJECT(TEMP.csr)._mc_pass</do>
+          <if>
+            <condition>TEMP.write eq '1'</condition>
+            <then>
+              <do>TEMP.current_pass = 'write'</do>
+            </then>
+          </if>
+          <do>TEMP.procname = 'pass_' ~ TEMP.current_pass ~ '_' ~ OBJECT(TEMP.csr)._mc_record_type_id</do>
+          <get_proc_text>
+            <name>TEMP.procname</name>
+            <success>TEMP.success</success>
+          </get_proc_text>
+          <if>
+            <condition>TEMP.success eq '1' and TEMP.have_error eq '' and OBJECT(TEMP.csr)._mc_error eq ''</condition>
+            <then>
+              <call_dynamic_proc_for_object>
+                <name>TEMP.procname</name>
+                <object_id>TEMP.csr</object_id>
+                <param name='infile'>TEMP.inputfile</param>
+                <param name='outfile'>TEMP.outputfile</param>
+              </call_dynamic_proc_for_object>
+            </then>
+          </if>
+          <if>
+            <condition>TEMP.have_error ne '' or OBJECT(TEMP.csr)._mc_error ne ''</condition>
+            <then>
+              <!-- TODO: have not really tested all the cases of ancestor/parent errors -->
+              <if>
+                <condition>TEMP.write eq '1'</condition>
+                <then>
+                  <call_proc_for_current_object>
+                    <name>'write_error'</name>
+                    <param name='object'>TEMP.csr</param>
+                    <param name='error_msg'>OBJECT(TEMP.csr)._mc_error</param>
+                  </call_proc_for_current_object>
+                </then>
+              </if>
+              <index_insert_if_none>
+                <index>'MC_OBJECT_ERRORS'</index>
+                <field name="file_id">OBJECT(TEMP.csr)._mc_file_id</field>
+                <field name="file_offset">OBJECT(TEMP.csr)._mc_record_offset</field>
+              </index_insert_if_none>
+              <index_insert_if_none>
+                <index>'MC_OBJECT_ERRORS_BY_OID'</index>
+                <field name="object_id">TEMP.csr</field>
+              </index_insert_if_none>
+            </then>
+          </if>
+        </loop>
+      </sorted_object_file_select>
+      
+      <call_proc_for_current_object>
+        <name>'clear_ancestors'</name>
+        <param name='level'>1</param>
+        <param name='outputfile'>TEMP.outputfile</param>
+        <param name='write'>1</param>
+      </call_proc_for_current_object>
+
+      <if>
+        <condition>TEMP.write eq '1'</condition>
+        <then>
+          <do>TEMP.break = '1'</do>
+        </then>
+        <condition>GLOBAL.all_objects_done eq '1'</condition>
+        <then>
+          <do>TEMP.write = '1'</do>
+        </then>
+      </if>
+
+      <!--
+      Change by TCF July 2014.
+      Changing flush flag from 0 to 1. This will empty the contents of the file.
+      -->
+        <print>'About to close and flush ' ~ TEMP.inputfile</print>
+      <sorted_object_file_close>
+        <file>TEMP.inputfile</file>
+        <flush>0</flush>
+      </sorted_object_file_close>
+        <print>'It is done for ' ~ TEMP.inputfile</print>
+      <if>
+        <condition>TEMP.reverse eq ''</condition>
+        <then>
+          <do>TEMP.inputfile = TEMP.outputfile</do>
+          <do>TEMP.outputfile = OBJECT.sortfilename ~ '.swapin'</do>
+        </then>
+        <else>
+          <try_file_delete>TEMP.inputfile ~ '*'</try_file_delete>
+          <do>TEMP.temp = TEMP.outputfile</do>
+          <do>TEMP.outputfile = TEMP.inputfile</do>
+          <do>TEMP.inputfile = TEMP.temp</do>
+        </else>
+      </if>
+      <do>TEMP.reverse = '1'</do>
+      <do>TEMP.pass += 1</do>
+      
+    </loop>
+  </while>
+  <print>'Finished looping in migration_consumer'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+    
+  <if>
+    <condition>TEMP.pass GTE 9</condition>
+    <then>
+      <fatal>'Error: too many mapping passes!'</fatal>
+    </then>
+  </if>
+
+  <sorted_object_file_close>
+    <file>TEMP.inputfile</file>
+    <flush>0</flush>
+  </sorted_object_file_close>
+  <sorted_object_file_close>
+    <file>TEMP.outputfile</file>
+    <flush>0</flush>
+  </sorted_object_file_close>
+    <!--<print>'I am about to delete ' ~ TEMP.inputfile ~ ' and ' ~ TEMP.outputfile</print>-->
+  <try_file_delete>TEMP.inputfile ~ '*'</try_file_delete>
+  <try_file_delete>TEMP.outputfile ~ '*'</try_file_delete>
+
+  <!-- 
+  Added by TCF July 2014
+  "unsorted" files, created by mvm.exe, take up a ton of space. Purge them as we no longer need them.
+  October 2014 - too many scenarios where it doesn't like this...commenting out 
+  -->
+  <!--<try_file_delete>GLOBAL.sorted_directory ~ GLOBAL.path_separator ~ GLOBAL.node_id ~ '.unsorted.*'</try_file_delete>-->
+  
+  <print>'I am about to clear indexes in migration_consumer'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+    
+  <call_proc_for_current_object>
+    <name>'clear_hierarchy_references'</name>
+  </call_proc_for_current_object>
+  <call_proc_for_current_object>
+    <name>'clear_rate_schedules'</name>
+  </call_proc_for_current_object>
+  <index_clear>
+    <index>'MC_OBJECT_ERRORS'</index>
+  </index_clear>
+  <index_clear>
+    <index>'MC_OBJECT_ERRORS_BY_OID'</index>
+  </index_clear>
+  <index_clear>
+    <index>'MC_OBJECT_ANCESTORS_BY_OID'</index>
+  </index_clear>
+  <index_clear>
+    <index>'MC_OBJECT_ANCESTORS'</index>
+  </index_clear>
+
+  <print>'I finished clearing indexes in migration_consumer'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+  <!--<print>'MEMFLAG: merge_sorted_files (pre-push_index)'</print>-->
+
+  <!-- Push errors up to parent -->
+  <push_index>
+    <process_id>GLOBAL.master_id</process_id>
+    <clear_source>1</clear_source>
+    <source>
+      <index>'MC_RECORD_ERRORS'</index>
+    </source>
+    <target>
+      <index>'MC_RECORD_ERRORS'</index>
+    </target>
+  </push_index>
+
+  <!--<print>'MEMFLAGEND: merge_sorted_files'</print>-->
+  <print>'migration_consumer is complete'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+
+</proc>
+
+<proc name='replace_ancestor'>
+  <!-- Replace the existing entry in the index -->
+  <index_remove>
+    <index>'MC_OBJECT_ANCESTORS'</index>
+    <field name='level'>OBJECT._mc_level</field>
+  </index_remove>
+  <index_insert>
+    <index>'MC_OBJECT_ANCESTORS'</index>
+    <field name='level'>OBJECT._mc_level</field>
+    <field name='object'>OBJECT.object_id</field>
+  </index_insert>
+</proc>
+
+<proc name='get_full_tx_path'>
+  <param name='value' mode='out' />
+
+  <if>
+    <condition>OBJECT(OBJECT._mc_parent).full_tx_path ne ''</condition>
+    <then>
+      <do>TEMP.value = OBJECT(OBJECT._mc_parent).full_tx_path ~ '/' ~ OBJECT.id_acc</do>
+    </then>
+    <else>
+      <do>TEMP.acct = OBJECT.object_id</do>
+      <do>TEMP.myacct = TEMP.acct</do>
+      <do>TEMP.full_tx_path = ''</do>
+      <while>
+        <condition>TEMP.myacct ne ''</condition>
+        <loop>
+          <!-- Build up the full tx_path string -->
+          <if>
+            <condition>TEMP.full_tx_path ne ''</condition>
+            <then>
+              <do>TEMP.full_tx_path = '/' ~ TEMP.full_tx_path</do>
+            </then>
+          </if>
+          <do>TEMP.full_tx_path = OBJECT(TEMP.myacct).id_acc ~ TEMP.full_tx_path</do>
+          <do>TEMP.myacct = OBJECT(TEMP.myacct)._mc_parent</do>
+          <if>
+            <condition>TEMP.myacct eq ''</condition>
+            <then>
+              <do>TEMP.full_tx_path = '/' ~ TEMP.full_tx_path</do>
+            </then>
+          </if>
+        </loop>
+      </while>
+      <do>TEMP.value = TEMP.full_tx_path</do>
+    </else>
+  </if>
+</proc>
+
+<proc name='get_account_ancestors'>
+  <param name='pipe_cursor' />
+  <if>
+    <condition>OBJECT._mc_error eq ''</condition>
+    <then>
+      <do>TEMP.acct = OBJECT.object_id</do>
+      <do>TEMP.myacct = TEMP.acct</do>
+      <do>TEMP.full_tx_path = ''</do>
+      <call_proc_for_current_object>
+        <name>'get_full_tx_path'</name>
+        <param name='value'>TEMP.full_tx_path</param>
+      </call_proc_for_current_object>
+
+      <do>TEMP.continue = '1'</do>
+      <do>TEMP.ancestor = TEMP.acct</do>
+      <do>TEMP.numgen = 0</do>
+      <while>
+        <condition>TEMP.continue eq '1'</condition>
+        <loop>
+          <do>TEMP.id_ancestor = OBJECT(TEMP.ancestor).id_acc</do>
+          <do>TEMP.id_dm_ancestor = OBJECT(TEMP.ancestor).id_dm_acc</do>
+          <if>
+            <condition>TEMP.ancestor eq ''</condition>
+            <then>
+              <do>TEMP.id_ancestor = '1'</do>
+              <do>TEMP.id_dm_ancestor = '1'</do>
+              <do>TEMP.continue = ''</do>
+            </then>
+          </if>
+          <match>
+            <input>TEMP.full_tx_path</input>
+            <regex>'((\d*\/){' ~ TEMP.numgen ~ '}\d+)$'</regex>
+            <success>TEMP.matched</success>
+            <capture>TEMP.tx_path</capture>
+          </match>
+          <spawn>
+            <internal_type>'format_array'</internal_type>
+            <feedback_name>'ACC_ANCESTOR'</feedback_name>
+            <object_type>'ACC_ANCESTOR'</object_type>
+            <object_id>TEMP.oid</object_id>
+            <pin_to_proc>0</pin_to_proc>
+          </spawn>
+          <do>OBJECT(TEMP.oid).id_ancestor = TEMP.id_ancestor</do>
+          <do>OBJECT(TEMP.oid).id_dm_ancestor = TEMP.id_dm_ancestor</do>
+          <do>OBJECT(TEMP.oid).id_descendent = OBJECT(TEMP.acct).id_acc</do>
+          <do>OBJECT(TEMP.oid).id_dm_descendent = OBJECT(TEMP.acct).id_dm_acc</do>
+          <do>OBJECT(TEMP.oid).num_generations = TEMP.numgen</do>
+          <do>OBJECT(TEMP.oid).b_children = OBJECT(TEMP.acct).b_children</do>
+          <do>OBJECT(TEMP.oid).vt_start = OBJECT(TEMP.acct).vt_start</do>
+          <do>OBJECT(TEMP.oid).vt_end = OBJECT(TEMP.acct).vt_end</do>
+          <do>OBJECT(TEMP.oid).tx_path = TEMP.tx_path</do>
+          <if>
+            <condition>OBJECT(TEMP.oid).id_ancestor eq '' or OBJECT(TEMP.oid).id_descendent eq ''</condition>
+            <then>
+              <do>OBJECT(TEMP.oid)._mc_error = 'Invalid ancestor data: ' ~ OBJECT(TEMP.oid).id_ancestor ~ '/' ~ OBJECT(TEMP.oid).id_descendent</do>
+            </then>
+          </if>
+          <pipe_row>TEMP.oid</pipe_row>
+          <do>TEMP.ancestor = OBJECT(TEMP.ancestor)._mc_parent</do>
+          <do>TEMP.numgen += 1</do>
+        </loop>
+      </while>
+    </then>
+  </if>
+</proc>
+
+<proc name='clear_ancestors'>
+  <param name='level' />
+  <param name='outputfile' />
+  <param name='write' />
+  <do>TEMP.actr = GLOBAL.ancestor_count</do>
+  <while>
+    <condition>TEMP.actr ne '' and TEMP.actr GTE TEMP.level</condition>
+    <loop>
+      <if>
+        <condition>TEMP.write eq '1'</condition>
+        <then>
+          <index_get>
+            <index>'MC_OBJECT_ANCESTORS'</index>
+            <field name='level'>TEMP.actr</field>
+            <field name='object'>TEMP.object</field>
+            <then>
+              <do>TEMP.mypass = ''</do>
+              <index_get>
+                <index>'MC_RECORD_FINAL_PASS'</index>
+                <field name='record_type_id'>OBJECT(TEMP.object)._mc_record_type_id</field>
+                <field name='pass'>TEMP.mypass</field>
+              </index_get>
+              <if>
+                <condition>TEMP.mypass eq ''</condition>
+                <then>
+                  <do>TEMP.mypass = '1'</do>
+                </then>
+              </if>
+              <if>
+                <condition>TEMP.mypass eq OBJECT(TEMP.object)._mc_pass</condition>
+                <then>
+                  <do>OBJECT(TEMP.object)._mc_pass = 'done'</do>
+                </then>
+              </if>
+              <if>
+                <condition>OBJECT(TEMP.object)._mc_pass ne 'done'</condition>
+                <then>
+                  <do>OBJECT(TEMP.object)._mc_pass += 1</do>
+                  <do>GLOBAL.all_objects_done = ''</do>
+                </then>
+              </if>
+              <sorted_object_file_write>
+                <file>TEMP.outputfile</file>
+                <object_id>TEMP.object</object_id>
+                <in_order>''</in_order>
+                <key_field>'_mc_sort_key'</key_field>
+              </sorted_object_file_write>
+            </then>
+          </index_get>
+        </then>
+      </if>
+      <index_remove>
+        <index>'MC_OBJECT_ANCESTORS'</index>
+        <num_rows>TEMP.numrows</num_rows>
+        <field name='level'>TEMP.actr</field>
+      </index_remove>
+      <do>TEMP.actr -= 1</do>
+      <if>
+        <condition>TEMP.numrows ne '1'</condition>
+        <then>
+          <do>TEMP.actr = ''</do>
+        </then>
+      </if>
+    </loop>
+  </while>
+  <do>GLOBAL.ancestor_count = TEMP.level - 1</do>
+</proc>
+
+<proc name='write_error'>
+  <param name='object' />
+  <param name='error_msg' />
+  <index_insert>
+    <index>'MC_RECORD_ERRORS'</index>
+    <field name='file_id'>OBJECT(TEMP.object)._mc_file_id</field>
+    <field name='line_no'>OBJECT(TEMP.object)._mc_line_no</field>
+    <field name='record_type_id'>OBJECT(TEMP.object)._mc_record_type_id</field>
+    <field name='chunk_no'>GLOBAL.sorted_chunk_no</field>
+    <field name='offset'>OBJECT(TEMP.object)._mc_record_offset</field>
+    <field name='length'>OBJECT(TEMP.object)._mc_record_length</field>
+    <field name='key_fields'>''</field>
+    <field name='message'>TEMP.error_msg</field>
+  </index_insert>
+</proc>
+
+<proc name='migration_reducer'>
+  <print>'Entering migration_reducer'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>  
+    
+  <!-- This proc handles all the errors encountered by the consumers -->
+  <do>TEMP.filename = ''</do>
+  <do>TEMP.fullfilename = ''</do>
+  <index_select>
+    <index>'MC_RECORD_ERRORS'</index>
+    <field name='chunk_no'>OBJECT.sorted_chunk_no</field>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <do>TEMP.record_type = ''</do>
+      <do>TEMP.display_record_type = ''</do>
+      <do>TEMP.result = ''</do>
+      <index_select> <!-- TODO: index_get -->
+        <index>'MC_DATAFILES_BY_ID'</index>
+        <field name='file_id'>OBJECT(TEMP.csr).file_id</field>
+        <cursor>TEMP.fcsr</cursor>
+        <then>
+          <do>TEMP.record_type = OBJECT(TEMP.fcsr).record_type</do>
+          <do>TEMP.display_record_type = OBJECT(TEMP.fcsr).display_record_type</do>
+          <do>TEMP.fullfilename = OBJECT(TEMP.fcsr).filename</do>
+          <path_basename>
+            <input>TEMP.fullfilename</input>
+            <output>TEMP.filename</output>
+          </path_basename>
+          <index_insert_if_none>
+            <index>'MC_RECORD_ERROR_ROWS'</index>
+            <field name='record_type'>TEMP.record_type</field>
+            <field name='file_id'>OBJECT(TEMP.csr).file_id</field>
+            <field name='line_no'>OBJECT(TEMP.csr).line_no</field>
+            <result>TEMP.result</result>
+          </index_insert_if_none>
+        </then>
+      </index_select>
+
+      <if>
+        <!-- If we have a message, print it to the error log -->
+        <condition>OBJECT(TEMP.csr).message ne ''</condition>
+        <then>
+          <print_record>
+            <file>GLOBAL.error_workbook</file>
+            <field_delim>','</field_delim>
+            <record_delim>'\r\n'</record_delim>
+            <data>
+              <field>TEMP.filename</field>
+              <field>OBJECT(TEMP.csr).line_no</field>
+              <field>TEMP.display_record_type</field>
+              <field>OBJECT(TEMP.csr).message</field>
+            </data>
+          </print_record>
+          <!--
+          <try>
+            <config>
+              <xl_open_workbook>GLOBAL.error_workbook</xl_open_workbook>
+              <xl_next_row>
+                <workbook>GLOBAL.error_workbook</workbook>
+                <worksheet>GLOBAL.error_worksheet</worksheet>
+              </xl_next_row>
+              <xl_append_field>
+                <workbook>GLOBAL.error_workbook</workbook>
+                <worksheet>GLOBAL.error_worksheet</worksheet>
+                <field>TEMP.filename</field>
+              </xl_append_field>
+              <xl_append_field>
+                <workbook>GLOBAL.error_workbook</workbook>
+                <worksheet>GLOBAL.error_worksheet</worksheet>
+                <field>OBJECT(TEMP.csr).line_no</field>
+              </xl_append_field>
+              <xl_append_field>
+                <workbook>GLOBAL.error_workbook</workbook>
+                <worksheet>GLOBAL.error_worksheet</worksheet>
+                <field>TEMP.record_type</field>
+              </xl_append_field>
+              <xl_append_field>
+                <workbook>GLOBAL.error_workbook</workbook>
+                <worksheet>GLOBAL.error_worksheet</worksheet>
+                <field>OBJECT(TEMP.csr).message</field>
+              </xl_append_field>
+            </config>
+            <finally>
+              <xl_close_workbook>GLOBAL.error_workbook</xl_close_workbook>
+            </finally>
+          </try>
+          -->
+        </then>
+      </if>
+
+      <!-- Write the original rows to error files -->
+      <if>
+        <condition>TEMP.result eq '1'</condition>
+        <then>
+          <file_substring>
+            <file>TEMP.fullfilename</file>
+            <offset>OBJECT(TEMP.csr).offset</offset>
+            <length>OBJECT(TEMP.csr).length</length>
+            <output>TEMP.errorline</output>
+          </file_substring>
+          <regex_replace>
+            <input>TEMP.filename</input>
+            <pattern>'data$'</pattern>
+            <replacement>'error.data'</replacement>
+            <output>TEMP.errorfilename</output>
+          </regex_replace>
+          <print_record>
+            <file>GLOBAL.error_directory ~ GLOBAL.path_separator ~ TEMP.errorfilename</file>
+            <field_delim>'junk'</field_delim>
+            <record_delim>''</record_delim>
+            <data>
+              <field>TEMP.errorline</field>
+            </data>
+          </print_record>
+        </then>
+      </if>
+    </loop>
+  </index_select>
+
+  <do>TEMP.current_count = 0</do>
+  <index_select_keys>
+    <index>'MC_RECORD_ERROR_ROWS'</index>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <do>TEMP.ecount = 0</do>
+      <index_select>
+        <index>'MC_RECORD_ERROR_ROWS'</index>
+        <field name='record_type'>OBJECT(TEMP.csr).record_type</field>
+        <field name='file_id'>OBJECT(TEMP.csr).file_id</field>
+        <field name='line_no'>OBJECT(TEMP.csr).line_no</field>
+        <cursor>TEMP.csr2</cursor>
+        <loop>
+          <do>TEMP.ecount += 1</do>
+        </loop>
+      </index_select>
+      <index_select> <!-- TODO: index_get -->
+        <index>'MC_RECORD_ERROR_COUNT'</index>
+        <field name='record_type'>OBJECT(TEMP.csr).record_type</field>
+        <cursor>TEMP.ecsr</cursor>
+        <then>
+          <do>TEMP.current_count = OBJECT(TEMP.ecsr).count + TEMP.ecount</do>
+          <do>TEMP.new_count = index_update('MC_RECORD_ERROR_COUNT', record_type=>OBJECT(TEMP.csr).record_type, count=>TEMP.current_count)</do>
+        </then>
+        <else>
+          <index_insert>
+            <index>'MC_RECORD_ERROR_COUNT'</index>
+            <field name='record_type'>OBJECT(TEMP.csr).record_type</field>
+            <field name='count'>TEMP.ecount</field>
+          </index_insert>
+          <do>TEMP.current_count = TEMP.ecount</do>
+        </else>
+      </index_select>
+    </loop>
+  </index_select_keys>
+  <index_clear>
+    <index>'MC_RECORD_ERROR_ROWS'</index>
+  </index_clear>
+
+  <!-- Remove the errors now that we're done with them -->
+  <index_remove>
+    <index>'MC_RECORD_ERRORS'</index>
+    <field name='chunk_no'>OBJECT.sorted_chunk_no</field>
+  </index_remove>
+
+  <print>'Leaving migration_reducer'</print>
+  <call_proc_for_current_object>
+      <name>'print_internals'</name>
+  </call_proc_for_current_object>
+</proc>
+
+<proc name='write_control_report'>
+  <do>TEMP.report = GLOBAL.migration_directory ~ GLOBAL.path_separator ~ 'migration_report.csv'</do>
+  <print_record>
+    <file>TEMP.report</file>
+    <field_delim>','</field_delim>
+    <record_delim>'\r\n'</record_delim>
+    <data>
+      <field>'Record Type'</field>
+      <field>'Rows Read'</field>
+      <field>'Rows Succeeded'</field>
+      <field>'Rows Errored'</field>
+      <field>'Success Percentage'</field>
+    </data>
+  </print_record>
+  <index_select_keys>
+    <index>'MC_RECORD_COUNT'</index>
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <do>TEMP.errors = 0</do>
+      <index_select>
+        <index>'MC_RECORD_ERROR_COUNT'</index>
+        <field name='record_type'>OBJECT(TEMP.csr).record_type</field>
+        <cursor>TEMP.csr2</cursor>
+        <loop>
+          <do>TEMP.errors = OBJECT(TEMP.csr2).count</do>
+        </loop>
+      </index_select>
+      <do>TEMP.displaytype = ''</do>
+      <do>TEMP.rcount = 0</do>
+      <index_select>
+        <index>'MC_RECORD_COUNT'</index>
+        <field name='record_type'>OBJECT(TEMP.csr).record_type</field>
+        <cursor>TEMP.csr2</cursor>
+        <loop>
+          <do>TEMP.rcount += OBJECT(TEMP.csr2).count</do>
+          <do>TEMP.displaytype = OBJECT(TEMP.csr2).display_record_type</do>
+        </loop>
+      </index_select>
+      <do>TEMP.percentage = 0</do>
+      <if>
+        <condition>TEMP.rcount GT 0</condition>
+        <then>
+          <round>
+            <input>100 * (TEMP.rcount - TEMP.errors) / TEMP.rcount</input>
+            <precision>2</precision>
+            <output>TEMP.percentage</output>
+          </round>
+        </then>
+      </if>
+      <print_record>
+        <file>TEMP.report</file>
+        <field_delim>','</field_delim>
+        <record_delim>'\r\n'</record_delim>
+        <data>
+          <field>TEMP.displaytype</field>
+          <field>TEMP.rcount</field>
+          <field>TEMP.rcount - TEMP.errors</field>
+          <field>TEMP.errors</field>
+          <field>TEMP.percentage</field>
+        </data>
+      </print_record>
+    </loop>
+  </index_select_keys>
+</proc>
+
+<proc name='boolean'>
+  <param name='input' />
+  <param name='output' mode='out' />
+
+  <do>TEMP.output = TEMP.input</do>
+  <if>
+    <condition>TEMP.input ne ''</condition>
+    <then>
+      <match>
+        <input>TEMP.input</input>
+        <regex>'y|t|on|1'</regex>
+        <ignore_case>'1'</ignore_case>
+        <success>TEMP.output</success>
+      </match>
+    </then>
+  </if>
+</proc>
+
+<proc name='clean_object'>
+  <remove_object_field>
+    <object_id>OBJECT.object_id</object_id>
+    <field_name>'_mc_sort_key'</field_name>
+  </remove_object_field>
+  <remove_object_field>
+    <object_id>OBJECT.object_id</object_id>
+    <field_name>'_mc_parent_key'</field_name>
+  </remove_object_field>
+  <remove_object_field>
+    <object_id>OBJECT.object_id</object_id>
+    <field_name>'_mc_parent'</field_name>
+  </remove_object_field>
+  <remove_object_field>
+    <object_id>OBJECT.object_id</object_id>
+    <field_name>'_mc_level'</field_name>
+  </remove_object_field>
+  <remove_object_field>
+    <object_id>OBJECT.object_id</object_id>
+    <field_name>'_mc_error'</field_name>
+  </remove_object_field>
+  <remove_object_field>
+    <object_id>OBJECT.object_id</object_id>
+    <field_name>'_mc_parent_error'</field_name>
+  </remove_object_field>
+</proc>
+
+</procs>

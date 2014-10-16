@@ -1,0 +1,92 @@
+<proc name="pass_1_143">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <if>
+    <condition>OBJECT.id_audit eq ''</condition>
+    <then>
+      <do>OBJECT.id_audit = 0</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'id_audit'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'int'</datatype>
+        <length>'10'</length>
+        <scale>'0'</scale>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.id_acc eq ''</condition>
+    <then>
+      <do>OBJECT.id_acc = OBJECT(OBJECT._mc_parent).id_acc</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.id_sub eq ''</condition>
+    <then>
+      <do>OBJECT.id_sub = OBJECT(OBJECT._mc_parent).id_sub</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.nm_currency_code eq ''</condition>
+    <then>
+      <do>OBJECT.nm_currency_code = OBJECT(OBJECT._mc_parent).nm_currency_code</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.tt_start eq ''</condition>
+    <then>
+      <do>OBJECT.tt_start = OBJECT(OBJECT._mc_parent).tt_start</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.tt_end eq ''</condition>
+    <then>
+      <do>OBJECT.tt_end = OBJECT(OBJECT._mc_parent).tt_end</do>
+    </then>
+  </if>
+  <if>
+    <condition>OBJECT.tt_start eq ''</condition>
+    <then>
+      <do>OBJECT.tt_start = OBJECT(OBJECT._mc_parent).vt_start</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'tt_start'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'datetime'</datatype>
+        <format>'yyyy-MM-dd HH:mm:ss'</format>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <if>
+    <condition>OBJECT.tt_end eq ''</condition>
+    <then>
+      <do>OBJECT.tt_end = OBJECT(OBJECT._mc_parent).vt_end</do>
+    </then>
+    <else>
+      <validate_field>
+        <field>'tt_end'</field>
+        <object_id>OBJECT.object_id</object_id>
+        <datatype>'datetime'</datatype>
+        <format>'yyyy-MM-dd HH:mm:ss'</format>
+        <nullable>'0'</nullable>
+        <output_field>'_mc_error'</output_field>
+      </validate_field>
+    </else>
+  </if>
+  <do>OBJECT.rate_schedule_key = ((((((((((OBJECT.id_acc ~ '|') ~ OBJECT.id_sub) ~ '|') ~ OBJECT.id_paramtable) ~ '|') ~ OBJECT.id_pi_template) ~ '|') ~ OBJECT.tt_start) ~ '|') ~ OBJECT.tt_end)</do>
+  <call_proc_for_current_object>
+    <name>'store_rate_schedule'</name>
+    <param name="value">TEMP.GeNsYm1201__MC_PROC</param>
+  </call_proc_for_current_object>
+  <do>OBJECT.rate_schedule = TEMP.GeNsYm1201__MC_PROC</do>
+</proc>

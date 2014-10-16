@@ -1,0 +1,62 @@
+<proc name="pass_2_31">
+  <run_once>
+    <call_proc>'initialize_namespace/Convert'</call_proc>
+  </run_once>
+  <param name="infile" />
+  <param name="outfile" />
+  <if>
+    <condition>OBJECT._mc_error ne ''</condition>
+    <then>
+      <return />
+    </then>
+  </if>
+  <select>
+    <proc_select>
+      <name>'get_account_ancestors'</name>
+    </proc_select>
+    <cursor>TEMP.GeNsYm92__mc</cursor>
+    <loop>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm92__mc).id_ancestor eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm92__mc).id_ancestor = OBJECT(TEMP.GeNsYm92__mc).id_ancestor</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm92__mc).id_descendent eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm92__mc).id_descendent = OBJECT(TEMP.GeNsYm92__mc).id_descendent</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm92__mc).num_generations eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm92__mc).num_generations = OBJECT(TEMP.GeNsYm92__mc).num_generations</do>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(TEMP.GeNsYm92__mc).tx_path eq ''</condition>
+        <then>
+          <do>OBJECT(TEMP.GeNsYm92__mc).tx_path = OBJECT(TEMP.GeNsYm92__mc).tx_path</do>
+        </then>
+      </if>
+      <do>OBJECT(TEMP.GeNsYm92__mc)._mc_file_id = OBJECT._mc_file_id</do>
+      <do>OBJECT(TEMP.GeNsYm92__mc)._mc_line_no = OBJECT._mc_line_no</do>
+      <do>OBJECT(TEMP.GeNsYm92__mc)._mc_record_offset = OBJECT._mc_record_offset</do>
+      <do>OBJECT(TEMP.GeNsYm92__mc)._mc_record_length = OBJECT._mc_record_length</do>
+      <do>OBJECT(TEMP.GeNsYm92__mc)._mc_record_type_id = 47</do>
+      <do>OBJECT(TEMP.GeNsYm92__mc)._mc_parent = OBJECT.object_id</do>
+      <do>OBJECT(TEMP.GeNsYm92__mc)._mc_level = OBJECT._mc_level + 1</do>
+      <do>OBJECT(TEMP.GeNsYm92__mc)._mc_first_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm92__mc)._mc_pass = '1'</do>
+      <do>OBJECT(TEMP.GeNsYm92__mc)._mc_sort_key = OBJECT._mc_sort_key ~ '	`|	`|' ~ 'ACC_ANCESTOR' ~ GLOBAL.spawn_child_no</do>
+      <do>GLOBAL.spawn_child_no += 1</do>
+      <do>OBJECT(TEMP.GeNsYm92__mc)._mc_spawned = '1'</do>
+      <sorted_object_file_write>
+        <file>TEMP.infile</file>
+        <object_id>TEMP.GeNsYm92__mc</object_id>
+        <key_field>'_mc_sort_key'</key_field>
+      </sorted_object_file_write>
+    </loop>
+  </select>
+</proc>

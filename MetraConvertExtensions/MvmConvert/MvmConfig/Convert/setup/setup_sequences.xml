@@ -1,0 +1,494 @@
+<procs>
+
+<!-- FIXME: test sequences with a blocksize of 1 for both oracle and sqlserver -->
+
+<!-- Note: t_current_id stores the next available number (i.e. one higher than the max value in the table) -->
+
+<proc name="sequence_get_next_id_acc">
+  <param name='value' mode='out' />
+
+  <!-- FIXME: need to test all this sequence stuff for sqlserver, test timeouts, and implement timeout fallback for identity columns -->
+  <do>TEMP.counter = 10</do>
+  <while>
+    <condition>TEMP.counter GT 0</condition>
+    <loop>
+      <if>
+        <condition>GLOBAL.sequence_current_id_acc eq '' or GLOBAL.sequence_current_id_acc GTE GLOBAL.sequence_max_id_acc</condition>
+        <then>
+          <if>
+            <condition>OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+            <then>
+              <db_select>
+                <login_object>GLOBAL.target_login</login_object>
+                <query type='sql'>
+                  "update t_current_id set id_current = id_current + " ~ GLOBAL.sequence_blocksize ~
+                  " output inserted.id_current as id_max, inserted.id_current - " ~ GLOBAL.sequence_blocksize ~
+                  " as id_current, inserted.id_min_id as id_min where nm_current = 'id_acc'"
+                </query>
+                <cursor>TEMP.csr</cursor>
+                <then>
+                  <do>GLOBAL.sequence_current_id_acc = OBJECT(TEMP.csr).id_current</do>
+                  <do>GLOBAL.sequence_max_id_acc = OBJECT(TEMP.csr).id_max</do>
+                  <do>GLOBAL.sequence_min_id_acc = OBJECT(TEMP.csr).id_min</do>
+                </then>
+                <else>
+                  <fatal>'Error: cannot query the next sequence value for id_acc'</fatal>
+                </else>
+              </db_select>
+            </then>
+            <else>
+              <!-- oracle does not use id_min_id for id_acc -->
+              <db_execute>
+                <login_object>GLOBAL.target_login</login_object>
+                <statement>
+                  "begin
+                  update t_current_id set id_current = id_current + " ~ GLOBAL.sequence_blocksize ~
+                  " where nm_current = 'id_acc' returning id_current, id_current - " ~ GLOBAL.sequence_blocksize ~ ", 0
+                  into $${OUT_INT:GLOBAL.sequence_max_id_acc}, $${OUT_INT:GLOBAL.sequence_current_id_acc}, $${OUT_INT:GLOBAL.sequence_min_id_acc};
+                  commit;
+                  end;"
+                </statement>
+                <num_rows>TEMP.num_rows</num_rows>
+              </db_execute>
+              <if>
+                <condition>GLOBAL.sequence_current_id_acc eq ''</condition>
+                <then>
+                  <fatal>'Error: cannot query the next sequence value for id_acc'</fatal>
+                </then>
+              </if>
+            </else>
+          </if>
+        </then>
+      </if>
+      <if>
+        <condition>OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+        <then>
+          <!-- oracle doesn't need to mash id_acc values -->
+          <mash_id>
+            <next_id>GLOBAL.sequence_current_id_acc</next_id>
+            <maximum_id>GLOBAL.sequence_max_id_acc</maximum_id>
+            <minimum_id>GLOBAL.sequence_min_id_acc</minimum_id>
+            <mashed_id>TEMP.value</mashed_id>
+            <unmashed_id>TEMP.value_unmashed</unmashed_id>
+          </mash_id>
+        </then>
+        <else>
+          <do>TEMP.value = GLOBAL.sequence_current_id_acc</do>
+          <do>TEMP.value_unmashed = GLOBAL.sequence_current_id_acc</do>
+          <do>GLOBAL.sequence_current_id_acc += 1</do>
+        </else>
+      </if>
+      <if>
+        <condition>GLOBAL.sequence_current_id_acc ne ''</condition>
+        <then>
+          <do>TEMP.counter = 0</do>
+          <if>
+            <condition>TEMP.value NE TEMP.value_unmashed</condition>
+            <then>
+              <!-- Record an audit trail of the unmashed id_acc values somewhere -->
+              <print_record>
+                <file>GLOBAL.mashed_filename ~ '.' ~ OBJECT(GLOBAL.target_login).database_name ~ '.' ~ GLOBAL.node_id ~ '.dat.txt'</file>
+                <field_delim>GLOBAL.field_delim</field_delim>
+                <record_delim>GLOBAL.record_delim</record_delim>
+                <data>
+                  <field>TEMP.value_unmashed</field>
+                  <field>TEMP.value</field>
+                </data>
+              </print_record>
+            </then>
+          </if>
+        </then>
+      </if>
+      <do>TEMP.counter -= 1</do>
+    </loop>
+  </while>
+  <if>
+    <condition>GLOBAL.sequence_current_id_acc eq ''</condition>
+    <then>
+      <fatal>'Error: unable to get the next sequence value for id_acc'</fatal>
+    </then>
+  </if>
+</proc>
+
+<proc name="setup_sequences">
+  <c>Configure database sequences</c>
+
+  <!-- Sequences either come from t_current_id, or from sequences (oracle) or identity columns (sqlserver) -->
+
+  <if>
+    <condition>OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_profile'</param>
+        <param name='query'>
+          "update t_current_id set id_current = id_current + " ~ GLOBAL.sequence_blocksize ~
+          " output inserted.id_current as id_max, inserted.id_current - " ~ GLOBAL.sequence_blocksize ~
+          " as id_current where nm_current = 'id_profile'"
+        </param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_sess'</param>
+        <param name='query'>
+          "update t_current_long_id set id_current = id_current + " ~ GLOBAL.sequence_blocksize ~
+          " output inserted.id_current as id_max, inserted.id_current - " ~ GLOBAL.sequence_blocksize ~
+          " as id_current where nm_current = 'id_sess'"
+        </param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_sub'</param>
+        <param name='query'>
+          "update t_current_id set id_current = id_current + " ~ GLOBAL.sequence_blocksize ~
+          " output inserted.id_current as id_max, inserted.id_current - " ~ GLOBAL.sequence_blocksize ~
+          " as id_current where nm_current = 'id_subscription'"
+        </param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_dm_acc'</param>
+        <param name='query'>
+          "begin transaction
+          declare @currval integer, @junk integer
+          select @junk = 1 from t_dm_account with (HOLDLOCK, TABLOCKX) where 0=1;
+          select top 1 @currval = ident_current('t_dm_account') + " ~ GLOBAL.sequence_blocksize ~ ";
+          dbcc checkident('t_dm_account', reseed, @currval);
+          select @currval + 1 - " ~ GLOBAL.sequence_blocksize ~ " as id_current, @currval as id_max;
+          commit transaction"
+        </param>
+        <param name='num_retries'>10</param>
+        <param name='retry_sleep'>1000</param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_base_props'</param>
+        <param name='query'>
+          "begin transaction
+          declare @currval integer, @junk integer
+          select @junk = 1 from t_base_props with (HOLDLOCK, TABLOCKX) where 0=1;
+          select top 1 @currval = ident_current('t_base_props') + " ~ GLOBAL.sequence_blocksize ~ ";
+          dbcc checkident('t_base_props', reseed, @currval);
+          select @currval + 1 - " ~ GLOBAL.sequence_blocksize ~ " as id_current, @currval as id_max;
+          commit transaction"
+        </param>
+        <param name='num_retries'>10</param>
+        <param name='retry_sleep'>1000</param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_group'</param>
+        <param name='query'>
+          "begin transaction
+          declare @currval integer, @junk integer
+          select @junk = 1 from t_group_sub with (HOLDLOCK, TABLOCKX) where 0=1;
+          select top 1 @currval = ident_current('t_group_sub') + " ~ GLOBAL.sequence_blocksize ~ ";
+          dbcc checkident('t_group_sub', reseed, @currval);
+          select @currval + 1 - " ~ GLOBAL.sequence_blocksize ~ " as id_current, @currval as id_max;
+          commit transaction"
+        </param>
+        <param name='num_retries'>10</param>
+        <param name='retry_sleep'>1000</param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_mt'</param>
+        <param name='query'>
+          "begin transaction
+          declare @currval integer, @junk integer
+          select @junk = 1 from t_mt_id with (HOLDLOCK, TABLOCKX) where 0=1;
+          select top 1 @currval = ident_current('t_mt_id') + " ~ GLOBAL.sequence_blocksize ~ ";
+          dbcc checkident('t_mt_id', reseed, @currval);
+          select @currval + 1 - " ~ GLOBAL.sequence_blocksize ~ " as id_current, @currval as id_max;
+          commit transaction"
+        </param>
+        <param name='num_retries'>10</param>
+        <param name='retry_sleep'>1000</param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_policy'</param>
+        <param name='query'>
+          "begin transaction
+          declare @currval integer, @junk integer
+          select @junk = 1 from t_principal_policy with (HOLDLOCK, TABLOCKX) where 0=1;
+          select top 1 @currval = ident_current('t_principal_policy') + " ~ GLOBAL.sequence_blocksize ~ ";
+          dbcc checkident('t_principal_policy', reseed, @currval);
+          select @currval + 1 - " ~ GLOBAL.sequence_blocksize ~ " as id_current, @currval as id_max;
+          commit transaction"
+        </param>
+        <param name='num_retries'>10</param>
+        <param name='retry_sleep'>1000</param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_cap_instance'</param>
+        <param name='query'>
+          "begin transaction
+          declare @currval integer, @junk integer
+          select @junk = 1 from t_capability_instance with (HOLDLOCK, TABLOCKX) where 0=1;
+          select top 1 @currval = ident_current('t_capability_instance') + " ~ GLOBAL.sequence_blocksize ~ ";
+          dbcc checkident('t_capability_instance', reseed, @currval);
+          select @currval + 1 - " ~ GLOBAL.sequence_blocksize ~ " as id_current, @currval as id_max;
+          commit transaction"
+        </param>
+        <param name='num_retries'>10</param>
+        <param name='retry_sleep'>1000</param>
+      </call_proc_for_current_object>
+    </then>
+    <condition>OBJECT(GLOBAL.target_login).database_type eq 'oracle'</condition>
+    <then>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_profile'</param>
+        <param name='query'>
+          "begin
+          update t_current_id set id_current = id_current + " ~ GLOBAL.sequence_blocksize ~
+          " where nm_current = 'id_profile' returning id_current, id_current - " ~ GLOBAL.sequence_blocksize ~ "
+          into $${OUT_INT:GLOBAL.sequence_max_id_profile}, $${OUT_INT:GLOBAL.sequence_current_id_profile};
+          commit;
+          end;"
+        </param>
+        <param name='querytype'>'execute'</param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_sess'</param>
+        <param name='query'>
+          "begin
+          update t_current_long_id set id_current = id_current + " ~ GLOBAL.sequence_blocksize ~
+          " where nm_current = 'id_sess' returning id_current, id_current - " ~ GLOBAL.sequence_blocksize ~ "
+          into $${OUT_INT:GLOBAL.sequence_max_id_sess}, $${OUT_INT:GLOBAL.sequence_current_id_sess};
+          commit;
+          end;"
+        </param>
+        <param name='querytype'>'execute'</param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_sub'</param>
+        <param name='query'>
+          "begin
+          update t_current_id set id_current = id_current + " ~ GLOBAL.sequence_blocksize ~
+          " where nm_current = 'id_subscription' returning id_current, id_current - " ~ GLOBAL.sequence_blocksize ~ "
+          into $${OUT_INT:GLOBAL.sequence_max_id_sub}, $${OUT_INT:GLOBAL.sequence_current_id_sub};
+          commit;
+          end;"
+        </param>
+        <param name='querytype'>'execute'</param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_dm_acc'</param>
+        <param name='query'>
+          "begin
+          execute immediate 'alter sequence SEQ_T_DM_ACCOUNT increment by " ~ GLOBAL.sequence_blocksize ~ "';
+          select SEQ_T_DM_ACCOUNT.nextval, SEQ_T_DM_ACCOUNT.currval + 1 - " ~ GLOBAL.sequence_blocksize ~
+          " into $${OUT_INT:GLOBAL.sequence_max_id_dm_acc}, $${OUT_INT:GLOBAL.sequence_current_id_dm_acc} from dual;
+          execute immediate 'alter sequence SEQ_T_DM_ACCOUNT increment by 1';
+          commit;
+          end;"
+        </param>
+        <param name='querytype'>'execute'</param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_base_props'</param>
+        <param name='query'>
+          "begin
+          execute immediate 'alter sequence SEQ_T_BASE_PROPS increment by " ~ GLOBAL.sequence_blocksize ~ "';
+          select SEQ_T_BASE_PROPS.nextval, SEQ_T_BASE_PROPS.currval + 1 - " ~ GLOBAL.sequence_blocksize ~
+          " into $${OUT_INT:GLOBAL.sequence_max_id_base_props}, $${OUT_INT:GLOBAL.sequence_current_id_base_props} from dual;
+          execute immediate 'alter sequence SEQ_T_BASE_PROPS increment by 1';
+          commit;
+          end;"
+        </param>
+        <param name='querytype'>'execute'</param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_group'</param>
+        <param name='query'>
+          "begin
+          execute immediate 'alter sequence SEQ_T_GROUP_SUB increment by " ~ GLOBAL.sequence_blocksize ~ "';
+          select SEQ_T_GROUP_SUB.nextval, SEQ_T_GROUP_SUB.currval + 1 - " ~ GLOBAL.sequence_blocksize ~
+          " into $${OUT_INT:GLOBAL.sequence_max_id_group}, $${OUT_INT:GLOBAL.sequence_current_id_group} from dual;
+          execute immediate 'alter sequence SEQ_T_GROUP_SUB increment by 1';
+          commit;
+          end;"
+        </param>
+        <param name='querytype'>'execute'</param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_mt'</param>
+        <param name='query'>
+          "begin
+          execute immediate 'alter sequence SEQ_T_MT_ID increment by " ~ GLOBAL.sequence_blocksize ~ "';
+          select SEQ_T_MT_ID.nextval, SEQ_T_MT_ID.currval + 1 - " ~ GLOBAL.sequence_blocksize ~
+          " into $${OUT_INT:GLOBAL.sequence_max_id_mt}, $${OUT_INT:GLOBAL.sequence_current_id_mt} from dual;
+          execute immediate 'alter sequence SEQ_T_MT_ID increment by 1';
+          commit;
+          end;"
+        </param>
+        <param name='querytype'>'execute'</param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_policy'</param>
+        <param name='query'>
+          "begin
+          execute immediate 'alter sequence SEQ_T_PRINCIPAL_POLICY increment by " ~ GLOBAL.sequence_blocksize ~ "';
+          select SEQ_T_PRINCIPAL_POLICY.nextval, SEQ_T_PRINCIPAL_POLICY.currval + 1 - " ~ GLOBAL.sequence_blocksize ~
+          " into $${OUT_INT:GLOBAL.sequence_max_id_policy}, $${OUT_INT:GLOBAL.sequence_current_id_policy} from dual;
+          execute immediate 'alter sequence SEQ_T_PRINCIPAL_POLICY increment by 1';
+          commit;
+          end;"
+        </param>
+        <param name='querytype'>'execute'</param>
+      </call_proc_for_current_object>
+      <call_proc_for_current_object>
+        <name>'make_sequence_proc'</name>
+        <param name='seqname'>'id_cap_instance'</param>
+        <param name='query'>
+          "begin
+          execute immediate 'alter sequence SEQ_T_CAP_INSTANCE increment by " ~ GLOBAL.sequence_blocksize ~ "';
+          select SEQ_T_CAP_INSTANCE.nextval, SEQ_T_CAP_INSTANCE.currval + 1 - " ~ GLOBAL.sequence_blocksize ~
+          " into $${OUT_INT:GLOBAL.sequence_max_id_cap_instance}, $${OUT_INT:GLOBAL.sequence_current_id_cap_instance} from dual;
+          execute immediate 'alter sequence SEQ_T_CAP_INSTANCE increment by 1';
+          commit;
+          end;"
+        </param>
+        <param name='querytype'>'execute'</param>
+      </call_proc_for_current_object>
+    </then>
+  </if>
+
+</proc>
+
+<proc name="make_sequence_proc">
+  <param name='seqname' />
+  <param name='query' default="''" />
+  <param name='querytype' default="'select'" />
+  <param name='num_retries' default="0" />
+  <param name='retry_sleep' default="0" />
+
+  <do>TEMP.procname = 'sequence_get_next_' ~ TEMP.seqname</do>
+  <do>TEMP.dbtype = OBJECT(GLOBAL.target_login).database_type</do>
+  <do>TEMP.qq = '"'</do>
+  <do>
+    TEMP.myproc = "<![CDATA[
+      <proc name='" ~ TEMP.procname ~ "'>
+        <param name='value' mode='out'/>
+        <if>
+          <condition>GLOBAL.sequence_current_" ~ TEMP.seqname ~ " eq '' or GLOBAL.sequence_current_" ~ TEMP.seqname ~ " GTE GLOBAL.sequence_max_" ~ TEMP.seqname ~ "</condition>
+          <then>
+    ]]>"
+  </do>
+  <if>
+    <condition>TEMP.querytype eq 'select'</condition>
+    <then>
+      <!-- 
+      Change by TCF May 2014.
+      db_select was changed in MVM; "num_retries" was removed and "retry_sleep" was
+      changed to "retry_sleep_ms".
+      -->
+      <if>
+          <condition>GLOBAL.mvmversionmajor LT 7</condition>
+          <then>
+              <do>
+                  TEMP.myproc ~= "<![CDATA[
+                    <db_select>
+                      <login_object>GLOBAL.target_login</login_object>
+                      <query type='" ~ TEMP.dbtype ~ "'>" ~ TEMP.qq ~ TEMP.query ~ TEMP.qq ~ "</query>
+                      <timeout>'0'</timeout>
+                      <num_retries>" ~ TEMP.num_retries ~ "</num_retries>
+                      <retry_sleep>" ~ TEMP.retry_sleep ~ "</retry_sleep>
+                      <cursor>TEMP.csr</cursor>
+                      <then>
+                        <do>GLOBAL.sequence_current_" ~ TEMP.seqname ~ " = OBJECT(TEMP.csr).id_current</do>
+                        <do>GLOBAL.sequence_max_" ~ TEMP.seqname ~ " = OBJECT(TEMP.csr).id_max</do>
+                      </then>
+                      <else>
+                        <fatal>'Error: cannot query the next sequence value for " ~ TEMP.seqname ~ "'</fatal>
+                      </else>
+                    </db_select>
+                ]]>"
+                      </do>
+          </then>
+          <else>
+              <do>
+                  TEMP.myproc ~= "<![CDATA[
+                    <db_select>
+                      <login_object>GLOBAL.target_login</login_object>
+                      <query type='" ~ TEMP.dbtype ~ "'>" ~ TEMP.qq ~ TEMP.query ~ TEMP.qq ~ "</query>
+                      <timeout>'0'</timeout>
+                      <retry_sleep_ms>" ~ TEMP.retry_sleep ~ "</retry_sleep_ms>
+                      <cursor>TEMP.csr</cursor>
+                      <then>
+                        <do>GLOBAL.sequence_current_" ~ TEMP.seqname ~ " = OBJECT(TEMP.csr).id_current</do>
+                        <do>GLOBAL.sequence_max_" ~ TEMP.seqname ~ " = OBJECT(TEMP.csr).id_max</do>
+                      </then>
+                      <else>
+                        <fatal>'Error: cannot query the next sequence value for " ~ TEMP.seqname ~ "'</fatal>
+                      </else>
+                    </db_select>
+                ]]>"
+                      </do>
+          </else>
+      </if>
+      <!--<do>
+        TEMP.myproc ~= "<![CDATA[
+            <db_select>
+              <login_object>GLOBAL.target_login</login_object>
+              <query type='" ~ TEMP.dbtype ~ "'>" ~ TEMP.qq ~ TEMP.query ~ TEMP.qq ~ "</query>
+              <timeout>'0'</timeout>
+              <num_retries>" ~ TEMP.num_retries ~ "</num_retries>
+              <retry_sleep>" ~ TEMP.retry_sleep ~ "</retry_sleep>
+              <cursor>TEMP.csr</cursor>
+              <then>
+                <do>GLOBAL.sequence_current_" ~ TEMP.seqname ~ " = OBJECT(TEMP.csr).id_current</do>
+                <do>GLOBAL.sequence_max_" ~ TEMP.seqname ~ " = OBJECT(TEMP.csr).id_max</do>
+              </then>
+              <else>
+                <fatal>'Error: cannot query the next sequence value for " ~ TEMP.seqname ~ "'</fatal>
+              </else>
+            </db_select>
+        ]]>"
+      </do>-->
+    </then>
+    <else>
+      <do>
+        TEMP.myproc ~= "<![CDATA[
+            <db_execute>
+              <login_object>GLOBAL.target_login</login_object>
+              <statement>" ~ TEMP.qq ~ TEMP.query ~ TEMP.qq ~ "</statement>
+              <num_rows>TEMP.num_rows</num_rows>
+            </db_execute>
+            <if>
+              <condition>GLOBAL.sequence_current_" ~ TEMP.seqname ~ " eq ''</condition>
+              <then>
+                <fatal>'Error: cannot query the next sequence value for " ~ TEMP.seqname ~ "'</fatal>
+              </then>
+            </if>
+        ]]>"
+      </do>
+    </else>
+  </if>
+  <do>
+    TEMP.myproc ~= "<![CDATA[
+          </then>
+        </if>
+        <do>TEMP.value = GLOBAL.sequence_current_" ~ TEMP.seqname ~ "</do>
+        <do>GLOBAL.sequence_current_" ~ TEMP.seqname ~ " += 1</do>
+      </proc>
+    ]]>"
+  </do>
+  <call_proc_for_current_object>
+    <name>'generate_print_proc'</name>
+    <param name='procname'>TEMP.procname</param>
+    <param name='proc'>TEMP.myproc</param>
+  </call_proc_for_current_object>
+</proc>
+
+</procs>

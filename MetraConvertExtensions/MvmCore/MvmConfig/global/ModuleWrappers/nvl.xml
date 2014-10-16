@@ -1,0 +1,6 @@
+<proc name="nvl">
+  <param name="input"/>
+  <param name="null_value"/>
+  <param name="return_value" mode="out"/>
+  <do>TEMP.return_value=TEMP.input ne ''? TEMP.input:TEMP.null_value</do>
+</proc>
