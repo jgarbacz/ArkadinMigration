@@ -1,0 +1,232 @@
+<proc name="core_group_subscription" run_after="setup_metranet_record_types">
+  <record_type name="core_group_subscription" display="GROUP_SUBSCRIPTION">
+    <base_record_type>GROUP_SUBSCRIPTION</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>GROUP_SUBSCRIPTION</namespace>
+    <file_regex>\bGROUPSUBSCRIPTION\..*data$</file_regex>
+    <fields>
+      <field name="parent_nm_login">
+      </field>
+      <field name="parent_nm_space">
+        <missing>true</missing>
+        <default>'mt'</default>
+      </field>
+      <field name="tx_name">
+        <required>true</required>
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>false</nullable>
+      </field>
+      <field name="id_po">
+        <required>true</required>
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>mc/id_po_names</enum>
+      </field>
+      <field name="parentgroupid">
+        <type>nvarchar</type>
+        <length>255</length>
+        <scale>0</scale>
+        <ignored>true</ignored>
+      </field>
+      <field name="subname">
+        <type>nvarchar</type>
+        <length>255</length>
+        <scale>0</scale>
+        <ignored>true</ignored>
+      </field>
+      <field name="techinstance">
+        <type>nvarchar</type>
+        <length>255</length>
+        <scale>0</scale>
+        <ignored>true</ignored>
+      </field>
+      <field name="numoflicenses">
+        <ignored>true</ignored>
+        <missing>true</missing>
+      </field>
+      <field name="n_value">
+        <type>numeric</type>
+        <length>22</length>
+        <scale>10</scale>
+        <nullable>false</nullable>
+      </field>
+      <field name="tt_start">
+        <type>datetime</type>
+        <format>yyyy-MM-dd HH:mm:ss</format>
+        <nullable>false</nullable>
+      </field>
+      <field name="tt_end">
+        <type>datetime</type>
+        <format>yyyy-MM-dd HH:mm:ss</format>
+        <nullable>false</nullable>
+        <default>2038-01-01 00:00:00</default>
+      </field>
+      <field name="b_proportional">
+        <type>char</type>
+        <length>1</length>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="b_supportgroupops">
+        <type>char</type>
+        <length>1</length>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="b_visable">
+        <type>char</type>
+        <length>1</length>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="dt_crt">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <default>tt_start</default>
+        <required>false</required>
+      </field>
+      <field name="id_acc">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_corporate_account">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="id_discountaccount">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_group">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="id_prop">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="id_sub">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="id_usage_cycle">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="tx_desc">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="vt_end">
+        <type>datetime</type>
+        <nullable>false</nullable>
+        <missing>true</missing>
+        <default>tt_end</default>
+      </field>
+      <field name="vt_start">
+        <type>datetime</type>
+        <nullable>false</nullable>
+        <missing>true</missing>
+        <default>tt_start</default>
+        <format>yyyy-MM-dd HH:mm:ss</format>
+      </field>
+      <field name="c_spec_name">
+        <type>nvarchar</type>
+        <length>20</length>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="c_spec_type">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="c_start_date">
+        <type>datetime</type>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="id_entity">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+        <ignored>true</ignored>
+      </field>
+      <field name="id_scv">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="nm_value">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="c_end_date">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="tx_name">OBJECT.tx_name</field>
+      <field name="id_po">OBJECT.id_po</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events override="true">
+      <create_record type="GROUP_SUBSCRIPTION">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+    <database_lookup>
+      <from>
+        from t_group_sub
+        inner join t_sub on t_group_sub.id_group = t_sub.id_group
+        where t_group_sub.tx_name = $${OBJECT.tx_name}
+      </from>
+    </database_lookup>
+    <sort_key>!</sort_key>
+  </record_type>
+</proc>

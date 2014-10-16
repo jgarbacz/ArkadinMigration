@@ -1,0 +1,27 @@
+<proc name="core_acc_ancestor" run_after="setup_metranet_record_types">
+  <record_type name="core_acc_ancestor" display="ACC_ANCESTOR">
+    <base_record_type>ACC_ANCESTOR</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>ACC_ANCESTOR</namespace>
+    <file_regex>\bACC_ANCESTOR\..*data$</file_regex>
+    <fields>
+      <field name="id_descendent">
+      </field>
+      <field name="id_ancestor">
+      </field>
+    </fields>
+    <primary_key>
+      <field name="id_ancestor">OBJECT.id_ancestor</field>
+      <field name="id_descendent">OBJECT.id_descendent</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="id_descendent">OBJECT.id_descendent</field>
+    </parent_key>
+    <events override="true">
+      <create_record type="ACC_ANCESTOR">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+  </record_type>
+</proc>

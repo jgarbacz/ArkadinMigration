@@ -1,0 +1,60 @@
+<proc name="core_enum_capability_instance" run_after="setup_metranet_record_types">
+  <record_type name="core_enum_capability_instance" display="ENUM_CAPABILITY_INSTANCE">
+    <base_record_type>ENUM_CAPABILITY_INSTANCE</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>ENUM_CAPABILITY_INSTANCE</namespace>
+    <file_regex>\bENUM_CAPABILITY_INSTANCE\..*data$</file_regex>
+    <fields>
+      <field name="id_cap_instance">
+      </field>
+      <field name="id_cap_type">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>mc/id_cap_type_names</enum>
+        <missing>true</missing>
+      </field>
+      <field name="param_value">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>Global/AccessLevel</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_guid">
+        <type>varbinary</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_op">
+        <type>varchar</type>
+        <length>1</length>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="tx_param_name">
+        <type>nvarchar</type>
+        <length>2000</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="id_cap_instance">OBJECT.id_cap_instance</field>
+    </primary_key>
+    <parent_key namespace="PARENT_CAPABILITY_INSTANCE">
+      <field name="id_cap_instance">OBJECT.id_parent_cap_instance</field>
+    </parent_key>
+    <events override="true">
+      <create_record type="ENUM_CAPABILITY_INSTANCE">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+  </record_type>
+</proc>

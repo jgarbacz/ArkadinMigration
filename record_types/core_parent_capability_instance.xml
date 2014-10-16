@@ -1,0 +1,69 @@
+<proc name="core_parent_capability_instance" run_after="setup_metranet_record_types">
+  <record_type name="core_parent_capability_instance" display="PARENT_CAPABILITY_INSTANCE">
+    <base_record_type>PARENT_CAPABILITY_INSTANCE</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>PARENT_CAPABILITY_INSTANCE</namespace>
+    <file_regex>\bPARENT_CAPABILITY_INSTANCE\..*data$</file_regex>
+    <fields>
+      <field name="id_acc">
+      </field>
+      <field name="id_cap_instance">
+      </field>
+      <field name="id_cap_type">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>mc/id_cap_type_names</enum>
+        <missing>true</missing>
+      </field>
+      <field name="id_parent_cap_instance">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="param_value">
+        <type>nvarchar</type>
+        <length>2000</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_guid">
+        <type>varbinary</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_op">
+        <type>varchar</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_param_name">
+        <type>nvarchar</type>
+        <length>2000</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="id_cap_instance">OBJECT.id_cap_instance</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="id_acc">OBJECT.id_acc</field>
+    </parent_key>
+    <events override="true">
+      <create_record type="PARENT_CAPABILITY_INSTANCE">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+  </record_type>
+</proc>

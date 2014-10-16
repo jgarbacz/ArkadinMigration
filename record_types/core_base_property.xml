@@ -1,0 +1,90 @@
+<proc name="core_base_property" run_after="setup_metranet_record_types">
+  <record_type name="core_base_property" display="BASE_PROPERTY">
+    <base_record_type>BASE_PROPERTY</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>BASE_PROPERTY</namespace>
+    <file_regex>\bBASE_PROPERTY\..*data$</file_regex>
+    <fields>
+      <field name="id_prop">
+        <required>true</required>
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+      </field>
+      <field name="b_approved">
+        <type>char</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="b_archive">
+        <type>char</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_lang_code">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="n_kind">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+        <required>true</required>
+      </field>
+      <field name="nm_desc">
+        <type>nvarchar</type>
+        <length>4000</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="nm_display_name">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="nm_name">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_desc">
+        <type>nvarchar</type>
+        <length>4000</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_url_desc">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="id_prop">OBJECT.id_prop</field>
+    </primary_key>
+    <events override="true">
+      <create_record type="BASE_PROPERTY">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+  </record_type>
+</proc>

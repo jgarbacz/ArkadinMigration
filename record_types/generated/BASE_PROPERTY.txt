@@ -1,0 +1,46 @@
+<record_type name="BASE_PROPERTY">
+  <base_record_type>
+  </base_record_type>
+  <phase>AccountPhase</phase>
+  <stage>MetraNetStage</stage>
+  <primary_key>
+    <field name="id_prop">OBJECT.id_prop</field>
+  </primary_key>
+  <events>
+    <field_mapping>
+      <def>OBJECT.n_name = 0</def>
+      <def>OBJECT.n_desc = 0</def>
+      <def>OBJECT.n_display_name = 0</def>
+      <def>OBJECT.b_approved = 'N'</def>
+      <def>OBJECT.b_archive = 'N'</def>
+    </field_mapping>
+    <create_record type="DESCRIPTION">
+      <condition>OBJECT.nm_name ne ''</condition>
+      <inherit_fields>false</inherit_fields>
+      <child_field_mapping>
+        <def>CHILD.tx_desc = OBJECT.nm_name</def>
+        <def>CHILD.id_mt = MC_SEQUENCE(id_mt)</def>
+        <def>OBJECT.n_name = CHILD.id_mt</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record type="DESCRIPTION">
+      <condition>OBJECT.nm_desc ne ''</condition>
+      <inherit_fields>false</inherit_fields>
+      <child_field_mapping>
+        <def>CHILD.tx_desc = OBJECT.nm_desc</def>
+        <def>CHILD.id_mt = MC_SEQUENCE(id_mt)</def>
+        <def>OBJECT.n_desc = CHILD.id_mt</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record type="DESCRIPTION">
+      <condition>OBJECT.nm_display_name ne ''</condition>
+      <inherit_fields>false</inherit_fields>
+      <child_field_mapping>
+        <def>CHILD.tx_desc = OBJECT.nm_display_name</def>
+        <def>CHILD.id_mt = MC_SEQUENCE(id_mt)</def>
+        <def>OBJECT.n_display_name = CHILD.id_mt</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record database="NetMeter" table="t_base_props" />
+  </events>
+</record_type>

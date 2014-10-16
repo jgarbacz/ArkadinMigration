@@ -1,0 +1,17 @@
+<record_type name="ACC_ANCESTOR" visibility="private">
+  <base_record_type>
+  </base_record_type>
+  <phase>AccountPhase</phase>
+  <stage>MetraNetStage</stage>
+  <primary_key>
+    <field name="id_ancestor">OBJECT.id_ancestor</field>
+    <field name="id_descendent">OBJECT.id_descendent</field>
+  </primary_key>
+  <parent_key namespace="ACCOUNT">
+    <field name="id_descendent">OBJECT.id_descendent</field>
+  </parent_key>
+  <events>
+    <create_record database="NetMeter" table="t_account_ancestor" />
+    <create_record database="NetMeter" table="t_dm_account_ancestor" />
+  </events>
+</record_type>

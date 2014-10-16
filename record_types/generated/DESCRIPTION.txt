@@ -1,0 +1,17 @@
+<record_type name="DESCRIPTION">
+  <base_record_type>
+  </base_record_type>
+  <phase>AccountPhase</phase>
+  <stage>MetraNetStage</stage>
+  <primary_key>
+    <field name="id_desc">OBJECT.id_desc</field>
+  </primary_key>
+  <events>
+    <field_mapping>
+      <def>OBJECT.id_desc = OBJECT.id_mt</def>
+      <def>OBJECT.id_lang_code = GLOBAL.default_id_lang_code</def>
+    </field_mapping>
+    <create_record database="NetMeter" table="t_mt_id" />
+    <create_record database="NetMeter" table="t_description" />
+  </events>
+</record_type>

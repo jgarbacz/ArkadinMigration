@@ -1,0 +1,332 @@
+<proc name="core_group_subscription_rate_t_pt_banddiscountsettings" run_after="setup_metranet_record_types">
+  <record_type name="core_group_subscription_rate_t_pt_banddiscountsettings" display="GROUP_SUBSCRIPTION_RATE_T_PT_BANDDISCOUNTSETTINGS">
+    <base_record_type>GROUP_SUBSCRIPTION_RATE_T_PT_BANDDISCOUNTSETTINGS</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>GROUP_SUBSCRIPTION_RATE_T_PT_BANDDISCOUNTSETTINGS</namespace>
+    <file_regex>\bGROUPSUB.BANDDISCOUNTSETTINGS\..*data$</file_regex>
+    <fields>
+      <field name="nm_login">
+        <ignored>true</ignored>
+      </field>
+      <field name="tx_name">
+      </field>
+      <field name="id_po">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>mc/id_po_names</enum>
+        <required>false</required>
+      </field>
+      <field name="id_pi_template">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>mc/id_pi_template_names</enum>
+      </field>
+      <field name="n_order">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+      </field>
+      <field name="c_subsidiaryname">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>metratech.com/enumglobal/subsidiaryname</enum>
+        <required>false</required>
+      </field>
+      <field name="c_band">
+        <type>nvarchar</type>
+        <length>50</length>
+        <nullable>false</nullable>
+        <required>true</required>
+      </field>
+      <field name="c_minutethresholdstart">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <default>'0'</default>
+        <required>true</required>
+      </field>
+      <field name="c_minutethresholdend">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <default>'0'</default>
+        <required>true</required>
+      </field>
+      <field name="c_retaildiscountpercentage">
+        <type>numeric</type>
+        <length>22</length>
+        <scale>10</scale>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_partnerdiscountpercentage">
+        <type>numeric</type>
+        <length>22</length>
+        <scale>10</scale>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="id_paramtable">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>mc/id_pt_names</enum>
+        <default>'100'</default>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="b_approved">
+        <type>char</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="b_archive">
+        <type>char</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="b_canicb">
+        <type>char</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="dt_end">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="dt_mod">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="dt_modified">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="dt_start">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_acc">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_audit">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="id_lang_code">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="id_pi_instance">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_pi_instance_parent">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_pi_type">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_pricelist">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="id_pt">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>mc/id_pt_names</enum>
+        <missing>true</missing>
+      </field>
+      <field name="id_sched">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+        <required>true</required>
+      </field>
+      <field name="id_sub">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="n_beginoffset">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="n_begintype">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="n_endoffset">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="n_endtype">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="n_kind">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="n_type">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="nm_currency_code">
+        <type>nvarchar</type>
+        <length>10</length>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="nm_desc">
+        <type>nvarchar</type>
+        <length>4000</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="nm_display_name">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="nm_name">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tt_end">
+        <type>datetime</type>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="tt_start">
+        <type>datetime</type>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="tx_desc">
+        <type>nvarchar</type>
+        <length>4000</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_url_desc">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_prop">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="tx_name">OBJECT.tx_name</field>
+      <field name="id_po">OBJECT.id_po</field>
+      <field name="id_pi_template">OBJECT.id_pi_template</field>
+      <field name="id_paramtable">OBJECT.id_paramtable</field>
+    </primary_key>
+    <parent_key namespace="GROUP_SUBSCRIPTION">
+      <field name="tx_name">OBJECT.tx_name</field>
+      <field name="id_po">OBJECT.id_po</field>
+    </parent_key>
+    <events override="true">
+      <create_record type="GROUP_SUBSCRIPTION_RATE_T_PT_BANDDISCOUNTSETTINGS">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+    <stable_sort>1</stable_sort>
+  </record_type>
+</proc>

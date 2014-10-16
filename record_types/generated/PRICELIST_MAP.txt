@@ -1,0 +1,21 @@
+<record_type name="PRICELIST_MAP">
+  <base_record_type>
+  </base_record_type>
+  <phase>AccountPhase</phase>
+  <stage>MetraNetStage</stage>
+  <primary_key>
+    <field name="id_sub">OBJECT.id_sub</field>
+    <field name="id_po">OBJECT.id_po</field>
+  </primary_key>
+  <events>
+    <field_mapping>
+      <def>OBJECT.dt_modified = MC_SYSDATE</def>
+      <def>OBJECT.b_canicb = 'Y'</def>
+    </field_mapping>
+    <create_record database="NetMeter" table="t_pl_map">
+      <!--<enum name="id_paramtable">mc/id_pt_names</enum>-->
+      <enum name="id_pi_template">mc/id_pi_template_names</enum>
+      <enum name="id_po">mc/id_po_names</enum>
+    </create_record>
+  </events>
+</record_type>

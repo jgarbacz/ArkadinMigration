@@ -1,0 +1,16 @@
+<record_type name="ACC_USAGE_INTERVAL">
+  <base_record_type>
+  </base_record_type>
+  <phase>AccountPhase</phase>
+  <stage>MetraNetStage</stage>
+  <primary_key>
+    <field name="id_acc">OBJECT.id_acc</field>
+    <field name="id_usage_interval">OBJECT.id_usage_interval</field>
+  </primary_key>
+  <parent_key namespace="ACCOUNT">
+    <field name="id_acc">OBJECT.id_acc</field>
+  </parent_key>
+  <events>
+    <create_record database="NetMeter" table="t_acc_usage_interval" />
+  </events>
+</record_type>

@@ -1,0 +1,34 @@
+<record_type name="RATE_SCHEDULE">
+  <base_record_type>
+  </base_record_type>
+  <phase>AccountPhase</phase>
+  <stage>MetraNetStage</stage>
+  <primary_key>
+    <field name="id_sched">OBJECT.id_sched</field>
+  </primary_key>
+  <events>
+    <field_mapping>
+      <def>OBJECT.nm_desc = OBJECT.nm_name</def>
+      <def>OBJECT.dt_mod = MC_SYSDATE</def>
+    </field_mapping>
+    <create_record type="BASE_PROPERTY">
+      <inherit_fields>false</inherit_fields>
+      <child_field_mapping>
+        <def>CHILD.n_kind = 130</def>
+        <def>CHILD.nm_name = OBJECT.nm_name</def>
+        <def>CHILD.id_prop = OBJECT.id_sched</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record type="EFFECTIVE_DATE">
+      <inherit_fields>false</inherit_fields>
+      <child_field_mapping>
+        <def>CHILD.id_eff_date = MC_SEQUENCE(id_base_props)</def>
+        <def>OBJECT.id_eff_date = CHILD.id_eff_date</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record database="NetMeter" table="t_rsched">
+      <enum name="id_pt">mc/id_pt_names</enum>
+      <!--<enum name="id_pi_template">mc/id_pi_template_names</enum>-->
+    </create_record>
+  </events>
+</record_type>

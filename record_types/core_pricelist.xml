@@ -1,0 +1,97 @@
+<proc name="core_pricelist" run_after="setup_metranet_record_types">
+  <record_type name="core_pricelist" display="PRICELIST">
+    <base_record_type>PRICELIST</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>PRICELIST</namespace>
+    <file_regex>\bPRICELIST\..*data$</file_regex>
+    <fields>
+      <field name="id_eff_date">
+      </field>
+      <field name="b_approved">
+        <type>char</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="b_archive">
+        <type>char</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_lang_code">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="n_kind">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="n_type">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="nm_currency_code">
+        <type>nvarchar</type>
+        <length>10</length>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="nm_desc">
+        <type>nvarchar</type>
+        <length>4000</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="nm_display_name">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="nm_name">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_desc">
+        <type>nvarchar</type>
+        <length>4000</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_url_desc">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="id_eff_date">OBJECT.id_eff_date</field>
+    </primary_key>
+    <events override="true">
+      <create_record type="PRICELIST">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+  </record_type>
+</proc>

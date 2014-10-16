@@ -1,0 +1,106 @@
+<proc name="core_pricelist_map" run_after="setup_metranet_record_types">
+  <record_type name="core_pricelist_map" display="PRICELIST_MAP">
+    <base_record_type>PRICELIST_MAP</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>PRICELIST_MAP</namespace>
+    <file_regex>\bPRICELIST_MAP\..*data$</file_regex>
+    <fields>
+      <field name="id_sub">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="id_po">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>mc/id_po_names</enum>
+        <required>false</required>
+      </field>
+      <field name="b_canicb">
+        <type>char</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="dt_modified">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_acc">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_paramtable">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <enum>mc/id_pt_names</enum>
+        <required>false</required>
+      </field>
+      <field name="id_pi_instance">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_pi_instance_parent">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_pi_template">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>mc/id_pi_template_names</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_pi_type">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_pricelist">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="id_sub">OBJECT.id_sub</field>
+      <field name="id_po">OBJECT.id_po</field>
+    </primary_key>
+    <events override="true">
+      <create_record type="PRICELIST_MAP">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+  </record_type>
+</proc>

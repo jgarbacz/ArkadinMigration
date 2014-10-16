@@ -1,0 +1,50 @@
+<proc name="core_acc_usage_interval" run_after="setup_metranet_record_types">
+  <record_type name="core_acc_usage_interval" display="ACC_USAGE_INTERVAL">
+    <base_record_type>ACC_USAGE_INTERVAL</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>ACC_USAGE_INTERVAL</namespace>
+    <file_regex>\bACC_USAGE_INTERVAL\..*data$</file_regex>
+    <fields>
+      <field name="id_acc">
+        <required>true</required>
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+      </field>
+      <field name="id_usage_interval">
+        <required>true</required>
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+      </field>
+      <field name="tx_status">
+        <type>char</type>
+        <length>1</length>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="dt_effective">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="id_acc">OBJECT.id_acc</field>
+      <field name="id_usage_interval">OBJECT.id_usage_interval</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="id_acc">OBJECT.id_acc</field>
+    </parent_key>
+    <events override="true">
+      <create_record type="ACC_USAGE_INTERVAL">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+  </record_type>
+</proc>

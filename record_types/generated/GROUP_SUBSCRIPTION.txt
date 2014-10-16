@@ -1,0 +1,155 @@
+<record_type name="GROUP_SUBSCRIPTION">
+  <base_record_type>
+  </base_record_type>
+  <phase>AccountPhase</phase>
+  <stage>MetraNetStage</stage>
+  <primary_key>
+    <field name="tx_name">OBJECT.tx_name</field>
+    <field name="id_po">OBJECT.id_po</field>
+  </primary_key>
+  <parent_key namespace="ACCOUNT">
+    <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+    <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+  </parent_key>
+  <events>
+    <field_mapping>
+      <def>OBJECT.id_acc = PARENT.id_acc</def>
+      <def>OBJECT.id_sub = MC_SEQUENCE(id_sub)</def>
+      <def>OBJECT.id_sub_ext = MC_GUID</def>
+      <def>OBJECT.dt_crt = PARENT.dt_crt</def>
+      <!--<def>OBJECT.vt_start = PARENT.vt_start</def>-->
+      <def>OBJECT.vt_start = OBJECT.dt_crt</def>
+      <def>OBJECT.vt_end = PARENT.vt_end</def>
+      <def>OBJECT.tt_start = PARENT.tt_start</def>
+      <def>OBJECT.tt_start = MC_SYSDAY</def>
+      <def>OBJECT.tt_end = PARENT.tt_end</def>
+      <def>OBJECT.tt_end = MC_MAXDATE</def>
+      <def>OBJECT.id_group = MC_SEQUENCE(id_group)</def>
+      <!--<def>OBJECT.id_group_ext = MC_GUID</def>-->
+      <def>OBJECT.id_group_ext = OBJECT.id_sub_ext</def>
+      <def>OBJECT.b_visable = 'N'</def>
+      <def>OBJECT.b_supportgroupops = 'Y'</def>
+      <def>OBJECT.b_proportional = 'Y'</def>
+      <def>OBJECT.id_usage_cycle = PARENT.id_usage_cycle</def>
+      <def>OBJECT.id_corporate_account = PARENT.id_acc</def>
+      <def>OBJECT.nm_currency_code = PARENT.c_currency</def>
+      <def>OBJECT.nm_currency_code = 'USD'</def>
+      <def>OBJECT.n_value = OBJECT.n_value</def>
+      <def>OBJECT.subname = OBJECT.subname</def>
+      <def>OBJECT.parentgroupid = OBJECT.parentgroupid</def>
+      <def>OBJECT.techinstance = OBJECT.techinstance</def>
+      <map>OBJECT.group_sub = MC_PROC(store_hierarchy_reference, record_type=&gt;'GROUP_SUBSCRIPTION', key=&gt;OBJECT.tx_name, object=&gt;OBJECT.object_id)</map>
+    </field_mapping>
+    <create_record database="NetMeter" table="t_group_sub" />
+    <create_record database="NetMeter" table="t_sub">
+      <enum name="id_po">mc/id_po_names</enum>
+      <!-- merge -->
+      <child_field_mapping>
+        <map>CHILD.id_acc = ''</map>
+      </child_field_mapping>
+    </create_record>
+    <create_record database="NetMeter" table="t_sub_history" selected="false">
+      <enum name="id_po">mc/id_po_names</enum>
+      <!-- merge -->
+      <child_field_mapping>
+        <map>CHILD.id_acc = ''</map>
+      </child_field_mapping>
+    </create_record>
+    <!-- TCF added t_char_values mappings August 2014 -->
+    <create_record database="NetMeter" table="t_char_values" selected="false">
+      <condition>OBJECT.subname ne ''</condition>
+      <child_field_mapping>
+        <def>CHILD.id_scv = 1000</def>
+        <def>CHILD.nm_value = OBJECT.subname</def>
+        <def>CHILD.id_entity = OBJECT.id_sub</def>
+        <def>CHILD.c_start_date = OBJECT.tt_start</def>
+        <def>CHILD.c_end_date = OBJECT.tt_end</def>
+        <def>CHILD.c_spec_name = 'SubscriptionName'</def>
+        <def>CHILD.c_spec_type = 0</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record database="NetMeter" table="t_char_values" selected="false">
+      <condition>OBJECT.parentgroupid ne ''</condition>
+      <child_field_mapping>
+        <def>CHILD.id_scv = 1002</def>
+        <def>CHILD.nm_value = OBJECT.parentgroupid</def>
+        <def>CHILD.id_entity = OBJECT.id_sub</def>
+        <def>CHILD.c_start_date = OBJECT.tt_start</def>
+        <def>CHILD.c_end_date = OBJECT.tt_end</def>
+        <def>CHILD.c_spec_name = 'ParentSubID'</def>
+        <def>CHILD.c_spec_type = 1</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record database="NetMeter" table="t_char_values" selected="false">
+      <child_field_mapping>
+        <def>CHILD.id_scv = 1001</def>
+        <def>CHILD.nm_value = '0'</def>
+        <def>CHILD.id_entity = OBJECT.id_sub</def>
+        <def>CHILD.c_start_date = OBJECT.tt_start</def>
+        <def>CHILD.c_end_date = OBJECT.tt_end</def>
+        <def>CHILD.c_spec_name = 'TechInstID'</def>
+        <def>CHILD.c_spec_type = 1</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record database="NetMeter" table="t_gsub_recur_map" selected="false">
+      <condition>OBJECT.n_value ne ''</condition>
+      <inherit_fields>false</inherit_fields>
+      <from_cursor>
+        <index_select>
+          <!-- Changed to new index by TCF August 2014. -->
+          <!--<index>'MC_PO_TO_PI_RECUR_MAPPING'</index>
+	    <field name="id_po">lc(OBJECT.id_po)</field>-->
+          <index>'MC_TBASEPROPS_TO_GSUB_MAPPING'</index>
+          <field name="id_po">lc(OBJECT.id_po)</field>
+        </index_select>
+        <cursor>TEMP.GeNsYm720__mc</cursor>
+      </from_cursor>
+      <child_field_mapping>
+        <def>CHILD.id_acc = PARENT.id_acc</def>
+        <def>CHILD.id_group = PARENT.id_group</def>
+        <def>CHILD.id_prop = CHILD.id_pi_instance</def>
+        <def>CHILD.vt_start = PARENT.vt_start</def>
+        <def>CHILD.vt_end = PARENT.vt_end</def>
+        <def>CHILD.tt_start = PARENT.tt_start</def>
+        <def>CHILD.tt_end = PARENT.tt_end</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record database="NetMeter" table="t_recur_value" selected="false">
+      <condition>OBJECT.n_value ne ''</condition>
+      <inherit_fields>false</inherit_fields>
+      <from_cursor>
+        <index_select>
+          <!-- Changed to new index by TCF August 2014. -->
+          <!--<index>'MC_PO_TO_PI_UDRC_MAPPING'</index>
+	    <field name="id_po">lc(OBJECT.id_po)</field>-->
+          <index>'MC_TBASEPROPS_TO_GSUB_MAPPING'</index>
+          <field name="id_po">lc(OBJECT.id_po)</field>
+        </index_select>
+        <cursor>TEMP.GeNsYm721__mc</cursor>
+      </from_cursor>
+      <child_field_mapping>
+        <def>CHILD.id_sub = PARENT.id_sub</def>
+        <def>CHILD.id_prop = CHILD.id_pi_instance</def>
+        <def>CHILD.n_value = PARENT.n_value</def>
+        <def>CHILD.vt_start = PARENT.vt_start</def>
+        <def>CHILD.vt_end = PARENT.vt_end</def>
+        <def>CHILD.tt_start = PARENT.tt_start</def>
+        <def>CHILD.tt_end = PARENT.tt_end</def>
+      </child_field_mapping>
+    </create_record>
+  </events>
+  <database_lookup>
+    <select_fields>
+        t_av_internal.c_currency as nm_currency_code, t_sub.id_sub as id_sub, t_group_sub.id_corporate_account as id_acc,
+        t_sub.id_sub_ext as id_sub_ext, t_group_sub.id_group as id_group, t_group_sub.id_group_ext as id_group_ext
+      </select_fields>
+    <from>
+        from t_group_sub
+        inner join t_sub on t_group_sub.id_group = t_sub.id_group
+		inner join t_av_internal on t_av_internal.id_acc = t_group_sub.id_corporate_account
+        inner join t_base_props on t_sub.id_po = t_base_props.id_prop and t_base_props.n_kind = 100 and lower(t_base_props.nm_name) = lower($${OBJECT.id_po})
+        where t_group_sub.tx_name = $${OBJECT.tx_name}
+      </from>
+  </database_lookup>
+  <sort_key>!</sort_key>
+</record_type>

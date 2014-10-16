@@ -1,0 +1,47 @@
+<proc name="core_role" run_after="setup_metranet_record_types">
+  <record_type name="core_role" display="ROLE">
+    <base_record_type>ROLE</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>ROLE</namespace>
+    <file_regex>\bROLE\..*data$</file_regex>
+    <fields>
+      <field name="parent_nm_login">
+      </field>
+      <field name="parent_nm_space">
+      </field>
+      <field name="id_role">
+      </field>
+      <field name="t_policy_role__id_role">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>mc/id_role_names</enum>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="id_policy">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+      <field name="id_role">OBJECT.id_role</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events override="true">
+      <create_record type="ROLE">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+  </record_type>
+</proc>

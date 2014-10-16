@@ -1,0 +1,220 @@
+<proc name="core_contact" run_after="setup_metranet_record_types">
+  <record_type name="core_contact" display="CONTACT">
+    <base_record_type>CONTACT</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>CONTACT</namespace>
+    <file_regex>\bACCOUNTCONTACT\..*data$</file_regex>
+    <fields>
+      <field name="parent_nm_login">
+      </field>
+      <field name="parent_nm_space">
+        <missing>true</missing>
+        <default>'mt'</default>
+      </field>
+      <field name="c_contacttype">
+        <required>true</required>
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>metratech.com/accountcreation/contacttype</enum>
+      </field>
+      <field name="c_communicationlanguage">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>metratech.com/enumaccount/customlanguagecode</enum>
+        <required>false</required>
+      </field>
+      <field name="c_timezoneidc">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>global/timezoneid</enum>
+        <required>false</required>
+      </field>
+      <field name="c_salutation">
+        <type>nvarchar</type>
+        <length>10</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_name1">
+        <type>nvarchar</type>
+        <length>100</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_name2">
+        <type>nvarchar</type>
+        <length>100</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_firstname">
+        <type>nvarchar</type>
+        <length>40</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_middleinitial">
+        <type>nvarchar</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_lastname">
+        <type>nvarchar</type>
+        <length>100</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_email">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_phonenumber">
+        <type>nvarchar</type>
+        <length>40</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_facsimiletelephonenumber">
+        <type>nvarchar</type>
+        <length>40</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_address1">
+        <type>nvarchar</type>
+        <length>100</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_address2">
+        <type>nvarchar</type>
+        <length>100</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_address3">
+        <type>nvarchar</type>
+        <length>100</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_city">
+        <type>nvarchar</type>
+        <length>40</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_state">
+        <type>nvarchar</type>
+        <length>40</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_zip">
+        <type>nvarchar</type>
+        <length>40</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_country">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>global/countryname</enum>
+        <required>false</required>
+      </field>
+      <field name="c_localsalutation">
+        <type>nvarchar</type>
+        <length>10</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_localfirstname">
+        <type>nvarchar</type>
+        <length>40</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_localmiddleinitial">
+        <type>nvarchar</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_locallastname">
+        <type>nvarchar</type>
+        <length>100</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_localaddress1">
+        <type>nvarchar</type>
+        <length>100</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_localaddress2">
+        <type>nvarchar</type>
+        <length>100</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_localaddress3">
+        <type>nvarchar</type>
+        <length>100</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_localcity">
+        <type>nvarchar</type>
+        <length>40</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_localstate">
+        <type>nvarchar</type>
+        <length>40</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_company">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="id_acc">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+      <field name="c_contacttype">OBJECT.c_contacttype</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events override="true">
+      <create_record type="CONTACT">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+  </record_type>
+</proc>

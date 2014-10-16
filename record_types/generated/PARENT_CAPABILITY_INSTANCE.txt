@@ -1,0 +1,43 @@
+<record_type name="PARENT_CAPABILITY_INSTANCE">
+  <base_record_type>
+  </base_record_type>
+  <phase>AccountPhase</phase>
+  <stage>MetraNetStage</stage>
+  <primary_key>
+    <field name="id_cap_instance">OBJECT.id_cap_instance</field>
+  </primary_key>
+  <parent_key namespace="ACCOUNT">
+    <field name="id_acc">OBJECT.id_acc</field>
+  </parent_key>
+  <events>
+    <field_mapping>
+      <def>OBJECT.id_cap_instance = MC_SEQUENCE(id_cap_instance)</def>
+      <def>OBJECT.tx_guid = decode(OBJECT(GLOBAL.target_login).database_type, 'sql', '41424344', 'ABCD')</def>
+      <def>OBJECT.id_cap_type = 'manage account hierarchies'</def>
+    </field_mapping>
+    <create_record type="PATH_CAPABILITY_INSTANCE">
+      <inherit_fields>true</inherit_fields>
+      <from_cursor>
+        <proc_select>
+          <name>'select_numbered_fields'</name>
+          <param name="field_name">'account_segment'</param>
+          <param name="proc_name">'account_segment_value'</param>
+          <param name="pipe_if_no_matches">1</param>
+        </proc_select>
+        <cursor>TEMP.GeNsYm676__mc</cursor>
+      </from_cursor>
+      <child_field_mapping>
+        <def>CHILD.id_parent_cap_instance = OBJECT.id_cap_instance</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record type="ENUM_CAPABILITY_INSTANCE">
+      <inherit_fields>true</inherit_fields>
+      <child_field_mapping>
+        <def>CHILD.id_parent_cap_instance = OBJECT.id_cap_instance</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record database="NetMeter" table="t_capability_instance">
+      <enum name="id_cap_type">mc/id_cap_type_names</enum>
+    </create_record>
+  </events>
+</record_type>

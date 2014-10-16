@@ -1,0 +1,72 @@
+<record_type name="SUBSCRIPTION_RATE_T_PT_TAXRATE">
+  <base_record_type>SUBSCRIPTION_RATE</base_record_type>
+  <phase>AccountPhase</phase>
+  <stage>MetraNetStage</stage>
+  <primary_key>
+    <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+    <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    <field name="id_po">OBJECT.id_po</field>
+    <field name="id_pi_template">OBJECT.id_pi_template</field>
+    <field name="id_paramtable">OBJECT.id_paramtable</field>
+  </primary_key>
+  <parent_key namespace="SUBSCRIPTION">
+    <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+    <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    <field name="id_po">OBJECT.id_po</field>
+  </parent_key>
+  <events>
+    <field_mapping>
+      <def>OBJECT.id_audit = 0</def>
+      <def>OBJECT.id_acc = PARENT.id_acc</def>
+      <def>OBJECT.id_sub = PARENT.id_sub</def>
+      <def>OBJECT.nm_currency_code = PARENT.nm_currency_code</def>
+      <def>OBJECT.tt_start = PARENT.tt_start</def>
+      <def>OBJECT.tt_end = PARENT.tt_end</def>
+      <def>OBJECT.tt_start = PARENT.vt_start</def>
+      <def>OBJECT.tt_end = PARENT.vt_end</def>
+      <map>OBJECT.rate_schedule_key = OBJECT.id_acc ~ '|' ~ OBJECT.id_sub ~ '|' ~ OBJECT.id_paramtable ~ '|' ~ OBJECT.id_pi_template ~ '|' ~ OBJECT.tt_start ~ '|' ~ OBJECT.tt_end</map>
+      <map>OBJECT.rate_schedule = MC_PROC(store_rate_schedule)</map>
+    </field_mapping>
+    <field_mapping pass="2">
+      <def>OBJECT.n_order = MC_PROC(get_rate_schedule_order)</def>
+    </field_mapping>
+    <create_record type="PRICELIST" pass="2" selected="false">
+      <condition>OBJECT.rate_schedule eq '1'</condition>
+      <inherit_fields>false</inherit_fields>
+      <child_field_mapping>
+        <def>CHILD.n_type = 0</def>
+        <def>CHILD.nm_name = 'ICB rate for id_sub=' ~ PARENT.id_sub</def>
+        <def>CHILD.nm_desc = 'ICB rate for id_sub=' ~ PARENT.id_sub</def>
+        <def>CHILD.id_pricelist = MC_SEQUENCE(id_base_props)</def>
+        <def>OBJECT.id_pricelist = CHILD.id_pricelist</def>
+        <def>CHILD.nm_currency_code = OBJECT.nm_currency_code</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record type="RATE_SCHEDULE" pass="2" selected="false">
+      <condition>OBJECT.rate_schedule eq '1'</condition>
+      <inherit_fields>false</inherit_fields>
+      <child_field_mapping>
+        <def>CHILD.id_pricelist = OBJECT.id_pricelist</def>
+        <def>CHILD.id_sched = OBJECT.id_sched</def>
+        <def>CHILD.id_pt = OBJECT.id_paramtable</def>
+        <def>CHILD.id_pi_template = OBJECT.id_pi_template</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record type="PRICELIST_MAP" pass="2" selected="false">
+      <condition>OBJECT.rate_schedule eq '1'</condition>
+      <inherit_fields>false</inherit_fields>
+      <child_field_mapping>
+        <def>CHILD.id_acc = PARENT.id_acc</def>
+        <def>CHILD.id_sub = PARENT.id_sub</def>
+        <def>CHILD.id_po = OBJECT.id_po</def>
+        <def>CHILD.id_pricelist = OBJECT.id_pricelist</def>
+        <def>CHILD.id_paramtable = OBJECT.id_paramtable</def>
+        <def>CHILD.id_pi_template = OBJECT.id_pi_template</def>
+        <def>CHILD.id_pi_type = MC_MAPPING('mc/id_pi_names', OBJECT.id_pi_template)</def>
+        <def>CHILD.id_pi_instance = MC_MAPPING('mc/id_pi_instances', OBJECT.id_po ~ '||' ~ OBJECT.id_pi_template)</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record database="NetMeter" table="t_pt_taxrate" selected="false" pass="2" />
+  </events>
+  <stable_sort>1</stable_sort>
+</record_type>

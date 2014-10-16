@@ -1,0 +1,84 @@
+<proc name="core_group_subscription_member" run_after="setup_metranet_record_types">
+  <record_type name="core_group_subscription_member" display="GROUP_SUBSCRIPTION_MEMBER">
+    <base_record_type>GROUP_SUBSCRIPTION_MEMBER</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>GROUP_SUBSCRIPTION_MEMBER</namespace>
+    <file_regex>\bGROUPSUBSCRIPTIONMEMBER\..*data$</file_regex>
+    <fields>
+      <field name="parent_nm_login">
+      </field>
+      <field name="parent_nm_space">
+        <missing>true</missing>
+        <default>'mt'</default>
+      </field>
+      <field name="id_po">
+        <required>true</required>
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>mc/id_po_names</enum>
+      </field>
+      <field name="tx_name">
+        <required>true</required>
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>false</nullable>
+      </field>
+      <field name="tt_start">
+        <type>datetime</type>
+        <format>yyyy-MM-dd HH:mm:ss</format>
+        <nullable>false</nullable>
+      </field>
+      <field name="tt_end">
+        <type>datetime</type>
+        <format>yyyy-MM-dd HH:mm:ss</format>
+        <default>2038-01-01 00:00:00</default>
+        <nullable>false</nullable>
+      </field>
+      <field name="gsub_status">
+        <ignored>true</ignored>
+      </field>
+      <field name="id_acc">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="id_group">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="vt_end">
+        <type>datetime</type>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="vt_start">
+        <type>datetime</type>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+      <field name="tx_name">OBJECT.tx_name</field>
+      <field name="id_po">OBJECT.id_po</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events override="true">
+      <create_record type="GROUP_SUBSCRIPTION_MEMBER">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+  </record_type>
+</proc>

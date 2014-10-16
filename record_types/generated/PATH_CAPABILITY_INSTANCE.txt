@@ -1,0 +1,22 @@
+<record_type name="PATH_CAPABILITY_INSTANCE">
+  <base_record_type>
+  </base_record_type>
+  <phase>AccountPhase</phase>
+  <stage>MetraNetStage</stage>
+  <primary_key>
+    <field name="id_cap_instance">OBJECT.id_cap_instance</field>
+  </primary_key>
+  <parent_key namespace="PARENT_CAPABILITY_INSTANCE">
+    <field name="id_cap_instance">OBJECT.id_parent_cap_instance</field>
+  </parent_key>
+  <events>
+    <field_mapping>
+      <map>OBJECT.id_cap_instance = MC_SEQUENCE(id_cap_instance)</map>
+      <def>OBJECT.param_value = OBJECT.full_tx_path ~ '/-'</def>
+    </field_mapping>
+    <create_record database="NetMeter" table="t_capability_instance">
+      <enum name="id_cap_type">mc/id_cap_type_names</enum>
+    </create_record>
+    <create_record database="NetMeter" table="t_path_capability" />
+  </events>
+</record_type>

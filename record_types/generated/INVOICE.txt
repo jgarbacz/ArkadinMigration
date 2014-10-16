@@ -1,0 +1,16 @@
+<record_type name="INVOICE">
+  <base_record_type>
+  </base_record_type>
+  <phase>AccountPhase</phase>
+  <stage>MetraNetStage</stage>
+  <primary_key>
+    <field name="id_invoice">OBJECT.id_invoice</field>
+  </primary_key>
+  <parent_key namespace="ACCOUNT">
+    <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+    <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+  </parent_key>
+  <events>
+    <create_record database="NetMeter" table="t_invoice" />
+  </events>
+</record_type>

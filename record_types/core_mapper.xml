@@ -1,0 +1,49 @@
+<proc name="core_mapper" run_after="setup_metranet_record_types">
+  <record_type name="core_mapper" display="MAPPER">
+    <base_record_type>MAPPER</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>MAPPER</namespace>
+    <file_regex>\bACCOUNTNAME\..*data$</file_regex>
+    <fields>
+      <field name="parent_nm_login">
+      </field>
+      <field name="parent_nm_space">
+        <missing>true</missing>
+        <default>'mt'</default>
+      </field>
+      <field name="nm_login">
+        <required>true</required>
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>false</nullable>
+      </field>
+      <field name="nm_space">
+        <type>nvarchar</type>
+        <length>40</length>
+        <nullable>false</nullable>
+        <enum>mc/nm_space</enum>
+      </field>
+      <field name="id_acc">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="nm_login">OBJECT.nm_login</field>
+      <field name="nm_space">OBJECT.nm_space</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events override="true">
+      <create_record type="MAPPER">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+  </record_type>
+</proc>

@@ -1,0 +1,161 @@
+<record_type name="ACCOUNT">
+  <base_record_type>
+  </base_record_type>
+  <phase>AccountPhase</phase>
+  <stage>MetraNetStage</stage>
+  <namespace>ACCOUNT</namespace>
+  <primary_key>
+    <field name="nm_login">OBJECT.nm_login</field>
+    <field name="nm_space">OBJECT.nm_space</field>
+  </primary_key>
+  <parent_key namespace="ACCOUNT">
+    <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+    <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+  </parent_key>
+  <events>
+    <field_mapping>
+      <!-- FIXME: Arkadin-specific fields -->
+      <def>OBJECT.c_createdby = 'MIG'</def>
+      <def>OBJECT.c_createddate = MC_SYSDATE</def>
+      <def>OBJECT.c_modifiedby = 'MIG'</def>
+      <def>OBJECT.c_modifieddate = MC_SYSDATE</def>
+      <def>OBJECT.c_migrationdate = MC_SYSDATE</def>
+      <def>OBJECT.c_legacystartdate = OBJECT.vt_start</def>
+      <def>OBJECT.c_legacyenddate = OBJECT.vt_end</def>
+      <def>OBJECT.c_legacyaccountidentifier = OBJECT.nm_login</def>
+      <def>OBJECT.day_of_month = 31</def>
+    </field_mapping>
+    <field_mapping>
+      <def>OBJECT.id_acc = MC_SEQUENCE(id_acc)</def>
+      <def>OBJECT.id_dm_acc = MC_SEQUENCE(id_dm_acc)</def>
+      <def>OBJECT.id_profile = MC_SEQUENCE(id_profile)</def>
+      <def>OBJECT.id_acc_ext = MC_GUID</def>
+      <def>OBJECT.tx_lang_code = 'US'</def>
+      <def>OBJECT.nm_space = 'mt'</def>
+      <def>OBJECT.parent_nm_space = OBJECT.nm_space</def>
+      <def>OBJECT.id_site = OBJECT.nm_space ~ '/' ~ OBJECT.tx_lang_code</def>
+      <def>OBJECT.c_billable = MC_MAPPING('mc/payer_account_types', OBJECT.id_type)</def>
+      <def>OBJECT.id_payee = OBJECT.id_acc</def>
+      <def>OBJECT.id_payer = MC_PROC(lookup_nearest_payer)</def>
+      <def>OBJECT.status = 'AC'</def>
+      <def>OBJECT.dt_crt = MC_SYSDAY</def>
+      <def>OBJECT.vt_start = OBJECT.dt_crt</def>
+      <def>OBJECT.vt_end = MC_MAXDATE</def>
+      <def>OBJECT.tt_start = OBJECT.vt_start</def>
+      <def>OBJECT.tt_end = MC_MAXDATE</def>
+      <def>OBJECT.nm_tag = 'timeZoneID'</def>
+      <def>OBJECT.val_tag = 22</def>
+      <def>OBJECT.id_audit = 0</def>
+      <def>OBJECT.id_usage_cycle = MC_PROC(lookup_usage_cycle)</def>
+      <def>OBJECT.c_usagecycletype = 'Monthly'</def>
+      <def>OBJECT.c_currency = 'USD'</def>
+      <def>OBJECT.c_folder = 1</def>
+      <def>OBJECT.c_invoicemethod = 'Other'</def>
+      <def>OBJECT.c_language = OBJECT.tx_lang_code</def>
+      <def>OBJECT.c_statusreason = 'None'</def>
+      <def>OBJECT.c_statusreasonother = 'No other reason'</def>
+      <def>OBJECT.c_securityanswer = 'None'</def>
+      <def>OBJECT.c_securityquestion = 'None'</def>
+      <def>OBJECT.c_paymentmethod = 'Cheque'</def>
+      <def>OBJECT.c_timezoneid = '(GMT-05:00) Eastern Time (US &amp;amp; Canada)'</def>
+      <map>OBJECT.tx_password = MC_PROC(set_tx_password)</map>
+      <def>OBJECT.id_policy = MC_SEQUENCE(id_policy)</def>
+      <def>OBJECT.policy_type = 'A'</def>
+      <def>OBJECT.t_policy_role__id_role = 'subscriber (metraview)'</def>
+      <def>OBJECT.b_children = 'N'</def>
+      <def>OBJECT.full_tx_path = MC_PROC(get_full_tx_path)</def>
+      <map>PARENT.b_children = 'Y'</map>
+      <map>OBJECT.nm_login_check = MC_PROC(check_nm_login_uniqueness)</map>
+    </field_mapping>
+    <create_record type="PARENT_CAPABILITY_INSTANCE">
+      <inherit_fields>account_segment[0-9]+</inherit_fields>
+      <child_field_mapping>
+        <def>CHILD.id_acc = OBJECT.id_acc</def>
+        <def>CHILD.id_policy = OBJECT.id_policy</def>
+        <def>CHILD.full_tx_path = OBJECT.full_tx_path</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record database="NetMeter" table="t_acc_usage_interval" selected="false">
+      <inherit_fields>false</inherit_fields>
+      <from_cursor>
+        <index_select>
+          <index>'MC_T_USAGE_INTERVAL'</index>
+          <field name="id_usage_cycle">OBJECT.id_usage_cycle</field>
+        </index_select>
+        <cursor>TEMP.GeNsYm78__mc</cursor>
+      </from_cursor>
+      <child_field_mapping>
+        <def>CHILD.id_acc = OBJECT.id_acc</def>
+        <def>CHILD.id_usage_interval = CHILD.id_interval</def>
+        <def>CHILD.tx_status = CHILD.tx_interval_status</def>
+      </child_field_mapping>
+    </create_record>
+    <create_record database="NetMeter" table="t_account">
+      <enum name="id_type">mc/id_type</enum>
+    </create_record>
+    <create_record database="NetMeter" table="t_account_mapper">
+      <enum name="nm_space">mc/nm_space</enum>
+    </create_record>
+    <create_record database="NetMeter" table="t_account_state">
+      <enum name="status">mc/account_states</enum>
+    </create_record>
+    <create_record database="NetMeter" table="t_acc_usage_cycle" />
+    <create_record database="NetMeter" table="t_dm_account" />
+    <create_record database="NetMeter" table="t_profile" />
+    <create_record database="NetMeter" table="t_site_user">
+      <enum name="id_site">mc/t_localized_site</enum>
+    </create_record>
+    <create_record database="NetMeter" table="t_user_credentials">
+      <enum name="nm_space">mc/nm_space</enum>
+    </create_record>
+    <create_record database="NetMeter" table="t_payment_redirection" />
+    <create_record database="NetMeter" table="t_principal_policy" selected="false" />
+    <create_record database="NetMeter" table="t_account_state_history" selected="false">
+      <enum name="status">mc/account_states</enum>
+    </create_record>
+    <create_record database="NetMeter" table="t_payment_redir_history" selected="false" />
+    <create_record database="NetMeter" table="t_policy_role" selected="false">
+      <alias name="id_role">t_policy_role__id_role</alias>
+      <enum name="id_role">mc/id_role_names</enum>
+    </create_record>
+    <create_record type="ACC_ANCESTOR" pass="2">
+      <inherit_fields>false</inherit_fields>
+      <from_cursor>
+        <proc_select>
+          <name>'get_account_ancestors'</name>
+        </proc_select>
+        <cursor>TEMP.GeNsYm92__mc</cursor>
+      </from_cursor>
+      <child_field_mapping>
+        <!-- These mappings simply let the tool recognize that these fields were set so they won't be marked as missing+required -->
+        <def>CHILD.id_ancestor = CHILD.id_ancestor</def>
+        <def>CHILD.id_descendent = CHILD.id_descendent</def>
+        <def>CHILD.num_generations = CHILD.num_generations</def>
+        <def>CHILD.tx_path = CHILD.tx_path</def>
+      </child_field_mapping>
+    </create_record>
+  </events>
+  <database_lookup>
+    <select_fields>mm.nm_login as parent_nm_login, mm.nm_space as parent_nm_space, case when mm.id_acc = 1 then '1' else '' end as parent_final</select_fields>
+    <from>
+        from t_account
+        inner join t_account_mapper on t_account.id_acc = t_account_mapper.id_acc
+        left join t_account_state on t_account.id_acc = t_account_state.id_acc
+        left join t_av_internal on t_account.id_acc = t_av_internal.id_acc
+        left join t_acc_usage_cycle on t_account.id_acc = t_acc_usage_cycle.id_acc
+        left join t_dm_account on t_account.id_acc = t_dm_account.id_acc
+        left join t_site_user on t_account_mapper.nm_login = t_site_user.nm_login
+        left join t_localized_site on t_site_user.id_site = t_localized_site.id_site and t_localized_site.nm_space = t_account_mapper.nm_space
+        left join t_profile on t_site_user.id_profile = t_profile.id_profile
+        left join t_user_credentials on t_account_mapper.nm_login = t_user_credentials.nm_login and t_account_mapper.nm_space = t_user_credentials.nm_space
+        left join t_payment_redirection on t_account.id_acc = t_payment_redirection.id_payee
+        left join t_account_ancestor on t_account.id_acc = t_account_ancestor.id_descendent
+        and t_account_ancestor.num_generations = 1
+        and t_account_ancestor.id_descendent != 1
+        and t_account_ancestor.vt_start &amp;lt;= $${GLOBAL.mvm_startup_date}
+        and t_account_ancestor.vt_end &amp;gt;= $${GLOBAL.mvm_startup_date}
+        left join t_account_mapper mm on t_account_ancestor.id_ancestor = mm.id_acc
+        where lower(t_account_mapper.nm_login) = lower($${OBJECT.parent_nm_login}) and lower(t_account_mapper.nm_space) = lower($${OBJECT.parent_nm_space})
+      </from>
+  </database_lookup>
+</record_type>

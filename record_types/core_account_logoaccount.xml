@@ -1,0 +1,694 @@
+<proc name="core_account_logoaccount" run_after="setup_metranet_record_types">
+  <record_type name="core_account_logoaccount" display="ACCOUNT_LOGOACCOUNT">
+    <base_record_type>ACCOUNT_LOGOACCOUNT</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>ACCOUNT</namespace>
+    <file_regex>\bLOGOACCOUNT\..*data$</file_regex>
+    <fields>
+      <field name="nm_login">
+        <required>true</required>
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>false</nullable>
+      </field>
+      <field name="c_legacysystemname">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>metratech.com/enumglobal/legacysystemname</enum>
+        <required>false</required>
+      </field>
+      <field name="parent_nm_login">
+      </field>
+      <field name="payer_account">
+        <type>nvarchar</type>
+        <length>255</length>
+        <ignored>true</ignored>
+      </field>
+      <field name="parent_nm_space">
+        <missing>true</missing>
+        <default>'mt'</default>
+      </field>
+      <field name="nm_space">
+        <type>nvarchar</type>
+        <length>40</length>
+        <default>'mt'</default>
+        <nullable>false</nullable>
+        <enum>mc/nm_space</enum>
+        <missing>true</missing>
+      </field>
+      <field name="dt_crt">
+        <type>datetime</type>
+        <format>yyyy-MM-dd HH:mm:ss</format>
+        <nullable>false</nullable>
+      </field>
+      <field name="vt_end">
+        <type>datetime</type>
+        <format>yyyy-MM-dd HH:mm:ss</format>
+        <nullable>false</nullable>
+        <default>2038-01-01 00:00:00</default>
+      </field>
+      <field name="vt_start">
+        <type>datetime</type>
+        <default>dt_crt</default>
+        <format>yyyy-MM-dd HH:mm:ss</format>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="tt_start">
+        <type>datetime</type>
+        <default>dt_crt</default>
+        <missing>true</missing>
+        <format>yyyy-MM-dd HH:mm:ss</format>
+        <nullable>false</nullable>
+      </field>
+      <field name="tt_end">
+        <type>datetime</type>
+        <default>vt_end</default>
+        <missing>true</missing>
+        <format>yyyy-MM-dd HH:mm:ss</format>
+        <default>2038-01-01 00:00:00</default>
+        <nullable>false</nullable>
+      </field>
+      <field name="status">
+        <type>char</type>
+        <length>2</length>
+        <nullable>false</nullable>
+        <enum>mc/account_states</enum>
+      </field>
+      <field name="createdby">
+        <default>'neha'</default>
+        <ignored>true</ignored>
+      </field>
+      <field name="c_createddate">
+        <type>datetime</type>
+        <format>yyyy-MM-dd HH:mm:ss</format>
+        <nullable>false</nullable>
+      </field>
+      <field name="c_modifiedby">
+        <type>nvarchar</type>
+        <length>50</length>
+        <nullable>false</nullable>
+      </field>
+      <field name="c_modifieddate">
+        <type>datetime</type>
+        <format>yyyy-MM-dd HH:mm:ss</format>
+        <nullable>false</nullable>
+      </field>
+      <field name="c_orderstatus">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <default>'Unlock'</default>
+        <enum>metratech.com/enumaccount/omlockstatus</enum>
+        <required>true</required>
+      </field>
+      <field name="c_custpartnerextid">
+        <type>nvarchar</type>
+        <length>50</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_customernodename">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>false</nullable>
+        <required>true</required>
+      </field>
+      <field name="c_commentc">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_submanagementl">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>metratech.com/enumglobal/subsidiaryname</enum>
+        <required>true</required>
+      </field>
+      <field name="c_centralbillingflagl">
+        <type>char</type>
+        <length>1</length>
+        <nullable>false</nullable>
+        <default>'0'</default>
+        <required>true</required>
+      </field>
+      <field name="c_effectivemgmtsubsidiary">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>metratech.com/enumglobal/subsidiaryname</enum>
+        <required>false</required>
+      </field>
+      <field name="ismigrated">
+        <type>char</type>
+        <length>1</length>
+        <nullable>false</nullable>
+        <default>'1'</default>
+        <ignored>true</ignored>
+      </field>
+      <field name="c_gsaflag">
+        <type>char</type>
+        <length>1</length>
+        <nullable>false</nullable>
+        <default>'0'</default>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="b_enabled">
+        <type>nvarchar</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_billable">
+        <type>char</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <default>'1'</default>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_currency">
+        <type>nvarchar</type>
+        <length>10</length>
+        <nullable>true</nullable>
+        <default>'USD'</default>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_division">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_folder">
+        <type>char</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <default>'0'</default>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_invoicemethod">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <default>Mail</default>
+        <enum>metratech.com/enumbilling/invoicedeliverymethod</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_language">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>global/languagecode</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_legacyaccountidentifier">
+        <type>nvarchar</type>
+        <length>100</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_legacyenddate">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <default>2038-01-01 00:00:00</default>
+        <required>false</required>
+      </field>
+      <field name="c_legacystartdate">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_logousername">
+        <type>nvarchar</type>
+        <length>255</length>
+        <default>nm_login</default>
+        <missing>true</missing>
+        <nullable>true</nullable>
+        <required>false</required>
+      </field>
+      <field name="c_metrataxcountryeligibility">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>metratech.com/enumglobal/subsidiaryname</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_metrataxcountryzone">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>metratech.com/tax/taxzone</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_metrataxhasoverrideband">
+        <type>char</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <default>'0'</default>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_metrataxoverrideband">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>metratech.com/tax/taxband</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_migrationdate">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_paymentmethod">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>metratech.com/accountcreation/paymentmethod</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_pricelist">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_securityanswer">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_securityquestion">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>metratech.com/accountcreation/securityquestion</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_securityquestiontext">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_statusreason">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>metratech.com/accountcreation/statusreason</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_statusreasonother">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <default>'None'</default>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_taxexempt">
+        <type>char</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_taxexemptenddate">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_taxexemptid">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_taxexemptreason">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <default>'NotExempt'</default>
+        <enum>metratech.com/tax/taxexemptreason</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_taxexemptstartdate">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_taxregistryreference">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_taxserviceaddresspcode">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_taxvendor">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>metratech.com/tax/taxvendor</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_timezoneid">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>global/timezoneid</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_usagecycletype">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <enum>metratech.com/billingcycle/usagecycletype</enum>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="dt_auto_reset_failures">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="dt_effective">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="dt_expire">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="dt_last_login">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="dt_last_logout">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_acc">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="id_cap_type">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>mc/id_cap_type_names</enum>
+        <missing>true</missing>
+      </field>
+      <field name="id_parent_cap_instance">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_payer">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="id_role">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_site">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>mc/t_localized_site</enum>
+        <missing>true</missing>
+      </field>
+      <field name="id_type">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>mc/id_type</enum>
+        <missing>true</missing>
+      </field>
+      <field name="id_usage_cycle">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="id_usage_interval">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="nm_tag">
+        <type>nvarchar</type>
+        <length>32</length>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="num_failures_since_login">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="param_value">
+        <type>nvarchar</type>
+        <length>2000</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="policy_type">
+        <type>varchar</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="t_policy_role__id_role">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>mc/id_role_names</enum>
+        <missing>true</missing>
+      </field>
+      <field name="tx_desc">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_guid">
+        <type>varbinary</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_name">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_op">
+        <type>varchar</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_param_name">
+        <type>nvarchar</type>
+        <length>2000</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="tx_password">
+        <type>nvarchar</type>
+        <length>1024</length>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="tx_status">
+        <type>char</type>
+        <length>1</length>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="val_tag">
+        <type>nvarchar</type>
+        <length>80</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="c_createdby">
+        <type>nvarchar</type>
+        <length>50</length>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="c_ismigrated">
+        <type>char</type>
+        <length>1</length>
+        <nullable>false</nullable>
+        <default>'0'</default>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="c_salesaccountassigned">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <ignored>true</ignored>
+      </field>
+      <field name="c_statusrequestedby">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <ignored>true</ignored>
+      </field>
+      <field name="c_communicationoptin">
+        <type>char</type>
+        <length>1</length>
+        <nullable>true</nullable>
+        <default>'0'</default>
+        <missing>true</missing>
+        <ignored>true</ignored>
+      </field>
+      <field name="c_localcustomernodename">
+        <type>nvarchar</type>
+        <length>255</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <ignored>true</ignored>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="nm_login">OBJECT.nm_login</field>
+      <field name="nm_space">OBJECT.nm_space</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events override="true">
+      <create_record type="ACCOUNT_LOGOACCOUNT">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+    <database_lookup>
+      <select_fields>mm.nm_login as parent_nm_login, mm.nm_space as parent_nm_space, case when mm.id_acc = 1 then '1' else '' end as parent_final</select_fields>
+      <from>
+        from t_account
+        inner join t_account_mapper on t_account.id_acc = t_account_mapper.id_acc
+        inner join t_account_state on t_account.id_acc = t_account_state.id_acc
+        inner join t_av_internal on t_account.id_acc = t_av_internal.id_acc
+        inner join t_acc_usage_cycle on t_account.id_acc = t_acc_usage_cycle.id_acc
+        inner join t_dm_account on t_account.id_acc = t_dm_account.id_acc
+        inner join t_site_user on t_account_mapper.nm_login = t_site_user.nm_login
+        inner join t_localized_site on t_site_user.id_site = t_localized_site.id_site and t_localized_site.nm_space = t_account_mapper.nm_space
+        inner join t_profile on t_site_user.id_profile = t_profile.id_profile
+        inner join t_user_credentials on t_account_mapper.nm_login = t_user_credentials.nm_login and t_account_mapper.nm_space = t_user_credentials.nm_space
+        inner join t_payment_redirection on t_account.id_acc = t_payment_redirection.id_payee
+        inner join t_account_ancestor on t_account.id_acc = t_account_ancestor.id_descendent
+        and t_account_ancestor.num_generations = 1
+        and t_account_ancestor.id_descendent != 1
+        and t_account_ancestor.vt_start &amp;lt;= $${GLOBAL.mvm_startup_date}
+        and t_account_ancestor.vt_end &amp;gt;= $${GLOBAL.mvm_startup_date}
+        inner join t_account_mapper mm on t_account_ancestor.id_ancestor = mm.id_acc
+        where lower(t_account_mapper.nm_login) = lower($${OBJECT.parent_nm_login}) and lower(t_account_mapper.nm_space) = lower($${OBJECT.parent_nm_space})
+      </from>
+    </database_lookup>
+  </record_type>
+</proc>

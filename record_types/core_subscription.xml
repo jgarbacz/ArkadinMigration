@@ -1,0 +1,101 @@
+<proc name="core_subscription" run_after="setup_metranet_record_types">
+  <record_type name="core_subscription" display="SUBSCRIPTION">
+    <base_record_type>SUBSCRIPTION</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>SUBSCRIPTION</namespace>
+    <file_regex>\bSUBSCRIPTION\..*data$</file_regex>
+    <fields>
+      <field name="parent_nm_login">
+      </field>
+      <field name="parent_nm_space">
+        <missing>true</missing>
+        <default>'mt'</default>
+      </field>
+      <field name="id_po">
+        <required>true</required>
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <enum>mc/id_po_names</enum>
+      </field>
+      <field name="subname">
+        <ignored>true</ignored>
+      </field>
+      <field name="parentgroupid">
+        <ignored>true</ignored>
+      </field>
+      <field name="techinstance">
+        <ignored>true</ignored>
+      </field>
+      <field name="numoflicenses">
+        <ignored>true</ignored>
+      </field>
+      <field name="tt_end">
+        <type>datetime</type>
+        <nullable>false</nullable>
+      </field>
+      <field name="tt_start">
+        <type>datetime</type>
+        <nullable>false</nullable>
+      </field>
+      <field name="dt_crt">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_acc">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="id_group">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="vt_end">
+        <type>datetime</type>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+      <field name="vt_start">
+        <type>datetime</type>
+        <nullable>false</nullable>
+        <missing>true</missing>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+      <field name="id_po">OBJECT.id_po</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events override="true">
+      <create_record type="SUBSCRIPTION">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+    <database_lookup>
+      <select_fields>t_account_mapper.nm_login as parent_nm_login, t_account_mapper.nm_space as parent_nm_space</select_fields>
+      <from>
+        from t_sub
+        inner join t_account_mapper on t_sub.id_acc = t_account_mapper.id_acc
+        inner join t_base_props on t_sub.id_po = t_base_props.id_prop and t_base_props.n_kind = 100
+        where lower(t_account_mapper.nm_login) = lower($${OBJECT.parent_nm_login}) and lower(t_account_mapper.nm_space) = lower($${OBJECT.parent_nm_space})
+        and lower(t_base_props.nm_name) = lower($${OBJECT.id_po})
+      </from>
+    </database_lookup>
+  </record_type>
+</proc>

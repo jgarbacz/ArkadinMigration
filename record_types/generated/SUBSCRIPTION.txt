@@ -1,0 +1,51 @@
+<record_type name="SUBSCRIPTION">
+  <base_record_type>
+  </base_record_type>
+  <phase>AccountPhase</phase>
+  <stage>MetraNetStage</stage>
+  <primary_key>
+    <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+    <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    <field name="id_po">OBJECT.id_po</field>
+  </primary_key>
+  <parent_key namespace="ACCOUNT">
+    <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+    <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+  </parent_key>
+  <events>
+    <field_mapping>
+      <def>OBJECT.id_acc = PARENT.id_acc</def>
+      <def>OBJECT.id_sub = MC_SEQUENCE(id_sub)</def>
+      <def>OBJECT.id_sub_ext = MC_GUID</def>
+      <def>OBJECT.dt_crt = PARENT.dt_crt</def>
+      <def>OBJECT.vt_start = OBJECT.dt_crt</def>
+      <def>OBJECT.vt_end = PARENT.vt_end</def>
+      <def>OBJECT.tt_start = PARENT.tt_start</def>
+      <def>OBJECT.tt_start = MC_SYSDAY</def>
+      <def>OBJECT.tt_end = PARENT.tt_end</def>
+      <def>OBJECT.tt_end = MC_MAXDATE</def>
+      <def>OBJECT.nm_currency_code = PARENT.c_currency</def>
+      <def>OBJECT.nm_currency_code = 'USD'</def>
+    </field_mapping>
+    <create_record database="NetMeter" table="t_sub">
+      <enum name="id_po">mc/id_po_names</enum>
+    </create_record>
+    <create_record database="NetMeter" table="t_sub_history" selected="false">
+      <enum name="id_po">mc/id_po_names</enum>
+    </create_record>
+  </events>
+  <database_lookup>
+    <!--<select_fields>t_account_mapper.nm_login as parent_nm_login, t_account_mapper.nm_space as parent_nm_space</select_fields>-->
+    <select_fields>
+        t_account_mapper.nm_login as parent_nm_login, t_account_mapper.nm_space as parent_nm_space,
+        t_av_internal.c_currency as nm_currency_code, t_sub.id_sub as id_sub, t_sub.id_sub_ext as id_sub_ext, t_sub.id_acc as id_acc
+      </select_fields>
+    <from>
+        from t_sub
+        inner join t_account_mapper on t_sub.id_acc = t_account_mapper.id_acc
+        inner join t_av_internal on t_av_internal.id_acc = t_account_mapper.id_acc
+        inner join t_base_props on t_sub.id_po = t_base_props.id_prop and t_base_props.n_kind = 100 and lower(t_base_props.nm_name) = lower($${OBJECT.id_po})
+        where lower(t_account_mapper.nm_login) = lower($${OBJECT.parent_nm_login}) and lower(t_account_mapper.nm_space) = lower($${OBJECT.parent_nm_space})
+      </from>
+  </database_lookup>
+</record_type>

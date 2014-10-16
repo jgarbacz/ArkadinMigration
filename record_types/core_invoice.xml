@@ -1,0 +1,183 @@
+<proc name="core_invoice" run_after="setup_metranet_record_types">
+  <record_type name="core_invoice" display="INVOICE">
+    <base_record_type>INVOICE</base_record_type>
+    <phase>AccountPhase</phase>
+    <stage>MetraNetStage</stage>
+    <namespace>INVOICE</namespace>
+    <file_regex>\bINVOICE\..*data$</file_regex>
+    <fields>
+      <field name="parent_nm_login">
+      </field>
+      <field name="parent_nm_space">
+      </field>
+      <field name="id_invoice">
+        <required>true</required>
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+      </field>
+      <field name="ar_adj_ttl_amt">
+        <type>numeric</type>
+        <length>22</length>
+        <scale>10</scale>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="current_balance">
+        <type>numeric</type>
+        <length>22</length>
+        <scale>10</scale>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="id_acc">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="id_interval">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="id_invoice_num">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="id_payer">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="id_payer_interval">
+        <type>int</type>
+        <length>10</length>
+        <scale>0</scale>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="invoice_amount">
+        <type>numeric</type>
+        <length>22</length>
+        <scale>10</scale>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="invoice_currency">
+        <type>nvarchar</type>
+        <length>10</length>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="invoice_date">
+        <type>datetime</type>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="invoice_due_date">
+        <type>datetime</type>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="invoice_string">
+        <type>nvarchar</type>
+        <length>50</length>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="namespace">
+        <type>nvarchar</type>
+        <length>40</length>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="payment_ttl_amt">
+        <type>numeric</type>
+        <length>22</length>
+        <scale>10</scale>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="postbill_adj_ttl_amt">
+        <type>numeric</type>
+        <length>22</length>
+        <scale>10</scale>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="sample_flag">
+        <type>varchar</type>
+        <length>1</length>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="tax_ttl_amt">
+        <type>numeric</type>
+        <length>22</length>
+        <scale>10</scale>
+        <nullable>false</nullable>
+        <required>true</required>
+        <missing>true</missing>
+      </field>
+      <field name="balance_forward_date">
+        <type>datetime</type>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="div_amount">
+        <type>numeric</type>
+        <length>22</length>
+        <scale>10</scale>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+      <field name="div_currency">
+        <type>nvarchar</type>
+        <length>3</length>
+        <nullable>true</nullable>
+        <missing>true</missing>
+        <required>false</required>
+      </field>
+    </fields>
+    <primary_key>
+      <field name="id_invoice">OBJECT.id_invoice</field>
+    </primary_key>
+    <parent_key namespace="ACCOUNT">
+      <field name="parent_nm_login">OBJECT.parent_nm_login</field>
+      <field name="parent_nm_space">OBJECT.parent_nm_space</field>
+    </parent_key>
+    <events override="true">
+      <create_record type="INVOICE">
+        <inherit_fields>true</inherit_fields>
+      </create_record>
+    </events>
+  </record_type>
+</proc>
