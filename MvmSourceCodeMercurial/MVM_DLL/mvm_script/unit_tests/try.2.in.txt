@@ -1,0 +1,6 @@
+try{
+	print("in try2");
+}
+finally{
+	print("in finally2");
+}

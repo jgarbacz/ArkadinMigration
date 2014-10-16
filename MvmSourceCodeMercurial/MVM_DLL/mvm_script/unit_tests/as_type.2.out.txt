@@ -1,0 +1,13 @@
+(
+  as
+    (
+      OBJECT
+        .(
+          myList
+        )
+      List
+        <
+          string
+        >
+    )
+)

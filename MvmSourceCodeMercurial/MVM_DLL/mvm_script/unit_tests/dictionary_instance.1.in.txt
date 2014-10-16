@@ -1,0 +1,1 @@
+dic=new Dictionary<string,int>();

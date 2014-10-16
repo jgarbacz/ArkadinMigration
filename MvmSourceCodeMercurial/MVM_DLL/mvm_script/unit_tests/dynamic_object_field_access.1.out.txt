@@ -1,0 +1,39 @@
+(
+  =
+    (
+      VAR
+        .(
+          field_name
+        )
+      'id_acc'
+    )
+  if
+    (
+      condition
+        (
+          eq
+            (
+              OBJECT
+                .(
+                  id_acc
+                )
+              OBJECT
+                [
+                  (
+                    VAR
+                      .(
+                        field_name
+                      )
+                  )
+                ]
+            )
+        )
+      then
+        {
+          print
+            (
+              'yes the will be equal'
+            )
+        }
+    )
+)

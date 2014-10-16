@@ -1,0 +1,32 @@
+(
+  =
+    (
+      x
+      array
+        (
+          Ast_Element => array
+            (
+              Ast_Element => 'John'
+              Ast_Element => 'Smith'
+              Ast_Element => 25
+              Ast_Element => array
+                (
+                  Ast_Element => '21 2nd Street'
+                  Ast_Element => 'New York'
+                  Ast_Element => 'NY'
+                  Ast_Element => '10021'
+                )
+              Ast_Element => array
+                (
+                  Ast_Element => '212 555-1234'
+                  Ast_Element => '646 555-4567'
+                )
+              Ast_Element => array
+                (
+                  7
+                  11
+                )
+            )
+        )
+    )
+)

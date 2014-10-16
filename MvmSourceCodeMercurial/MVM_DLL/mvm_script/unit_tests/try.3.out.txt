@@ -1,0 +1,23 @@
+(
+  try
+    (
+      brace
+        {
+          print
+            (
+              "in try3"
+            )
+        }
+      catch
+        (
+          ee
+          brace
+            {
+              print
+                (
+                  "in ee"
+                )
+            }
+        )
+    )
+)

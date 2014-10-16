@@ -1,0 +1,4 @@
+myLabel: 
+	loop{
+		break(myLabel);
+	}

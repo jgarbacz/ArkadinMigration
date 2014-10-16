@@ -1,0 +1,179 @@
+(
+  bookstore
+    (
+      Ast_Element => 'novel'
+    )
+    (
+      book
+        (
+          Ast_Element => 'autobiography'
+        )
+        (
+          author
+            (
+              first_name
+                (
+                  'Joe'
+                )
+              last_name
+                (
+                  'Bob'
+                )
+              award
+                (
+                  'Trenton Literary Review Honorable Mention'
+                )
+            )
+          price
+            (
+              '12'
+            )
+        )
+      book
+        (
+          Ast_Element => 'textbook'
+        )
+        (
+          author
+            (
+              first_name
+                (
+                  'Mary'
+                )
+              last_name
+                (
+                  'Bob'
+                )
+              publication
+                (
+                  first_name
+                    (
+                      'Mary'
+                    )
+                  last_name
+                    (
+                      'Bob'
+                    )
+                )
+            )
+          editor
+            (
+              first_name
+                (
+                  'Britney'
+                )
+              last_name
+                (
+                  'Bob'
+                )
+            )
+          price
+            (
+              '55'
+            )
+        )
+      magazine
+        (
+          Ast_Element => 'glossy'
+          Ast_Element => 'monthly'
+        )
+        (
+          price
+            (
+              '2.50'
+            )
+          subscription
+            (
+              Ast_Element => '24'
+              Ast_Element => 'year'
+            )
+            (
+            )
+        )
+      book
+        (
+          Ast_Element => 'novel'
+          Ast_Element => 'myfave'
+        )
+        (
+          author
+            (
+              first_name
+                (
+                  'Toni'
+                )
+              last_name
+                (
+                  'Bob'
+                )
+              degree
+                (
+                  Ast_Element => 'Trenton U'
+                )
+                (
+                  'B.A.'
+                )
+              degree
+                (
+                  Ast_Element => 'Harvard'
+                )
+                (
+                  'Ph.D.'
+                )
+              award
+                (
+                  'Pulitzer'
+                )
+              publication
+                (
+                  'Still in Trenton'
+                )
+              publication
+                (
+                  'Trenton Forever'
+                )
+            )
+          price
+            (
+              Ast_Element => 'Canada'
+              Ast_Element => '0.7'
+            )
+            (
+              '6.50'
+            )
+          excerpt
+            (
+              p
+                (
+                  'It was a dark and stormy night.'
+                )
+              definition_list
+                (
+                  term
+                    (
+                      'Trenton'
+                    )
+                  definition
+                    (
+                      'misery'
+                    )
+                )
+            )
+        )
+      book
+        (
+          Ast_Element => 'leather'
+          Ast_Element => '29.50'
+        )
+        (
+          title
+            (
+              "Who's Who in Trenton"
+            )
+          author
+            (
+              'Robert Bob'
+            )
+        )
+    )
+)

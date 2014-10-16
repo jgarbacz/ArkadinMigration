@@ -1,0 +1,2895 @@
+﻿<?xml version='1.0' encoding='utf-8' ?>
+<xs:schema id='ProcModuleSchema' xmlns:xs='WildcardSchema'>
+  <xs:element name='startup_cluster' type='xs:string'/>
+  <xs:element name='console' type='xs:string'/>
+  <xs:element name='reallocate_slaves' type='reallocate_slaves_type'/>
+  <xs:element name='remove_spawned_object_from_proc' type='xs:string'/>
+  <xs:element name='object_ref_count_get' type='object_ref_count_get_type'/>
+  <xs:element name='object_ref_count_set' type='object_ref_count_get_type'/>
+  <xs:element name='object_ref_get' type='object_ref_get_type'/>
+  <xs:element name='object_ref_remove' type='object_ref_remove_type'/>
+  <xs:element name='delete_object' type='xs:string'/>
+  <xs:element name='cursor_inst_create_eof_if_none' type='xs:string'/>
+  <xs:element name='cursor_inst_id_to_object_id' type='cursor_inst_id_to_object_id_type'/>
+  <xs:element name='cursor_object_id_to_inst_id' type='cursor_object_id_to_inst_id_type'/>
+  <xs:element name='pipeline_select' type='pipeline_select_type'/>
+  <xs:element name='mvm_cluster_set' type='mvm_cluster_set_type'/>
+  <xs:element name='mvm_cluster_get' type='mvm_cluster_get_type'/>
+  <xs:element name='server_credentials_get' type='server_credentials_get_type'/>
+  <xs:element name='server_credentials_set' type='server_credentials_set_type'/>
+
+  <xs:element name='object_delta_table_status' type='object_delta_table_status_type'/>
+  <xs:element name='object_delta_flush_all' type='xs:string'/>
+  <xs:element name='object_delta_clear_originals' type='object_id_type'/>
+
+  <xs:element name='object_delta_add_update_triggered_table' type='object_delta_add_update_triggered_table_type'/>
+  <xs:element name='object_delta_from_table' type='object_id_table_name_type'/>
+  <xs:element name='object_delta_persist' type='object_delta_persist_type'/>
+  <xs:element name='object_delta_persist_audit' type='object_id_type'/>
+  <xs:element name='object_delta_pack_originals' type='object_id_field_type'/>
+  <xs:element name='object_delta_unpack_originals' type='object_id_field_type'/>
+  <xs:element name='object_delta_get_persisted' type='object_delta_get_set_type'/>
+  <xs:element name='object_delta_get_original' type='object_delta_get_set_type'/>
+  <xs:element name='object_delta_set_original' type='object_delta_get_set_type'/>
+  <xs:element name='object_delta_has_changes' type='object_delta_value_type'/>
+  <xs:element name='object_delta_persisted_tables_select' type='object_delta_select_type'/>
+  <xs:element name='object_delta_select' type='object_delta_select_type'/>
+  <xs:element name='object_null_fields' type='object_null_fields_type'/>
+  <xs:element name='object_clear' type='xs:string'/>
+  <xs:element name='write_object_to_file' type='write_object_to_file_type'/>
+  <xs:element name='usage_hook_save_local' type='usage_hook_save_local_type'/>
+  <xs:element name='usage_hook_fetch_local' type='usage_hook_fetch_local_type'/>
+  <xs:element name='usage_hook_fetch_flush' type='usage_hook_fetch_flush_type'/>
+  <xs:element name='usage_hook_create' type='usage_hook_create_type'/>
+  <xs:element name='usage_hook_select' type='usage_hook_select_type'/>
+  <xs:element name='usage_hook_add_object' type='usage_hook_add_object_type'/>
+  <xs:element name='usage_hook_release' type='usage_hook_release_type'/>
+  <xs:element name='setup_buffered_file_system' type='setup_buffered_file_system_type'/>
+  <xs:element name='test_message_speed' type='test_message_speed_type'/>
+  <xs:element name='test_outbox_speed' type='test_message_speed_type'/>
+  <xs:element name='map_reduce' type='map_reduce_type'/>
+  <xs:element name='shutdown_cluster' type='xs:string'/>
+  <xs:element name='slave_node_id_select' type='slave_node_id_select_type'/>
+  <xs:element name='all_node_id_select' type='slave_node_id_select_type'/>
+  <xs:element name='define_mvm_cluster' type='define_mvm_cluster_type'/>
+  <xs:element name='push_index' type='push_index_type'/>
+  <xs:element name='clear_batch' type='xs:string'/>
+  <xs:element name='wait_for_batch_complete' type='xs:string'/>
+  <xs:element name='set_server_mode_on' type='xs:string'/>
+  <xs:element name='set_server_mode_off' type='xs:string'/>
+  <xs:element name='send_remote_results' type='xs:string'/>
+  <xs:element name='remote_queue_proc' type='remote_queue_proc_type'/>
+  <xs:element name='startup_slave_listener' type='startup_slave_listener_type'/>
+  <xs:element name='startup_slaves' type='startup_slaves_type'/>
+  <xs:element name='extract_embedded_resource' type='extract_embedded_resource_type'/>
+  <xs:element name='parallel_process_cursor' type='parallel_process_cursor_type'/>
+  <xs:element name='mvm_socket_select' type='mvm_socket_select_type'/>
+  <xs:element name='goto_label' type='xs:string'/>
+  <xs:element name='label' type='xs:string'/>
+  <xs:element name='join' type='join_type'/>
+  <xs:element name='execute_immediate' type='xs:string'/>
+  <xs:element name='mt_msixdef_select' type='mt_msixdef_select_type'/>
+  <xs:element name='proc_inst_get_params' type='proc_inst_get_params_type'/>
+  <xs:element name='proc_inst_resume' type='xs:string'/>
+  <xs:element name='proc_inst_delete' type='xs:string'/>
+  <xs:element name='proc_inst_is_complete' type='proc_inst_is_complete_type'/>
+  <xs:element name='yield' type='xs:string'/>
+  <xs:element name='switch' type='switch_type'/>
+  <xs:element name='get_stack_trace' type='xs:string'/>
+  <xs:element name='get_proc_name' type='xs:string'/>
+  <xs:element name='get_full_proc_name' type='xs:string'/>
+  <xs:element name='get_proc_namespace' type='xs:string'/>
+  <xs:element name='xl_delete_worksheet' type='xl_specify_worksheet_type'/>
+  <xs:element name='xl_next_row' type='xl_specify_worksheet_type'/>
+  <xs:element name='xl_append_row' type='xl_append_row_type'/>
+  <xs:element name='xl_append_field' type='xl_append_field_type'/>
+  <xs:element name='xl_open_workbook' type='xs:string'/>
+  <xs:element name='xl_close_workbook' type='xs:string'/>
+  <xs:element name='cursor_field_name_select' type='cursor_field_name_select_type'/>
+  <xs:element name='proc_select' type='proc_select_type'/>
+  <xs:element name='pipe_row' type='xs:string'/>
+  <xs:element name='open_pipe_cursor' type='open_pipe_cursor_type'/>
+  <xs:element name='generate_metranet_procs' type='generate_metranet_procs_type'/>
+  <xs:element name='get_exception_info' type='get_exception_info_type'/>
+  <xs:element name='get_exception_name' type='xs:string'/>
+  <xs:element name='get_exception_trace' type='xs:string'/>
+  <xs:element name='get_exception_message' type='xs:string'/>
+  <xs:element name='try' type='try_type'/>
+  <xs:element name='throw' type='throw_type'/>
+  <xs:element name='read_text_file' type='read_text_file_type'/>
+  <xs:element name='mash_id' type='mash_id_type'/>
+  <xs:element name='entity_group' type='entity_group_type'/>
+  <xs:element name='entity_map_type' type='entity_map_type_type'/>
+  <xs:element name='entity' type='entity_type'/>
+  <xs:element name='get_mt_db_info' type='get_mt_db_info_type'/>
+  <xs:element name='compile_dll' type='compile_dll_type'/>
+  <xs:element name='path_head' type='input_output_type'/>
+  <xs:element name='path_tail' type='input_output_type'/>
+  <xs:element name='host_wcf_services' type='host_wcf_services_type' />
+  <xs:element name='shutdown_wcf_host' type='xs:string' />
+  <xs:element name='cursor_order_by' type='cursor_order_by_type' />
+  <xs:element name='cursor_top' type='cursor_top_type' />
+  <xs:element name='cursor_where' type='cursor_where_type' />
+  <xs:element name='cursor_distinct' type='cursor_distinct_type' />
+  <xs:element name='cursor_is_eof' type='cursor_is_eof_type' />
+
+  <xs:element name='c' type='wildcard_type' />
+  <xs:element name='dump_memory' type='xs:string'/>
+  <xs:element name='rename_object_fields' type='rename_object_fields_type'/>
+  <xs:element name='rename_object_field' type='rename_object_field_type'/>
+  <xs:element name='copy_object_field' type='rename_object_field_type'/>
+  <xs:element name='remove_object_field' type='remove_object_field_type'/>
+  <xs:element name='call_dotnet_static_method' type='call_dotnet_static_method_type'/>
+  <xs:element name='regex_replace' type='regex_replace_type'/>
+  <xs:element name='get_object_field' type='get_object_field_type'/>
+  <xs:element name='set_object_field' type='set_object_field_type'/>
+  <xs:element name='sterilize_cursor' type='input_output_type'/>
+  <xs:element name='capitalize' type='input_output_type'/>
+  <xs:element name='uncapitalize' type='input_output_type'/>
+  <xs:element name='system_command_select' type='system_command_select_type'/>
+  <xs:element name='create_directory' type='xs:string'/>
+  <xs:element name='file_delete' type='xs:string'/>
+  <xs:element name='try_file_delete' type='xs:string'/>
+  <xs:element name='file_exists' type='input_output_type'/>
+  <xs:element name='file_info' type='file_info_type'/>
+  <xs:element name='file_substring' type='file_substring_type'/>
+  <xs:element name='file_touch' type='xs:string'/>
+  <xs:element name='file_close' type='xs:string'/>
+  <xs:element name='directory_delete' type='xs:string'/>
+  <xs:element name='directory_exists' type='input_output_type'/>
+  <xs:element name='file_move' type='multi_source_target_type'/>
+  <xs:element name='file_copy' type='multi_source_target_type'/>
+  <xs:element name='get_length' type='input_output_type'/>
+  <xs:element name='path_parent' type='input_output_type'/>
+  <xs:element name='path_basename' type='input_output_type'/>
+  <xs:element name='path_to_absolute' type='input_output_type'/>
+  <xs:element name='match' type='match_type'/>
+  <xs:element name='match_static' type='match_type'/>
+  <xs:element name='validate_field' type='validate_field_type'/>
+  <xs:element name='print_file' type='print_file_type'/>
+  <xs:element name='print_text_to_file' type='print_text_to_file_type'/>
+  <xs:element name='parse' type='parse_type'/>
+  <xs:element name='get_current_directory' type='xs:string'/>
+  <xs:element name='startup' type='proc_type'/>
+  <xs:element name='initialize' type='initialize_type'/>
+  <xs:element name='inherit_object' type='inherit_object_type'/>
+  <xs:element name='db_call_proc' type='db_call_proc_type'/>
+  <xs:element name='db_insert' type='db_insert_type'/>
+  <xs:element name='db_upsert' type='db_upsert_type'/>
+  <xs:element name='db_upsert_dynamic' type='db_upsert_type'/>
+  <xs:element name='db_insert_dynamic' type='db_insert_type'/>
+  <xs:element name='db_bulk_insert' type='db_bulk_insert_type'/>
+  <xs:element name='db_bulk_insert_dynamic' type='db_bulk_insert_type'/>
+  <xs:element name='db_bulk_insert_flush' type='db_bulk_insert_type'/>
+  <xs:element name='db_bulk_insert_flush_all' type='xs:string'/>
+  <xs:element name='db_bulk_insert_abort' type='db_bulk_insert_type'/>
+  <xs:element name='db_bulk_insert_abort_all' type='xs:string'/>
+  <xs:element name='db_execute' type='db_execute_type'/>
+  <xs:element name='db_execute_dynamic' type='db_execute_type'/>
+  <xs:element name='get_date' type='xs:string'/>
+  <xs:element name='parallel' type='proc_type'/>
+  <xs:element name='serial' type='proc_type'/>
+  <xs:element name='multi_thread_cursor' type='multi_thread_cursor_type'/>
+  <xs:element name='counter_select' type='counter_select_type'/>
+  <xs:element name='sleep' type='xs:string'/>
+  <xs:element name='time' type='time_type'/>
+  <xs:element name='time_start' type='time_type'/>
+  <xs:element name='time_end' type='time_type'/>
+  <xs:element name='duplicate' type='duplicate_type'/>
+  <xs:element name='stopwatch' type='stopwatch_type'/>
+  <xs:element name='stopwatch_start' type='stopwatch_start_type'/>
+  <xs:element name='stopwatch_stop' type='stopwatch_stop_type'/>
+  <xs:element name='stopwatch_reset' type='stopwatch_start_type'/>
+  <xs:element name='print' type='xs:string'/>
+  <xs:element name='log' type='log_type'/>
+  <xs:element name='debug' type='log_type'/>
+  <xs:element name='warn' type='log_type'/>
+  <xs:element name='info' type='log_type'/>
+  <xs:element name='fatal' type='log_type'/>
+  <xs:element name='warning' type='log_type'/>
+  <xs:element name='severe' type='log_type'/>
+  <xs:element name='config' type='log_type'/>
+  <xs:element name='fine' type='log_type'/>
+  <xs:element name='finer' type='log_type'/>
+  <xs:element name='finest' type='log_type'/>
+  <xs:element name='glob_select' type='glob_select_type'/>
+  <xs:element name='date_add' type='date_add_type'/>
+  <xs:element name='date_diff' type='date_diff_type'/>
+  <xs:element name='garbage_collect' type='garbage_collect_type'/>
+  <xs:element name='float_add' type='multi_input_output_type'/>
+  <xs:element name='float_divide' type='multi_input_output_type'/>
+  <xs:element name='round' type='round_type'/>
+  <xs:element name='round_currency' type='round_currency_type'/>
+  <xs:element name='replace' type='replace_type'/>
+  <xs:element name='remove_named_class' type='xs:string'/>
+  <xs:element name='trim' type='input_output_type'/>
+  <xs:element name='to_upper' type='input_output_type'/>
+  <xs:element name='to_lower' type='input_output_type'/>
+  <xs:element name='date_convert' type='date_convert_type'/>
+  <xs:element name='date_to_string' type='date_to_string_type'/>
+  <xs:element name='string_to_date' type='string_to_date_type'/>
+  <xs:element name='substring' type='substring_type'/>
+  <xs:element name='file_convert' type='file_convert_type'/>
+  <xs:element name='file_grep' type='file_grep_type'/>
+  <xs:element name='get_file' type='get_file_type'/>
+  <xs:element name='file_sort' type='file_sort_type'/>
+  <xs:element name='get_guid' type='xs:string'/>
+  <xs:element name='get_proc_file_name' type='xs:string'/>
+  <xs:element name='get_mvm_generated_dir' type='get_mvm_generated_dir_type'/>
+  <xs:element name='get_proc_extension_dir' type='xs:string'/>
+  <xs:element name='get_metratech_dir' type='xs:string'/>
+  <xs:element name='get_rmp_bin_dir' type='xs:string'/>
+  <xs:element name='get_machine_name' type='xs:string'/>
+  <xs:element name='get_assembly_uri' type='xs:string'/>
+  <xs:element name='inherit_cursor' type='inherit_cursor_type'/>
+  <xs:element name='inherit_cursor_default' type='inherit_cursor_type'/>
+  <xs:element name='index_clear' type='index_clear_type'/>
+  <xs:element name='index_close' type='index_close_type'/>
+  <xs:element name='index_remove' type='index_remove_type'/>
+  <xs:element name='index_insert' type='index_insert_type'/>
+  <xs:element name='index_insert_if_none' type='index_insert_type'/>
+  <xs:element name='define_memory_index' type='define_memory_index_type'/>
+  <xs:element name='print_table' type='print_table_type'/>
+  <xs:element name='print_table_for_ctrl' type='print_table_for_ctrl_type'/>
+  <!--<xs:element name='run' type='proc_type'/>-->
+  <xs:element name='run_once' type='proc_type'/>
+  <xs:element name='db_query_to_file' type='db_query_to_file_type'/>
+  <xs:element name='db_select_dynamic' type='db_select_type'/>
+  <xs:element name='create_memory_index_from_cursor' type='create_memory_index_from_cursor_type'/>
+  <xs:element name='nested_index_select' type='index_select_type'/>
+  <xs:element name='nested_index_select_keys' type='index_select_keys_type'/>
+  <xs:element name='index_select' type='index_select_type'/>
+  <xs:element name='index_select_keys' type='index_select_keys_type'/>
+  <xs:element name='index_get' type='index_select_type'/>
+  <xs:element name='create_index_on_sorted_file' type='create_index_on_sorted_file_type'/>
+  <xs:element name='get_worker_no' type='xs:string'/>
+  <xs:element name='print_record' type='print_record_type'/>
+  <xs:element name='nothing' type='xs:string'/>
+  <xs:element name='produce' type='produce_type'/>
+  <xs:element name='produce_work' type='produce_type'/>
+  <xs:element name='do' type='xs:string'/>
+  <xs:element name='get_proc_text' type='get_proc_text_type'/>
+  <xs:element name='record_type' type='record_type_type'/>
+  <xs:element name='call_proc' type='xs:string'/>
+  <xs:element name='call_proc_for_object' type='call_proc_type'/>
+  <xs:element name='setup_call_proc_for_object' type='call_proc_type'/>
+  <xs:element name='call_dynamic_proc_for_object' type='call_proc_type'/>
+  <xs:element name='call_proc_for_current_object' type='call_proc_type'/>
+  <xs:element name='setup_call_proc_for_current_object' type='call_proc_type'/>
+  <xs:element name='call_dynamic_proc_for_current_object' type='call_proc_type'/>
+  <xs:element name='call_proc_for_current_object_nested' type='call_proc_type'/>
+  <xs:element name='queue_proc_for_object' type='call_proc_type'/>
+  <xs:element name='queue_proc_for_object_nested' type='call_proc_type'/>
+  <xs:element name='queue_proc_for_current_object' type='call_proc_type'/>
+  <xs:element name='queue_proc_for_current_object_nested' type='call_proc_type'/>
+  <xs:element name='queue_proc_for_current_object_nested_on_stack' type='call_proc_type'/>
+  <xs:element name='call_proc_for_object_nested_no_callback_on_stack' type='call_proc_type'/>
+  <xs:element name='spawn' type='spawn_type'/>
+  <xs:element name='synchronized' type='synchronized_type'/>
+  <xs:element name='sync_start' type='sync_type'/>
+  <xs:element name='sync_end' type='sync_type'/>
+  <xs:element name='while' type='while_type'/>
+  <xs:element name='while2' type='while_type'/>
+  <xs:element name='if' type='if_type'/>
+  <xs:element name='if2' type='if_type'/>
+  <xs:element name='callback' type='xs:string'/>
+  <xs:element name='callback_create_with_scope_pop' type='xs:string'/>
+  <xs:element name='push_before' type='push_before_type'/>
+  <xs:element name='push_after' type='push_before_type'/>
+  <xs:element name='input' type='input_type'/>
+  <xs:element name='output' type='output_type'/>
+  <xs:element name='return' type='xs:string'/>
+  <xs:element name='remove_object_from_cache' type='xs:string'/>
+  <xs:element name='pop_scope' type='xs:string'/>
+  <xs:element name='push_scope' type='xs:string'/>
+  <xs:element name='sorted_object_file_write' type='sorted_object_file_write_type'/>
+  <xs:element name='sorted_object_file_close' type='sorted_object_file_close_type'/>
+  <xs:element name='sorted_object_file_select' type='sorted_object_file_select_type'/>
+  <xs:element name='file_select' type='file_select_type'/>
+  <xs:element name='cursor_next' type='cursor_next_type'/>
+  <xs:element name='cursor_clear' type='cursor_inst_id_object_id_type'/>
+  <xs:element name='load_procs_from_files' type='load_procs_from_files_type'/>
+  <xs:element name='load_procs_from_glob' type='load_procs_from_glob_type'/>
+  <xs:element name='md5' type='md5_type'/>
+  <xs:element name='param' type='param_declare_type'/>
+  <xs:element name='ide_break' type='xs:string'/>
+  <xs:element name='generate_entities' type='generate_entities_type'/>
+  <xs:element name='split' type='split_type'/>
+  <xs:element name='objects_equal' type='objects_equal_type'/>
+  <xs:element name='get_server_data' type='get_server_data_type'/>
+  
+  
+  
+  <xs:group name='modules_group' norecurse='1'>
+    <xs:choice>
+      <xs:element name='remove_spawned_object_from_proc' type='xs:string'/>
+      <xs:element name='delete_object' type='xs:string'/>
+      <xs:element name='reallocate_slaves' type='reallocate_slaves_type'/>
+
+
+      <xs:element name='console' type='xs:string'/>
+      <xs:element name='startup_cluster' type='xs:string'/>
+      <xs:element name='object_ref_count_get' type='object_ref_count_get_type'/>
+      <xs:element name='object_ref_count_set' type='object_ref_count_get_type'/>
+      <xs:element name='object_ref_get' type='object_ref_get_type'/>
+      <xs:element name='object_ref_remove' type='object_ref_remove_type'/>
+
+      <xs:element name='cursor_inst_create_eof_if_none' type='xs:string'/>
+      <xs:element name='cursor_inst_id_to_object_id' type='cursor_inst_id_to_object_id_type'/>
+      <xs:element name='cursor_object_id_to_inst_id' type='cursor_object_id_to_inst_id_type'/>
+      <xs:element name='select' type='pipeline_select_type'/>
+      <xs:element name='union_all_select' type='union_all_select_type'/>
+      <xs:element name='mvm_cluster_set' type='mvm_cluster_set_type'/>
+      <xs:element name='mvm_cluster_get' type='mvm_cluster_get_type'/>
+      <xs:element name='server_credentials_get' type='server_credentials_get_type'/>
+      <xs:element name='server_credentials_set' type='server_credentials_set_type'/>
+
+      <xs:element name='object_delta_clear_originals' type='object_id_type'/>
+      <xs:element name='object_delta_table_status' type='object_delta_table_status_type'/>
+      <xs:element name='object_delta_flush_all' type='xs:string'/>
+      <xs:element name='object_delta_persist' type='object_delta_persist_type'/>
+      <xs:element name='object_delta_persist_audit' type='object_id_type'/>
+      <xs:element name='object_delta_add_update_triggered_table' type='object_delta_add_update_triggered_table_type'/>
+      <xs:element name='object_delta_from_table' type='object_id_table_name_type'/>
+      <xs:element name='object_delta_pack_originals' type='object_id_field_type'/>
+      <xs:element name='object_delta_unpack_originals' type='object_id_field_type'/>
+      <xs:element name='object_delta_get_persisted' type='object_delta_get_set_type'/>
+      <xs:element name='object_delta_get_original' type='object_delta_get_set_type'/>
+      <xs:element name='object_delta_set_original' type='object_delta_get_set_type'/>
+      <xs:element name='object_delta_has_changes' type='object_delta_value_type'/>
+      <xs:element name='object_delta_persisted_tables_select' type='object_delta_select_type'/>
+      <xs:element name='object_delta_select' type='object_delta_select_type'/>
+      <xs:element name='object_null_fields' type='object_null_fields_type'/>
+      <xs:element name='object_clear' type='xs:string'/>
+      <xs:element name='write_object_to_file' type='write_object_to_file_type'/>
+      <xs:element name='usage_hook_fetch_flush' type='usage_hook_fetch_flush_type'/>
+      <xs:element name='usage_hook_fetch_local' type='usage_hook_fetch_local_type'/>
+      <xs:element name='usage_hook_save_local' type='usage_hook_save_local_type'/>
+      <xs:element name='usage_hook_create' type='usage_hook_create_type'/>
+      <xs:element name='usage_hook_select' type='usage_hook_select_type'/>
+      <xs:element name='usage_hook_add_object' type='usage_hook_add_object_type'/>
+      <xs:element name='usage_hook_release' type='usage_hook_release_type'/>
+      <xs:element name='setup_buffered_file_system' type='setup_buffered_file_system_type'/>
+      <xs:element name='test_message_speed' type='test_message_speed_type'/>
+      <xs:element name='test_outbox_speed' type='test_message_speed_type'/>
+      <xs:element name='map_reduce' type='map_reduce_type'/>
+      <xs:element name='shutdown_cluster' type='xs:string'/>
+      <xs:element name='slave_node_id_select' type='slave_node_id_select_type'/>
+      <xs:element name='all_node_id_select' type='slave_node_id_select_type'/>
+      <xs:element name='define_mvm_cluster' type='define_mvm_cluster_type'/>
+      <xs:element name='push_index' type='push_index_type'/>
+      <xs:element name='clear_batch' type='xs:string'/>
+      <xs:element name='wait_for_batch_complete' type='xs:string'/>
+      <xs:element name='set_server_mode_on' type='xs:string'/>
+      <xs:element name='set_server_mode_off' type='xs:string'/>
+      <xs:element name='send_remote_results' type='xs:string'/>
+      <xs:element name='remote_queue_proc' type='remote_queue_proc_type'/>
+      <xs:element name='startup_slave_listener' type='startup_slave_listener_type'/>
+      <xs:element name='startup_slaves' type='startup_slaves_type'/>
+      <xs:element name='extract_embedded_resource' type='extract_embedded_resource_type'/>
+      <xs:element name='parallel_process_cursor' type='parallel_process_cursor_type'/>
+      <xs:element name='mvm_socket_select' type='mvm_socket_select_type'/>
+      <xs:element name='goto_label' type='xs:string'/>
+      <xs:element name='label' type='xs:string'/>
+      <xs:element name='join' type='join_type'/>
+      <xs:element name='execute_immediate' type='xs:string'/>
+      <xs:element name='mt_msixdef_select' type='mt_msixdef_select_type'/>
+      <xs:element name='proc_inst_get_params' type='proc_inst_get_params_type'/>
+      <xs:element name='proc_inst_resume' type='xs:string'/>
+      <xs:element name='proc_inst_delete' type='xs:string'/>
+      <xs:element name='proc_inst_is_complete' type='proc_inst_is_complete_type'/>
+      <xs:element name='yield' type='xs:string'/>
+      <xs:element name='switch' type='switch_type'/>
+      <xs:element name='get_stack_trace' type='xs:string'/>
+      <xs:element name='get_proc_name' type='xs:string'/>
+      <xs:element name='get_full_proc_name' type='xs:string'/>
+      <xs:element name='get_proc_namespace' type='xs:string'/>
+      <xs:element name='xl_delete_worksheet' type='xl_specify_worksheet_type'/>
+      <xs:element name='xl_next_row' type='xl_specify_worksheet_type'/>
+      <xs:element name='xl_append_row' type='xl_append_row_type'/>
+      <xs:element name='xl_append_field' type='xl_append_field_type'/>
+      <xs:element name='xl_open_workbook' type='xs:string'/>
+      <xs:element name='xl_close_workbook' type='xs:string'/>
+      <xs:element name='cursor_field_name_select' type='cursor_field_name_select_type'/>
+      <xs:element name='proc_select' type='proc_select_type'/>
+      <xs:element name='pipe_row' type='xs:string'/>
+      <xs:element name='open_pipe_cursor' type='open_pipe_cursor_type'/>
+      <xs:element name='generate_metranet_procs' type='generate_metranet_procs_type'/>
+      <xs:element name='read_text_file' type='read_text_file_type'/>
+      <xs:element name='get_exception_info' type='get_exception_info_type'/>
+      <xs:element name='get_exception_name' type='xs:string'/>
+      <xs:element name='get_exception_trace' type='xs:string'/>
+      <xs:element name='get_exception_message' type='xs:string'/>
+      <xs:element name='try' type='try_type'/>
+      <xs:element name='throw' type='throw_type'/>
+      <xs:element name='mash_id' type='mash_id_type'/>
+      <xs:element name='entity_group' type='entity_group_type'/>
+      <xs:element name='entity_map_type' type='entity_map_type_type'/>
+      <xs:element name='entity' type='entity_type'/>
+      <xs:element name='get_mt_db_info' type='get_mt_db_info_type'/>
+      <xs:element name='compile_dll' type='compile_dll_type'/>
+      <xs:element name='path_head' type='input_output_type'/>
+      <xs:element name='path_tail' type='input_output_type'/>
+      <xs:element name='host_wcf_services' type='host_wcf_services_type' />
+      <xs:element name='shutdown_wcf_host' type='xs:string' />
+      <xs:element name='cursor_order_by' type='cursor_order_by_type' />
+      <xs:element name='cursor_where' type='cursor_where_type' />
+      <xs:element name='cursor_top' type='cursor_top_type' />
+      <xs:element name='cursor_distinct' type='cursor_distinct_type' />
+      <xs:element name='cursor_is_eof' type='cursor_is_eof_type' />
+
+      <xs:element name='c' type='wildcard_type' />
+      <xs:element name='dump_memory' type='xs:string'/>
+      <xs:element name='rename_object_fields' type='rename_object_fields_type'/>
+      <xs:element name='rename_object_field' type='rename_object_field_type'/>
+      <xs:element name='copy_object_field' type='rename_object_field_type'/>
+      <xs:element name='remove_object_field' type='remove_object_field_type'/>
+      <xs:element name='regex_replace' type='regex_replace_type'/>
+      <xs:element name='call_dotnet_static_method' type='call_dotnet_static_method_type'/>
+      <xs:element name='get_object_field' type='get_object_field_type'/>
+      <xs:element name='set_object_field' type='set_object_field_type'/>
+      <xs:element name='sterilize_cursor' type='input_output_type'/>
+      <xs:element name='capitalize' type='input_output_type'/>
+      <xs:element name='uncapitalize' type='input_output_type'/>
+      <xs:element name='system_command_select' type='system_command_select_type'/>
+      <xs:element name='create_directory' type='xs:string'/>
+      <xs:element name='file_touch' type='xs:string'/>
+      <xs:element name='file_close' type='xs:string'/>
+      <xs:element name='file_exists' type='input_output_type'/>
+      <xs:element name='file_info' type='file_info_type'/>
+      <xs:element name='file_substring' type='file_substring_type'/>
+      <xs:element name='file_delete' type='xs:string'/>
+	  <xs:element name='try_file_delete' type='xs:string'/>
+      <xs:element name='directory_delete' type='xs:string'/>
+      <xs:element name='directory_exists' type='input_output_type'/>
+      <xs:element name='file_move' type='multi_source_target_type'/>
+      <xs:element name='file_copy' type='multi_source_target_type'/>
+      <xs:element name='get_length' type='input_output_type'/>
+      <xs:element name='path_parent' type='input_output_type'/>
+      <xs:element name='path_basename' type='input_output_type'/>
+      <xs:element name='path_to_absolute' type='input_output_type'/>
+      <xs:element name='match' type='match_type'/>
+      <xs:element name='match_static' type='match_type'/>
+      <xs:element name='validate_field' type='validate_field_type'/>
+      <xs:element name='print_file' type='print_file_type'/>
+      <xs:element name='print_text_to_file' type='print_text_to_file_type'/>
+      <xs:element name='parse' type='parse_type'/>
+      <xs:element name='get_current_directory' type='xs:string'/>
+      <xs:element name='startup' type='proc_type'/>
+      <xs:element name='initialize' type='initialize_type'/>
+      <xs:element name='inherit_object' type='inherit_object_type'/>
+      <xs:element name='db_call_proc' type='db_call_proc_type'/>
+      <xs:element name='db_upsert' type='db_upsert_type'/>
+      <xs:element name='db_upsert_dynamic' type='db_upsert_type'/>
+      <xs:element name='db_insert' type='db_insert_type'/>
+      <xs:element name='db_insert_dynamic' type='db_insert_type'/>
+      <xs:element name='db_bulk_insert' type='db_bulk_insert_type'/>
+      <xs:element name='db_bulk_insert_dynamic' type='db_bulk_insert_type'/>
+      <xs:element name='db_bulk_insert_flush' type='db_bulk_insert_type'/>
+      <xs:element name='db_bulk_insert_flush_all' type='xs:string'/>
+      <xs:element name='db_bulk_insert_abort' type='db_bulk_insert_type'/>
+      <xs:element name='db_bulk_insert_abort_all' type='xs:string'/>
+      <xs:element name='db_execute' type='db_execute_type'/>
+      <xs:element name='db_execute_dynamic' type='db_execute_type'/>
+      <xs:element name='get_date' type='xs:string'/>
+      <xs:element name='serial' type='proc_type'/>
+      <xs:element name='parallel' type='proc_type'/>
+      <xs:element name='multi_thread_cursor' type='multi_thread_cursor_type'/>
+      <xs:element name='counter_select' type='counter_select_type'/>
+      <xs:element name='sleep' type='xs:string'/>
+      <xs:element name='time' type='time_type'/>
+      <xs:element name='time_start' type='time_type'/>
+      <xs:element name='time_end' type='time_type'/>
+      <xs:element name='duplicate' type='duplicate_type'/>
+      <xs:element name='stopwatch' type='stopwatch_type'/>
+      <xs:element name='stopwatch_start' type='stopwatch_start_type'/>
+      <xs:element name='stopwatch_stop' type='stopwatch_stop_type'/>
+      <xs:element name='stopwatch_reset' type='stopwatch_start_type'/>
+      <xs:element name='print' type='xs:string'/>
+      <xs:element name='log' type='log_type'/>
+      <xs:element name='debug' type='log_type'/>
+      <xs:element name='warn' type='log_type'/>
+      <xs:element name='info' type='log_type'/>
+      <xs:element name='fatal' type='xs:string'/>
+      <xs:element name='warning' type='log_type'/>
+      <xs:element name='severe' type='log_type'/>
+      <xs:element name='config' type='log_type'/>
+      <xs:element name='fine' type='log_type'/>
+      <xs:element name='finer' type='log_type'/>
+      <xs:element name='finest' type='log_type'/>
+      <xs:element name='glob_select' type='glob_select_type'/>
+      <xs:element name='date_add' type='date_add_type'/>
+      <xs:element name='date_diff' type='date_diff_type'/>
+      <xs:element name='garbage_collect' type='garbage_collect_type'/>
+      <xs:element name='float_add' type='multi_input_output_type'/>
+      <xs:element name='float_divide' type='multi_input_output_type'/>
+      <xs:element name='round' type='round_type'/>
+      <xs:element name='round_currency' type='round_currency_type'/>
+      <xs:element name='replace' type='replace_type'/>
+      <xs:element name='remove_named_class' type='xs:string'/>
+      <xs:element name='trim' type='input_output_type'/>
+      <xs:element name='to_upper' type='input_output_type'/>
+      <xs:element name='to_lower' type='input_output_type'/>
+      <xs:element name='date_convert' type='date_convert_type'/>
+      <xs:element name='date_to_string' type='date_to_string_type'/>
+      <xs:element name='string_to_date' type='string_to_date_type'/>
+      <xs:element name='substring' type='substring_type'/>
+      <xs:element name='file_convert' type='file_convert_type'/>
+      <xs:element name='file_grep' type='file_grep_type'/>
+      <xs:element name='get_file' type='get_file_type'/>
+      <xs:element name='file_sort' type='file_sort_type'/>
+      <xs:element name='get_guid' type='xs:string'/>
+      <xs:element name='get_proc_file_name' type='xs:string'/>
+      <xs:element name='get_mvm_generated_dir' type='get_mvm_generated_dir_type'/>
+      <xs:element name='get_proc_extension_dir' type='xs:string'/>
+      <xs:element name='get_metratech_dir' type='xs:string'/>
+      <xs:element name='get_rmp_bin_dir' type='xs:string'/>
+      <xs:element name='get_machine_name' type='xs:string'/>
+      <xs:element name='get_assembly_uri' type='xs:string'/>
+      <xs:element name='inherit_cursor' type='inherit_cursor_type'/>
+      <xs:element name='inherit_cursor_default' type='inherit_cursor_type'/>
+      <xs:element name='index_clear' type='index_clear_type'/>
+      <xs:element name='index_close' type='index_close_type'/>
+      <xs:element name='index_remove' type='index_remove_type'/>
+      <xs:element name='index_insert' type='index_insert_type'/>
+      <xs:element name='index_insert_if_none' type='index_insert_type'/>
+      <xs:element name='define_memory_index' type='define_memory_index_type'/>
+      <xs:element name='print_table' type='print_table_type'/>
+      <xs:element name='print_table_for_ctrl' type='print_table_for_ctrl_type'/>
+      <!--<xs:element name='run' type='proc_type'/>-->
+      <xs:element name='run_once' type='proc_type'/>
+      <xs:element name='db_query_to_file' type='db_query_to_file_type'/>
+      <xs:element name='db_select_dynamic' type='db_select_type'/>
+      <xs:element name='create_memory_index_from_cursor' type='create_memory_index_from_cursor_type'/>
+      <xs:element name='nested_index_select' type='index_select_type'/>
+      <xs:element name='nested_index_select_keys' type='index_select_keys_type'/>
+      <xs:element name='index_select' type='index_select_type'/>
+      <xs:element name='index_select_keys' type='index_select_keys_type'/>
+      <xs:element name='index_get' type='index_select_type'/>
+      <xs:element name='create_index_on_sorted_file' type='create_index_on_sorted_file_type'/>
+      <xs:element name='get_worker_no' type='xs:string'/>
+      <xs:element name='print_record' type='print_record_type'/>
+      <xs:element name='nothing' type='xs:string'/>
+      <xs:element name='produce' type='produce_type'/>
+      <xs:element name='produce_work' type='produce_type'/>
+      <xs:element name='do' type='xs:string'/>
+      <xs:element name='get_proc_text' type='get_proc_text_type'/>
+      <xs:element name='record_type' type='record_type_type'/>
+      <xs:element name='call_proc' type='xs:string'/>
+      <xs:element name='call_proc_for_object' type='call_proc_type'/>
+      <xs:element name='setup_call_proc_for_object' type='call_proc_type'/>
+      <xs:element name='call_dynamic_proc_for_object' type='call_proc_type'/>
+      <xs:element name='call_proc_for_current_object' type='call_proc_type'/>
+      <xs:element name='setup_call_proc_for_current_object' type='call_proc_type'/>
+      <xs:element name='call_dynamic_proc_for_current_object' type='call_proc_type'/>
+      <xs:element name='call_proc_for_current_object_nested' type='call_proc_type'/>
+      <xs:element name='queue_proc_for_object' type='call_proc_type'/>
+      <xs:element name='queue_proc_for_object_nested' type='call_proc_type'/>
+      <xs:element name='queue_proc_for_current_object' type='call_proc_type'/>
+      <xs:element name='queue_proc_for_current_object_nested' type='call_proc_type'/>
+      <xs:element name='queue_proc_for_current_object_nested_on_stack' type='call_proc_type'/>
+      <xs:element name='call_proc_for_object_nested_no_callback_on_stack' type='call_proc_type'/>
+      <xs:element name='spawn' type='spawn_type'/>
+      <xs:element name='synchronized' type='synchronized_type'/>
+      <xs:element name='sync_start' type='sync_type'/>
+      <xs:element name='sync_end' type='sync_type'/>
+      <xs:element name='while' type='while_type'/>
+      <xs:element name='while2' type='while_type'/>
+      <xs:element name='if' type='if_type'/>
+      <xs:element name='if2' type='if_type'/>
+      <xs:element name='callback' type='xs:string'/>
+      <xs:element name='callback_create_with_scope_pop' type='xs:string'/>
+      <xs:element name='push_before' type='push_before_type'/>
+      <xs:element name='push_after' type='push_before_type'/>
+      <xs:element name='input' type='input_type'/>
+      <xs:element name='output' type='output_type'/>
+      <xs:element name='return' type='xs:string'/>
+      <xs:element name='remove_object_from_cache' type='xs:string'/>
+      <xs:element name='pop_scope' type='xs:string'/>
+      <xs:element name='push_scope' type='xs:string'/>
+      <xs:element name='sorted_object_file_write' type='sorted_object_file_write_type'/>
+      <xs:element name='sorted_object_file_close' type='sorted_object_file_close_type'/>
+      <xs:element name='sorted_object_file_select' type='sorted_object_file_select_type'/>
+      <xs:element name='file_select' type='file_select_type'/>
+      <xs:element name='cursor_next' type='cursor_next_type'/>
+      <xs:element name='cursor_clear' type='cursor_inst_id_object_id_type'/>
+      <xs:element name='load_procs_from_files' type='load_procs_from_files_type'/>
+      <xs:element name='load_procs_from_glob' type='load_procs_from_glob_type'/>
+      <xs:element name='md5' type='md5_type'/>
+      <xs:element name='param' type='param_declare_type'/>
+      <xs:element name='ide_break' type='xs:string'/>
+      <xs:element name='generate_entities' type='generate_entities_type'/>
+      <xs:element name='split' type='split_type'/>
+      <xs:element name='objects_equal' type='objects_equal_type'/>
+	  <xs:element name='get_server_data' type='get_server_data_type'/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:complexType name='proc_type' norecurse='1'>
+    <xs:group ref='modules_group' minOccurs='0' maxOccurs='unbounded'/>
+    <xs:attribute name='work_type' use='optional'>
+      <xs:simpleType>
+        <xs:restriction base='xs:string'>
+          <xs:enumeration value='finally'/>
+          <xs:enumeration value='catch'/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name='is_entry' use='optional' type='xs:boolean'></xs:attribute>
+    <xs:attribute name='test' use='optional' type='xs:boolean'></xs:attribute>
+  </xs:complexType>
+
+
+
+  <xs:complexType name='mvm_cluster_set_type'>
+    <xs:sequence>
+      <xs:element name='login_object' type='xs:string'/>
+      <xs:element name='mvm_cluster_name' type='xs:string'/>
+      <xs:element name='node' minOccurs='1' maxOccurs='unbounded'>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='server' type='xs:string'/>
+            <xs:element name='num_instances' type='xs:string'/>
+            <xs:element name='group_id' type='xs:string' minOccurs='0'/>
+            <xs:element name='user' type='xs:string' minOccurs='0'/>
+            <xs:element name='password' type='xs:string' minOccurs='0'/>
+            <xs:element name='port_start' type='xs:string' minOccurs='0'/>
+            <xs:element name='port_end' type='xs:string' minOccurs='0'/>
+            <xs:element name='bin' type='xs:string' minOccurs='0'/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='reallocate_slaves_type'>
+    <xs:sequence>
+      <xs:element name='to_node_id' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='object_ref_count_get_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string'/>
+      <xs:element name='ref_count' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='object_ref_remove_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string'/>
+      <xs:element name='ref_count' type='xs:string' minOccurs='0'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='object_ref_get_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string'/>
+      <xs:element name='target' type='xs:string'/>
+      <xs:element name='ref_count' type='xs:string' minOccurs='0'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='mvm_cluster_get_type'>
+    <xs:sequence>
+      <xs:element name='login_object' type='xs:string'/>
+      <xs:element name='mvm_cluster_name' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='server_credentials_set_type'>
+    <xs:sequence>
+      <xs:element name='login_object' type='xs:string'/>
+      <xs:element name='server' type='xs:string'/>
+      <xs:element name='username' type='xs:string'/>
+      <xs:element name='password' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='server_credentials_get_type'>
+    <xs:sequence>
+      <xs:element name='login_object' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='bfs_flush_file_type'>
+    <xs:sequence>
+      <xs:element name='file' type='xs:string' datatype='string' mode='in' description='name of the file'/>
+      <xs:element name='result' type='xs:string' datatype='boolean' mode='out' values='0:could not delete file,1:file deleted successfully'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='usage_hook_release_type'>
+    <xs:sequence>
+      <xs:element name='hook_id' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='usage_hook_fetch_flush_type'>
+    <xs:sequence>
+      <xs:element name='hook_id' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='usage_hook_add_object_type'>
+    <xs:sequence>
+      <xs:element name='hook_id' type='xs:string'/>
+      <xs:element name='object_id' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+
+
+  <xs:complexType name='usage_hook_select_type'>
+    <xs:sequence>
+      <xs:element name='hook_id' type='xs:string'/>
+      <xs:element name='read_only' type='xs:string' minOccurs='0'/>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='usage_hook_fetch_local_type'>
+    <xs:sequence>
+      <xs:element name='hook_id' type='xs:string'/>
+      <xs:element name='id_acc' type='xs:string' minOccurs='1'/>
+      <xs:element name='node_id' type='xs:string' minOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name='usage_hook_save_local_type'>
+    <xs:sequence>
+      <xs:element name='hook_id' type='xs:string' minOccurs='1'/>
+      <xs:element name='object_id' type='xs:string' minOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='usage_hook_create_type'>
+    <xs:sequence>
+      <xs:element name='hook_id' type='xs:string'/>
+      <xs:element name='sort_field' type='xs:string'/>
+      <xs:element name='id_acc_count' type='xs:string'/>
+      <xs:element name='max_open_files' type='xs:string'/>
+      <xs:element name='max_sort_objects' type='xs:string'/>
+      <xs:element name='usage_tables_dir' type='xs:string'/>
+      <xs:element name='usage_join_dir' type='xs:string'/>
+      <xs:element name='usage_cursor_1_dir' type='xs:string'/>
+      <xs:element name='usage_cursor_2_dir' type='xs:string'/>
+      <xs:element name='usage_partitioning_dir' type='xs:string'/>
+      <xs:element name='usage_streaming_dir' type='xs:string'/>
+      <xs:element name='usage_released_dir' type='xs:string'/>
+      <xs:element name='usage_persisted_dir' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='object_null_fields_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string'/>
+      <xs:element name='exclude' type='xs:string' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='write_object_to_file_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string'/>
+      <xs:element name='file' type='xs:string'/>
+      <xs:element name='is_temporary' type='xs:string' minOccurs='0'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='setup_buffered_file_system_type'>
+    <xs:sequence>
+      <xs:element name='max_files' type='xs:string'/>
+      <xs:element name='write_buffer_start_bytes' type='xs:string'/>
+      <xs:element name='write_buffer_increment_bytes' type='xs:string'/>
+      <xs:element name='write_buffer_max_bytes' type='xs:string'/>
+      <xs:element name='read_buffer_bytes' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='startup_slave_listener_type'>
+    <xs:sequence>
+      <xs:element name='master_port' type='xs:string'/>
+      <!--<xs:element name='master_id' type='xs:string'/>-->
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='test_message_speed_type'>
+    <xs:sequence>
+      <xs:element name='round_trips' type='xs:string'/>
+      <xs:element name='node_id' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='startup_slaves_type'>
+    <xs:sequence>
+      <!--<xs:element name='master_id' type='xs:string'/>-->
+      <xs:element name='slave_count' type='xs:string'/>
+      <xs:element name='num_started' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='map_reduce_type'>
+    <xs:sequence>
+      <xs:element name='producer_queue_length' type='xs:string'/>
+      <xs:element name='producer_proc'>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='name' type='xs:string'/>
+            <xs:element name='param' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='consumer_proc'>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='name' type='xs:string'/>
+            <xs:element name='include_object_fields_in_output' type='xs:string' minOccurs='0'/>
+            <xs:element name='param' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='reducer_proc'>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='name' type='xs:string'/>
+            <xs:element name='param' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='remote_queue_proc_type'>
+    <xs:sequence>
+      <xs:element name='name' type='xs:string'/>
+      <xs:element name='process_id' type='xs:string'/>
+      <xs:element name='batch_id' type='xs:string'/>
+      <xs:choice minOccurs='0'>
+        <xs:element name='new_remote_object_type' type ='xs:string'/>
+        <xs:element name='object_id' type ='xs:string'/>
+      </xs:choice>
+      <xs:element name='include_object_fields_in_output' type='xs:string' minOccurs='0'/>
+      <xs:element name='param' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='push_index_type'>
+    <xs:sequence>
+      <xs:element name='process_id' type='xs:string'/>
+      <xs:element name='clear_source' type='xs:string' minOccurs='0'/>
+      <xs:element name='source'>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='index' type='xs:string'/>
+            <xs:element name='field' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='target'>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='index' type='xs:string'/>
+            <xs:element name='local_name' type='xs:string' minOccurs='0'/>
+            <xs:element name='field' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='extract_embedded_resource_type'>
+    <xs:sequence>
+      <xs:element name='assembly_name' type='xs:string' minOccurs='0'/>
+      <xs:element name='resource_name' type='xs:string'/>
+      <xs:element name='file_name' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='join_type'>
+    <xs:sequence>
+      <xs:element name='delim' type='xs:string' minOccurs='0'/>
+      <xs:element name='input' type='xs:string' maxOccurs='unbounded'/>
+      <xs:element name='output' type='xs:string'/>
+      <xs:element name='output_length' type='xs:string' minOccurs='0'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='cursor_is_eof_type'>
+    <xs:sequence>
+      <xs:choice>
+        <xs:element name='cursor_inst_id' type='xs:string'/>
+        <xs:element name='cursor' type='xs:string'/>
+      </xs:choice>
+      <xs:element name='is_eof' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='cursor_next_type' mixed='true'>
+    <xs:sequence minOccurs='0'>
+      <xs:element name='cursor_inst_id' type='xs:string' minOccurs='0'/>
+      <xs:element name='cursor' type='xs:string' minOccurs='0'/>
+      <xs:element name='is_eof' type='xs:string' minOccurs='0'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='cursor_inst_id_object_id_type' mixed='true'>
+    <xs:sequence minOccurs='0'>
+      <xs:element name='cursor_inst_id' type='xs:string' minOccurs='0'/>
+      <xs:element name='cursor' type='xs:string' minOccurs='0'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='open_pipe_cursor_type'>
+    <xs:sequence>
+      <xs:element name='proc_inst_id' type='xs:string'/>
+      <xs:element name='cursor_inst_id' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='cursor_inst_id_to_object_id_type'>
+    <xs:sequence>
+      <xs:element name='cursor_inst_id' type='xs:string'/>
+      <xs:element name='cursor' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='cursor_object_id_to_inst_id_type'>
+    <xs:sequence>
+      <xs:element name='cursor' type='xs:string'/>
+      <xs:element name='cursor_inst_id' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+
+  <xs:complexType name='proc_inst_get_params_type'>
+    <xs:sequence>
+      <xs:element name='proc_inst_id' type='xs:string'/>
+      <xs:element name='param' type='named_field_type' minOccurs='1' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='proc_inst_is_complete_type'>
+    <xs:sequence>
+      <xs:element name='proc_inst_id' type='xs:string'/>
+      <xs:element name='is_complete' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='xl_specify_worksheet_type'>
+    <xs:sequence>
+      <xs:element name='workbook' type='xs:string'/>
+      <xs:element name='worksheet' type='xs:string'/>
+      <!--<xs:element name='success' type='xs:string' minOccurs='0'/>-->
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='xl_append_field_type'>
+    <xs:sequence>
+      <xs:element name='workbook' type='xs:string'/>
+      <xs:element name='worksheet' type='xs:string'/>
+      <xs:element name='field' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='xl_append_row_type'>
+    <xs:sequence>
+      <xs:element name='workbook' type='xs:string'/>
+      <xs:element name='worksheet' type='xs:string'/>
+      <xs:element name='cursor' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='get_exception_info_type'>
+    <xs:sequence>
+      <xs:element name='catch_name' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='exception_name' type='xs:string'/>
+      <xs:element name='exception_message' type='xs:string'/>
+      <xs:element name='exception_trace' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='object_delta_persist_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='packed_originals_field_name' type='xs:string' minOccurs='0'/>
+      <xs:element name='audit_table_name' type='xs:string' minOccurs='0'/>
+      <xs:element name='modified_date_field' type='xs:string' minOccurs='0'/>
+      <xs:element name='modified_date_value' type='xs:string' minOccurs='0'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='object_id_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='object_id_field_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='field' type='xs:string' minOccurs='1' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='object_delta_add_update_triggered_table_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='update_table_name' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='update_field_name' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='insert_table_name' type='xs:string' minOccurs='1' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='object_id_table_name_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='table_name' type='xs:string' minOccurs='1' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='object_delta_table_status_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string' minOccurs='0'/>
+      <xs:element name='table_name' type='xs:string'/>
+      <xs:element name='is_inserted' type='xs:string'/>
+      <xs:element name='is_updated' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='object_delta_get_set_type'>
+    <xs:sequence>
+      <xs:choice>
+        <xs:sequence>
+          <xs:element name='object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+          <xs:element name='field_name' type='xs:string' minOccurs='1' maxOccurs='1'/>
+        </xs:sequence>
+        <xs:element name='field' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      </xs:choice>
+      <xs:element name='value' type='xs:string' minOccurs='1' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='object_delta_value_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='value' type='xs:string' minOccurs='1' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='object_delta_select_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='mt_msixdef_select_type'>
+    <xs:sequence>
+      <xs:element name='file' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='mvm_socket_select_type'>
+    <xs:sequence>
+      <xs:element name='server' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='port' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='proc_select_type'>
+    <xs:sequence>
+      <xs:element name='name' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='object_type' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='callback_proc_name' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='callback_object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='param' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='cursor_field_name_select_type'>
+    <xs:sequence>
+      <xs:element name='input_cursor' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='generate_metranet_procs_type'>
+    <xs:sequence>
+      <xs:element name='rmp_dir' type='xs:string' minOccurs='1'/>
+      <xs:element name='generate_dir' type='xs:string' minOccurs='1'/>
+      <xs:group ref='db_info_group'/>
+      <xs:element name='account_views' minOccurs='0'>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name='av_override' minOccurs='0' maxOccurs='unbounded'>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name='case' minOccurs='0' maxOccurs='unbounded'>
+                    <xs:complexType>
+                      <xs:simpleContent>
+                        <xs:extension base='xs:string'>
+                          <xs:attribute name='enum_value' type='xs:string' use='required'/>
+                          <xs:attribute name='prefix' type='xs:string' use='required'/>
+                        </xs:extension>
+                      </xs:simpleContent>
+                    </xs:complexType>
+                  </xs:element>
+                </xs:sequence>
+                <xs:attribute name='view_name' type='xs:string' use='required'/>
+                <xs:attribute name='enum_name' type='xs:string' use='required'/>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name='av_printing' minOccurs='0'>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name='proc_name' minOccurs='1'/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name='av_enum_mapping' minOccurs='0'>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name='proc_name' minOccurs='1'/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name='av_defaults' minOccurs='0'>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name='proc_name' minOccurs='1'/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name='pt_printing' minOccurs='0'>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name='proc_name' minOccurs='1'/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name='pt_enum_mapping' minOccurs='0'>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name='proc_name' minOccurs='1'/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name='pt_defaults' minOccurs='0'>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name='proc_name' minOccurs='1'/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name='svc_printing' minOccurs='0'>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name='proc_name' minOccurs='1'/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name='svc_enum_mapping' minOccurs='0'>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name='proc_name' minOccurs='1'/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name='svc_defaults' minOccurs='0'>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name='proc_name' minOccurs='1'/>
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='get_mvm_generated_dir_type'>
+    <xs:sequence>
+      <xs:element name='namespace' type='xs:string' minOccurs='0'/>
+      <xs:element name='label' type='xs:string' minOccurs='1'/>
+      <xs:element name='directory' type='xs:string' minOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='entity_group_type'>
+    <xs:sequence>
+      <xs:element name='name' type='xs:string'/>
+      <xs:element name='parent' minOccurs='0'>
+        <xs:complexType>
+          <xs:group ref='relative_map_group' minOccurs='0' maxOccurs='unbounded'/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='self' minOccurs='0'>
+        <xs:complexType>
+          <xs:group ref='relative_map_group' minOccurs='0' maxOccurs='unbounded'/>
+        </xs:complexType>
+      </xs:element>
+      <xs:choice minOccurs='0' maxOccurs='unbounded'>
+        <xs:element name='result_operation' type='operation_type'/>
+        <xs:element name='result_operation_before' type='operation_type'/>
+        <xs:element name='result_operation_after' type='operation_type'/>
+        <xs:element name='input_operation' type='operation_type'/>
+        <xs:element name='input_operation_before' type='operation_type'/>
+        <xs:element name='input_operation_after' type='operation_type'/>
+        <xs:element name='operation' type='operation_type'/>
+        <xs:element name='operation_before' type='operation_type'/>
+        <xs:element name='operation_after' type='operation_type'/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='entity_map_type_type'>
+    <xs:sequence>
+      <xs:element name='name' type='xs:string'/>
+      <xs:element name='action' minOccurs='1' maxOccurs='unbounded'>
+        <xs:complexType>
+          <xs:choice minOccurs='0' maxOccurs='unbounded'>
+            <xs:element name='operation' type='valid_operations'/>
+            <xs:element name='direction' type='valid_directions'/>
+            <xs:element name='when' type='valid_when'/>
+          </xs:choice>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name='valid_operations' >
+    <xs:restriction base='xs:string'>
+      <xs:enumeration value='get'/>
+      <xs:enumeration value='put'/>
+      <xs:enumeration value='metadata'/>
+      <xs:enumeration value='all'/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name='valid_directions' >
+    <xs:restriction base='xs:string'>
+      <xs:enumeration value='up'/>
+      <xs:enumeration value='down'/>
+      <xs:enumeration value='all'/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name='valid_when' >
+    <xs:restriction base='xs:string'>
+      <xs:enumeration value='before'/>
+      <xs:enumeration value='after'/>
+      <xs:enumeration value='all'/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name='valid_severity' >
+    <xs:restriction base='xs:string'>
+      <xs:enumeration value='warn'/>
+      <xs:enumeration value='error'/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name='entity_type'>
+    <xs:sequence>
+      <xs:element name='name' type='xs:string'/>
+      <xs:element name='entity_group' type='xs:string' minOccurs='0'/>
+      <xs:element name='parent' minOccurs='0'>
+        <xs:complexType>
+          <xs:group ref='map_group' minOccurs='0' maxOccurs='unbounded'/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='self' minOccurs='0'>
+        <xs:complexType>
+          <xs:group ref='map_group' minOccurs='0' maxOccurs='unbounded'/>
+        </xs:complexType>
+      </xs:element>
+      <xs:choice minOccurs='0' maxOccurs='unbounded'>
+        <xs:element name='operation' type='operation_type'/>
+        <xs:element name='input_operation' type='operation_type'/>
+        <xs:element name='result_operation' type='operation_type'/>
+        <xs:element name='child' type='child_entity_type'/>
+        <xs:element name='child_from_index' type='xs:string'/>
+        <xs:element name='input_child' type='child_entity_type'/>
+        <xs:element name='result_child' type='child_entity_type'/>
+        <xs:element name='validate' type='validate_type'/>
+        <xs:element name='print' type='xs:string'/>
+        <xs:element name='grid' type='entity_grid_type'/>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name='is_public' type='xs:boolean' use='optional'/>
+  </xs:complexType>
+
+  <xs:group name='map_group'>
+    <xs:choice>
+      <xs:element name='map' type='map_type'/>
+      <xs:element name='map_down' type='map_type'/>
+      <xs:element name='map_up' type='map_type'/>
+      <xs:element name='print' type='xs:string'/>
+      <xs:element name='print_up' type='xs:string'/>
+      <xs:element name='print_down' type='xs:string'/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:group name='relative_map_group'>
+    <xs:choice>
+      <xs:group ref='map_group' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:element name='map_before' type='map_type'/>
+      <xs:element name='map_after' type='map_type'/>
+      <xs:element name='map_down_before' type='map_type'/>
+      <xs:element name='map_down_after' type='map_type'/>
+      <xs:element name='map_up_before' type='map_type'/>
+      <xs:element name='map_up_after' type='map_type'/>
+      <xs:element name='print_before' type='xs:string'/>
+      <xs:element name='print_after' type='xs:string'/>
+      <xs:element name='print_down_before' type='xs:string'/>
+      <xs:element name='print_down_after' type='xs:string'/>
+      <xs:element name='print_up_before' type='xs:string'/>
+      <xs:element name='print_up_after' type='xs:string'/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:complexType name='entity_grid_type'>
+    <xs:sequence>
+      <xs:choice minOccurs='0' maxOccurs='unbounded'>
+        <xs:element name='grid_key_fields_proc' type='xs:string' minOccurs='0'/>
+        <xs:element name='grid_key_field_values'>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name='fields'/>
+              <xs:element name='values' maxOccurs='unbounded'/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+      <xs:element name='child' type='child_entity_type' maxOccurs='unbounded'/>
+    </xs:sequence>
+    <xs:attribute name='name' type='xs:string'/>
+  </xs:complexType>
+
+  <xs:complexType name='child_entity_type' mixed='true'>
+    <xs:sequence>
+      <xs:element name='name' type='xs:string' minOccurs='0'/>
+      <xs:element name='inherit' type='xs:string' minOccurs='0'/>
+      <xs:group ref='relative_map_group' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+    <xs:attribute name='field_label' type='xs:string' use='optional'></xs:attribute>
+    <xs:attribute name='group' type='xs:string' use='optional'></xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name='operation_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='name' type='xs:string' use='optional'/>
+        <xs:attribute name='get' type='xs:boolean' use='optional'/>
+        <xs:attribute name='put' type='xs:boolean' use='optional'/>
+        <xs:attribute name='metadata' type='xs:boolean' use='optional'/>
+        <xs:attribute name='top_level' type='xs:boolean' use='optional'/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name='map_type' mixed='true'>
+    <xs:sequence minOccurs='0' maxOccurs='1'>
+      <xs:element name='get' type='xs:string'/>
+      <xs:element name='put' type='xs:string'/>
+    </xs:sequence>
+    <xs:attribute name='type' type='xs:string' use='optional'/>
+  </xs:complexType>
+
+  <xs:complexType name='validate_type'>
+    <xs:sequence>
+      <xs:choice>
+        <xs:element name='input_field' type='validate_input_field_type' minOccurs='0' maxOccurs='unbounded'/>
+        <xs:element name='input_group' type='validate_input_group_type' minOccurs='0' maxOccurs='unbounded'/>
+      </xs:choice>
+      <xs:element name='error_condition' type='xs:string'/>
+      <xs:element name='error_message' type='xs:string'/>
+      <xs:element name='error_field' type='xs:string'/>
+    </xs:sequence>
+    <xs:attribute name='type' type='xs:string' use='optional'/>
+    <xs:attribute name='severity' type='valid_severity' use='optional'/>
+  </xs:complexType>
+
+  <xs:complexType name='validate_input_group_type'>
+    <xs:sequence>
+      <xs:element name='input_field' type='validate_input_field_type' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='validate_input_field_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='name' type='xs:string' use='required'/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name='get_mt_db_info_type'>
+    <xs:sequence>
+      <xs:element name='server_type' type='xs:string' minOccurs='0'/>
+      <xs:element name='database_type' type='xs:string'/>
+      <xs:element name='database_server' type='xs:string'/>
+      <xs:element name='database_name' type='xs:string'/>
+      <xs:element name='database_user' type='xs:string'/>
+      <xs:element name='database_password' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='compile_dll_type'>
+    <xs:sequence>
+      <xs:element name='source_glob' type='xs:string' minOccurs='1' maxOccurs='unbounded'/>
+      <xs:element name='assembly' type='xs:string'/>
+      <xs:element name='reference' type='xs:string' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:element name='compiler_options' type='xs:string'/>
+      <xs:element name='success' type='xs:string'/>
+      <xs:element name='compiler_output' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='host_wcf_services_type'>
+    <xs:sequence>
+      <xs:element name='proc_name' type='xs:string' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:element name='generate_dir' type='xs:string'/>
+      <xs:element name='host_name' type='xs:string'/>
+      <xs:element name='base_address' type='xs:string'/>
+      <xs:element name='end_point' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='cursor_where_type'>
+    <xs:sequence>
+      <xs:element name='cursor_inst_id' type='xs:string'/>
+      <xs:element name='where' type='xs:string' minOccurs='1' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='cursor_top_type'>
+    <xs:sequence>
+      <xs:element name='cursor_inst_id' type='xs:string'/>
+      <xs:element name='top' type='xs:string' minOccurs='1' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='cursor_order_by_type'>
+    <xs:sequence>
+      <xs:element name='cursor_inst_id' type='xs:string'/>
+      <xs:element name='order_by' type='order_by_type' minOccurs='1' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='cursor_distinct_type'>
+    <xs:sequence>
+      <xs:element name='cursor_inst_id' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='wildcard_type' mixed='true'>
+    <xs:sequence>
+      <xs:any minOccurs='0' maxOccurs='unbounded' processContents='skip'></xs:any>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='objects_equal_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string' minOccurs='2' maxOccurs='unbounded'/>
+      <xs:element name='view_object_id' type='xs:string' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:element name='field' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:element name='exclude_view_object_id' type='xs:string' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:element name='exclude_field' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:element name='result' type='xs:string' minOccurs='1' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+	
+  <xs:complexType name='get_server_data_type'>
+	  <xs:sequence>
+		<xs:element name='memory' type='xs:string' minOccurs='1' maxOccurs='1'/>
+		<xs:element name='index' type='xs:string' minOccurs='1' maxOccurs='1'/>
+		<xs:element name='buffers' type='xs:string' minOccurs='1' maxOccurs='1'/>
+		<xs:element name='objects' type='xs:string' minOccurs='1' maxOccurs='1'/>
+		<xs:element name='output' type='xs:string'/>
+	  </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='split_type'>
+    <xs:sequence>
+      <xs:element name='source' type='xs:string'/>
+      <xs:element name='delimiter' type='xs:string'/>
+      <xs:element name='limit' type='xs:string' minOccurs='0'/>
+      <xs:element name='target' type='xs:string' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='generate_entities_type'>
+    <xs:sequence>
+      <xs:element name='entities_glob' type='xs:string' minOccurs='0'/>
+      <xs:element name='generate_dir' type='xs:string' minOccurs='0'/>
+      <xs:element name='generate_domain_model_dir' type='xs:string' minOccurs='0'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='throw_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='name' use='optional'/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name='try_type'>
+    <xs:sequence>
+      <xs:element name='config' type='proc_type'/>
+      <xs:element name='catch' minOccurs='0' maxOccurs='unbounded'>
+        <xs:complexType>
+          <xs:complexContent>
+            <xs:extension base='proc_type'>
+              <xs:attribute name='name' use='optional'></xs:attribute>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='finally' type='proc_type' minOccurs='0'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='read_text_file_type'>
+    <xs:sequence>
+      <xs:element name='file' type='xs:string'/>
+      <xs:element name='text' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='mash_id_type'>
+    <xs:sequence>
+      <xs:element name='next_id' type='xs:string'/>
+      <xs:element name='maximum_id' type='xs:string' minOccurs='0'/>
+      <xs:element name='minimum_id' type='xs:string'/>
+      <xs:element name='mashed_id' type='xs:string'/>
+      <xs:element name='unmashed_id' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='match_type'>
+    <xs:sequence>
+      <xs:element name='input' type='xs:string' minOccurs='1'/>
+      <xs:element name='regex' type='xs:string' minOccurs='1'/>
+      <xs:element name='ignore_case' type='xs:string' minOccurs='0'/>
+      <xs:element name='success' type='xs:string' minOccurs='0'/>
+      <xs:element name='capture' type='xs:string' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='validate_field_type'>
+    <xs:sequence>
+      <xs:element name='field' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='datatype' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='namespace' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='format' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='length' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='scale' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='nullable' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='default' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='output_field' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='replace' type='xs:string' minOccurs='0' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='parse_type'>
+    <xs:sequence>
+      <xs:element name='input' type='xs:string' minOccurs='1'/>
+      <xs:element name='format' type='format_type' minOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='format_type'>
+    <xs:sequence>
+      <xs:element name='record' type='format_field_type' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:element name='field' type='format_field_type' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+    <xs:attribute name='type' type='xs:string' use='optional'/>
+    <xs:attribute name='blocking' type='xs:boolean' use='optional'/>
+    <xs:attribute name='rewind' type='xs:boolean' use='optional'/>
+    <xs:attribute name='fixed_length' type='xs:boolean' use='optional'/>
+    <xs:attribute name='delimited' type='xs:boolean' use='optional'/>
+    <xs:attribute name='field_delim' type='xs:string' use='optional'/>
+    <xs:attribute name='field_delim_regex' type='xs:string' use='optional'/>
+    <xs:attribute name='record_delim' type='xs:string' use='optional'/>
+    <xs:attribute name='trim' type='xs:string' use='optional'/>
+    <xs:attribute name='default' type='xs:string' use='optional'/>
+    <xs:attribute name='format_in_header' type='xs:boolean' use='optional'/>
+  </xs:complexType>
+
+  <xs:complexType name='format_field_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='name' type='xs:string' use='required'/>
+        <xs:attribute name='length' type='xs:string' use='optional'/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name='multi_source_target_type'>
+    <xs:sequence>
+      <xs:element name='source' type='xs:string' minOccurs='1' maxOccurs='unbounded' datatype='string' mode='in' description='source object name'/>
+      <xs:element name='target' type='xs:string' minOccurs='1' datatype='string' mode='in' description='target object name'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='source_target_type'>
+    <xs:sequence>
+      <xs:element name='source' type='xs:string' minOccurs='1' datatype='string' mode='in' description='source object name'/>
+      <xs:element name='target' type='xs:string' minOccurs='1' datatype='string' mode='in' description='target object name'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='inherit_object_type'>
+    <xs:sequence>
+      <xs:element name='include_history' type='xs:string' minOccurs='0'/>
+      <xs:element name='source' type='xs:string' minOccurs='1'/>
+      <xs:element name='target' type='xs:string' minOccurs='1'/>
+      <xs:element name='exclude_regex' type='xs:string' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='db_execute_type'>
+    <xs:sequence>
+      <xs:group ref='db_info_group'/>
+      <xs:element name='statement' type='query_type' minOccurs='1' maxOccurs='unbounded'/>
+      <xs:element name='alias' type='xs:string' minOccurs='0'/>
+      <xs:element name='num_rows' type='xs:string' minOccurs='0'/>
+      <xs:element name='param' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='db_call_proc_type' mixed='true'>
+    <xs:sequence>
+      <xs:group ref='db_info_group'/>
+      <xs:element name='name' type='xs:string' minOccurs='0'/>
+      <xs:element name='alias' type='xs:string' minOccurs='0'/>
+      <xs:element name='param' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='db_bulk_insert_type'>
+    <xs:sequence>
+      <xs:group ref='db_info_group'/>
+      <xs:element name='name' type='xs:string' minOccurs='1'/>
+      <xs:element name='alias' type='xs:string' minOccurs='0'/>
+      <xs:element name='commit_size' type='xs:string' minOccurs='0'/>
+      <xs:group ref='sql_field_override_group' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='db_upsert_type'>
+    <xs:sequence>
+      <xs:group ref='db_info_group'/>
+      <xs:element name='name' type='xs:string' minOccurs='1'/>
+      <xs:element name='alias' type='xs:string' minOccurs='0'/>
+      <xs:element name='key_column_name' type='xs:string' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:group ref='sql_field_override_group' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='db_insert_type'>
+    <xs:sequence>
+      <xs:group ref='db_info_group'/>
+      <xs:element name='name' type='xs:string' minOccurs='1'/>
+      <xs:element name='alias' type='xs:string' minOccurs='0'/>
+      <xs:group ref='sql_field_override_group' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:group name='sql_field_override_group'>
+    <xs:choice>
+      <xs:element name='field'>
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base='xs:string'>
+              <xs:attribute name='name' type='xs:string' use='required'/>
+              <xs:attribute name='sql' type='xs:boolean' use='optional'/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='regex' type='regex_type'/>
+      <xs:element name='object_id' type='xs:string'/>
+      <xs:element name='skip' type='named_field_type'/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:group name='field_override_group'>
+    <xs:choice>
+      <xs:element name='field' type='named_field_type'/>
+      <xs:element name='regex' type='regex_type'/>
+      <xs:element name='object_id' type='xs:string'/>
+      <xs:element name='skip' type='named_field_type'/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:complexType name='parallel_process_cursor_type'>
+    <xs:sequence>
+      <xs:element name='port' type='xs:string' minOccurs='1'/>
+      <xs:element name='server' type='xs:string' minOccurs='1'/>
+      <xs:element name='batch_size' type='xs:string' minOccurs='0'/>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='multi_thread_cursor_type'>
+    <xs:sequence>
+      <xs:element name='cursor_temp_object' type='xs:string' minOccurs='0'/>
+      <xs:element name='same_temp_scope' type='xs:string' minOccurs='0'/>
+      <xs:element name='batch_size' type='xs:string' minOccurs='0'/>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='duplicate_type'>
+    <xs:complexContent>
+      <xs:extension base='proc_type'>
+        <xs:attribute name='quantity' type='xs:string' use='optional'/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name='stopwatch_type'>
+    <xs:complexContent>
+      <xs:extension base='proc_type'>
+        <xs:attribute name='name' type='xs:string' use='optional'/>
+        <xs:attribute name='ms' type='xs:string' use='optional'/>
+        <xs:attribute name='total_ms' type='xs:string' use='optional'/>
+        <xs:attribute name='counter' type='xs:string' use='optional'/>
+        <xs:attribute name='counter_increment' type='xs:string' use='optional'/>
+        <xs:attribute name='skip_first' type='xs:string' use='optional'/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name='stopwatch_start_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='name' type='xs:string'/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name='stopwatch_stop_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='name' type='xs:string'/>
+        <xs:attribute name='ms' type='xs:string' use='optional'/>
+        <xs:attribute name='total_ms' type='xs:string' use='optional'/>
+        <xs:attribute name='counter' type='xs:string' use='optional'/>
+        <xs:attribute name='counter_increment' type='xs:string' use='optional'/>
+        <xs:attribute name='skip_first' type='xs:string' use='optional'/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name='time_type'>
+    <xs:complexContent>
+      <xs:extension base='proc_type'>
+        <xs:attribute name='ms' type='xs:string' use='optional'/>
+        <xs:attribute name='total_ms' type='xs:string' use='optional'/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name='atomic_incr_decr_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string' minOccurs='1' mode='in' datatype='object_id' description='object to modify'/>
+      <xs:element name='field_name' type='xs:string' minOccurs='1' mode='in' datatype='string' description='field name to increment or decrement'/>
+      <xs:element name='output' type='xs:string' minOccurs='1' mode='out' datatype='integer' description='result of increment/decrement operation'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='log_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='level' type='xs:string' use='optional'/>
+        <xs:attribute name='switch' type='xs:string' use='optional'/>
+        <xs:attribute name='is_literal' type='xs:string' use='optional'/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name='round_type'>
+    <xs:sequence>
+      <xs:element name='input' type='xs:string' minOccurs='1'/>
+      <xs:element name='precision' type='xs:string' minOccurs='0'/>
+      <xs:element name='output' type='xs:string' minOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='round_currency_type'>
+    <xs:sequence>
+      <xs:element name='input' type='xs:string' minOccurs='1'/>
+      <xs:element name='currency' type='xs:string' minOccurs='1'/>
+      <xs:element name='output' type='xs:string' minOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='replace_type'>
+    <xs:sequence>
+      <xs:element name='input' type='xs:string' minOccurs='1'/>
+      <xs:element name='old_value' type='xs:string' minOccurs='1'/>
+      <xs:element name='new_value' type='xs:string' minOccurs='1'/>
+      <xs:element name='output' type='xs:string' minOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='inherit_cursor_type'>
+    <xs:sequence>
+      <xs:element name='cursor' type='xs:string'/>
+      <xs:element name='object_id' type='xs:string' minOccurs='0'/>
+      <xs:element name='prefix' type='xs:string' minOccurs='0'/>
+      <xs:element name='suffix' type='xs:string' minOccurs='0'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='print_table_for_ctrl_type'>
+    <xs:sequence>
+      <xs:element name='ctrl_file' type='xs:string' minOccurs='0'/>
+      <xs:element name='field_delim' type='xs:string' minOccurs='0'/>
+      <xs:element name='record_delim' type='xs:string' minOccurs='0'/>
+      <xs:element name='output_dir' type='xs:string' minOccurs='0'/>
+      <xs:element name='output_filename' type='xs:string' minOccurs='0'/>
+      <xs:group ref='field_override_group' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='call_dotnet_static_method_type'>
+    <xs:sequence>
+      <xs:element name='assembly' type='xs:string'/>
+      <xs:element name='type' type='xs:string'/>
+      <xs:element name='method' type='xs:string'/>
+      <xs:group ref='field_override_group' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:element name='result' type='xs:string' minOccurs='0'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='print_table_type'>
+    <xs:sequence>
+      <xs:group ref='db_info_group'/>
+      <xs:element name='name' type='xs:string'/>
+      <xs:element name='charset' type='xs:string' minOccurs='0'/>
+      <xs:element name='field_delim' type='xs:string' minOccurs='0'/>
+      <xs:element name='record_delim' type='xs:string' minOccurs='0'/>
+      <xs:element name='output_dir' type='xs:string' minOccurs='0'/>
+      <xs:element name='output_filename' type='xs:string' minOccurs='0'/>
+      <xs:element name='default_prefix' type='xs:string' minOccurs='0'/>
+      <xs:group ref='field_override_group' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:group name='db_info_group'>
+    <xs:choice>
+      <xs:sequence minOccurs='0' maxOccurs='1'>
+        <xs:element name='db' type='xs:string' minOccurs='1' maxOccurs='1' datatype='string' mode='in' description='name of the database'/>
+        <xs:element name='user' type='xs:string' minOccurs='1' maxOccurs='1' datatype='string' mode='in' description='user name to log in as'/>
+        <xs:element name='pw' type='xs:string' minOccurs='1' maxOccurs='1' datatype='string' mode='in' description='password for this user'/>
+      </xs:sequence>
+      <xs:element name='login_object' type='xs:string' maxOccurs='1' datatype='object_id' mode='in' description='existing MVM object of type LOGIN'/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:complexType name='order_by_type' description='controls the order of returned objects'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='direction' use='optional' description='direction of the ordering'>
+          <xs:simpleType>
+            <xs:restriction base='xs:string'>
+              <xs:enumeration value='asc' description='ascending order'/>
+              <xs:enumeration value='desc' description='descending order'/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name='type' use='optional' description='datatype used for the ordering'>
+          <xs:simpleType>
+            <xs:restriction base='xs:string'>
+              <xs:enumeration value='string' description='string ordering'/>
+              <xs:enumeration value='numeric' description='numeric ordering'/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+        <xs:attribute name='max_files' type='xs:string'/>
+        <xs:attribute name='max_objects' type='xs:string'/>
+        <xs:attribute name='temp_dir' type='xs:string'/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+
+  <xs:group name='sql_like_cursor_ops_group'>
+    <xs:sequence>
+      <xs:element name='execute' minOccurs='0' description='contains one or more modules to execute'>
+        <xs:complexType>
+          <xs:choice minOccurs='1' maxOccurs='unbounded'>
+            <xs:group ref='modules_group'/>
+          </xs:choice>
+          <xs:attribute name='pipe_row' type='xs:boolean' description='automatically pipe out every input object (do not use with a where clause)'/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='where' type='xs:string' minOccurs='0' description='where condition, like the SQL operation'/>
+      <xs:element name='group_by' type='xs:string' minOccurs='0' description='group by clause, like the SQL operation'/>
+      <xs:element name='having' type='xs:string' minOccurs='0' description='having clause, like the SQL operation'/>
+      <xs:element name='distinct' type='xs:string' minOccurs='0' description='distinct clause, like the SQL operation'/>
+      <xs:element name='order_by' type='order_by_type' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:element name='top' type='xs:string' minOccurs='0' description='select only first N rows, like the SQL operation'/>
+      <!-- these are not really in sql but it doesn't hurt to have them here -->
+      <xs:element name='last' type='xs:string' minOccurs='0' description='select only last N rows'/>
+      <xs:element name='element_at' type='xs:string' minOccurs='0' description='select only the Nth element'/>
+      <xs:element name='skip' type='xs:string' minOccurs='0' description='skip objects matching this condition'/>
+      <xs:element name='skip_while' type='xs:string' minOccurs='0' description='skip objects as long as the condition is true'/>
+      <xs:element name='take' type='xs:string' minOccurs='0' description='select objects matching this condition'/>
+      <xs:element name='take_while' type='xs:string' minOccurs='0' description='select objects as long as the condition is true'/>
+    </xs:sequence>
+  </xs:group>
+
+  <xs:group name='cursor_operation_group'>
+    <xs:sequence>
+      <xs:group ref='sql_like_cursor_ops_group' minOccurs='0'/>
+      <xs:element name='pipeline' minOccurs='0'>
+        <xs:complexType>
+          <xs:group ref='sql_like_cursor_ops_group' minOccurs='1' maxOccurs='unbounded'/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='cursor_inst_id' minOccurs='0' maxOccurs='1'>
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base='xs:string'>
+              <xs:attribute name='no_return' type='xs:string' use='optional' description='set this attribute if the proc cannot return from within this cursor'/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='cursor' minOccurs='0' maxOccurs='1' description='name of the cursor variable'>
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base='xs:string'>
+              <xs:attribute name='no_return' type='xs:string' use='optional' description='set this attribute if the proc cannot return from within this cursor'/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='run' type='proc_type' minOccurs='0' maxOccurs='1' description='contains zero or more modules to execute once if any objects are returned'/>
+      <xs:element name='then' type='proc_type' minOccurs='0' maxOccurs='1' description='contains zero or more modules to execute once if any objects are returned'/>
+      <xs:element name='loop' type='proc_type' minOccurs='0' maxOccurs='1' description='contains zero or more modules to execute for each object returned by the cursor'/>
+      <xs:element name='parallel_loop' minOccurs='0' maxOccurs='1'>
+        <xs:complexType>
+          <xs:group ref='modules_group' minOccurs='0' maxOccurs='1'/>
+          <xs:attribute name='batch_size' type='xs:string' use='optional'/>
+          <xs:attribute name='cursor_temp_object' type='xs:string' use='optional'/>
+          <xs:attribute name='copy_cursor_to_temp' type='xs:string' use='optional'/>
+          <xs:attribute name='prefix' type='xs:string' use='optional'/>
+          <xs:attribute name='suffix' type='xs:string' use='optional'/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='else' minOccurs='0' maxOccurs='1' description='contains zero or more modules to execute if no objects are returned'>
+        <xs:complexType>
+          <xs:group ref='modules_group' minOccurs='0' maxOccurs='unbounded'/>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+
+  <xs:complexType name='pipeline_select_type'>
+    <xs:sequence>
+      <xs:choice minOccurs='1' maxOccurs='unbounded'>
+        <xs:group ref='modules_group'/>
+        <xs:element name='input_cursor_inst_id' type='xs:string'/>
+      </xs:choice>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='union_all_select_type'>
+    <xs:sequence>
+      <xs:choice minOccurs='1' maxOccurs='unbounded'>
+        <xs:group ref='modules_group'/>
+        <xs:element name='input_cursor_inst_id' type='xs:string'/>
+      </xs:choice>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='db_query_to_file_type'>
+    <xs:sequence>
+      <xs:group ref='db_info_group'/>
+      <xs:element name='query' type='xs:string'/>
+      <xs:element name='order_by' type='xs:string' minOccurs='0'/>
+      <xs:element name='file' type='xs:string'/>
+      <xs:element name='ctrl' type='xs:string'/>
+      <xs:element name='field_delim' type='xs:string' minOccurs='0'/>
+      <xs:element name='record_delim' type='xs:string' minOccurs='0'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='create_memory_index_from_cursor_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='index' type='xs:string'/>
+        <xs:element name='cursor' type='xs:string'/>
+        <xs:element name='default_cursor_order' type='xs:string' minOccurs='0'/>
+        <xs:element name='key_field' minOccurs='0' maxOccurs='unbounded'/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+
+
+  <xs:complexType name='system_command_select_type'>
+    <xs:sequence>
+      <xs:element name='command' type='xs:string' minOccurs='1' maxOccurs='unbounded'/>
+      <xs:element name='cursor_command' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='cursor_command_no' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='cursor_value' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='counter_select_type'>
+    <xs:sequence>
+      <xs:element name='from' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='to' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='increment' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='cursor_value' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='define_mvm_cluster_type'>
+    <xs:sequence>
+      <xs:group ref='db_info_group'/>
+      <xs:choice>
+        <xs:element name='query' type='xs:string'/>
+        <xs:element name='node' maxOccurs='unbounded'>
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base='xs:string'>
+                <xs:attribute name='num_instances' use='required'/>
+                <xs:attribute name='machine' use='required'/>
+                <xs:attribute name='user' use='optional'/>
+                <xs:attribute name='password' use='optional'/>
+                <xs:attribute name='bin' use='optional'/>
+                <xs:attribute name='port_start' use='required'/>
+                <xs:attribute name='port_end' use='required'/>
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='query_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='type' use='optional' datatype='string' description='database type for when query is dbms-specific'>
+          <xs:simpleType>
+            <xs:restriction base='xs:string'>
+              <xs:enumeration value='sql' description='query uses SqlServer-specific syntax'/>
+              <xs:enumeration value='oracle' description='query uses Oracle-specific syntax'/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name='param_declare_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='name' type='xs:string' use='required'/>
+        <xs:attribute name='mode' type='xs:string' use='optional'/>
+        <xs:attribute name='default' type='xs:string' use='optional'/>
+        <xs:attribute name='description' type='xs:string' use='optional'/>
+        <xs:attribute name='datatype' type='xs:string' use='optional'/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+
+  <xs:complexType name='named_field_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='name' type='xs:string' use='required'/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name='regex_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='pattern' type='xs:string' use='required'/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name='glob_select_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='glob' type='xs:string'/>
+        <xs:element name='cursor_value' type='xs:string' minOccurs='0' maxOccurs='1'/>
+        <xs:group ref='cursor_operation_group'/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='index_select_keys_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='index' type='xs:string'/>
+        <xs:element name='field' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+        <xs:group ref='cursor_operation_group'/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='index_select_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='index' type='xs:string'/>
+        <xs:element name='field' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+        <xs:element name='cursor_order' type='xs:string' minOccurs='0'/>
+        <xs:group ref='cursor_operation_group'/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='index_clear_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='index' type='xs:string'/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='index_close_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='index' type='xs:string'/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='index_remove_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='index' type='xs:string'/>
+        <xs:element name='num_rows' type='xs:string' minOccurs='0' maxOccurs='1'/>
+        <xs:element name='field' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+        <xs:element name='removal_option' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='index_insert_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='index' type='xs:string'/>
+        <xs:group ref='field_override_group' minOccurs='0' maxOccurs='unbounded'/>
+        <xs:element name='result' type='xs:string' minOccurs='0'/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='define_memory_index_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='index' type='xs:string'/>
+        <xs:element name='replace' type='xs:string' minOccurs='0'/>
+        <xs:element name='file' type='xs:string' minOccurs='0'/>
+        <xs:element name='output_file' type='xs:string' minOccurs='0'/>
+        <xs:element name='default_cursor_order' type='xs:string' minOccurs='0'/>
+        <xs:element name='use_nested_keys' type='xs:string' minOccurs='0'/>
+        <xs:element name='use_context' type='xs:string' minOccurs='0'/>
+        <xs:element name='unique' type='xs:string' minOccurs='0'/>
+		<xs:element name='key_field' type='index_field_type' minOccurs='0' maxOccurs='unbounded'/>
+        <xs:element name='field' type='index_field_type' minOccurs='0' maxOccurs='unbounded'/>
+	    <xs:element name='capacity' type='xs:string' minOccurs='0' maxOccurs='unbounded'/>
+      </xs:sequence>
+    </xs:sequence>
+    <xs:attribute name='synchronized' type='xs:string' use='optional'/>
+    <xs:attribute name='capacity' type='xs:string' use='optional'/>
+  </xs:complexType>
+
+
+
+  <xs:complexType name='index_field_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='type'>
+          <xs:simpleType>
+            <xs:restriction base='xs:string'>
+              <xs:enumeration value='object_id'/>
+              <xs:enumeration value='search'/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name='load_procs_from_glob_type'>
+    <xs:sequence>
+      <xs:element name='glob' type='xs:string' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='load_procs_from_files_type'>
+    <xs:sequence>
+      <xs:element name='input_dir' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:choice>
+        <xs:element name='input_match' type='xs:string' minOccurs='1' maxOccurs='1'/>
+        <xs:element name='input_file' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      </xs:choice>
+      <xs:element name='error_count' type='xs:string' minOccurs='0' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='remove_object_field_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string' minOccurs='0'/>
+      <xs:element name='field_name' type='xs:string'/>
+      <xs:element name='output' type='xs:string' minOccurs='0'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='rename_object_field_type'>
+    <xs:sequence>
+      <xs:element name='source_object_id' type='xs:string' minOccurs='0'/>
+      <xs:element name='source_field_name' type='xs:string'/>
+      <xs:element name='target_object_id' type='xs:string' minOccurs='0'/>
+      <xs:element name='target_field_name' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='rename_object_fields_type'>
+    <xs:sequence>
+      <xs:element name='object_id' type='xs:string' minOccurs='0'/>
+      <xs:element name='pattern' type='xs:string'/>
+      <xs:element name='replacement' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='regex_replace_type'>
+    <xs:sequence>
+      <xs:element name='input' type='xs:string'/>
+      <xs:element name='pattern' type='xs:string'/>
+      <xs:element name='replacement' type='xs:string'/>
+      <xs:sequence minOccurs='0'>
+        <xs:element name='max_count' type='xs:string'/>
+        <xs:element name='start_at' type='xs:string' minOccurs='0'/>
+      </xs:sequence>
+      <xs:element name='output' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='date_convert_type'>
+    <xs:sequence>
+      <xs:element name='from' >
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base='xs:string'>
+              <xs:attribute name='format' type='xs:string' use='optional'/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='to' >
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base='xs:string'>
+              <xs:attribute name='format' type='xs:string' use='optional'/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='date_to_string_type'>
+    <xs:sequence>
+      <xs:element name='input' type='xs:string'/>
+      <xs:element name='output' >
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base='xs:string'>
+              <xs:attribute name='format' type='xs:string' use='optional'/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='string_to_date_type'>
+    <xs:sequence>
+      <xs:element name='input' >
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base='xs:string'>
+              <xs:attribute name='format' type='xs:string' use='optional'/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='output' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='set_object_field_type'>
+    <xs:sequence>
+      <xs:element name='input' type='xs:string'/>
+      <xs:choice>
+        <xs:sequence>
+          <xs:element name='object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+          <xs:element name='field_name' type='xs:string' minOccurs='1' maxOccurs='1'/>
+        </xs:sequence>
+        <xs:element name='field' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='get_object_field_type'>
+    <xs:sequence>
+      <xs:choice>
+        <xs:sequence>
+          <xs:element name='object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+          <xs:element name='field_name' type='xs:string' minOccurs='1' maxOccurs='1'/>
+        </xs:sequence>
+        <xs:element name='field' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      </xs:choice>
+      <xs:element name='snapshot_id' type='xs:string' minOccurs='0'/>
+      <xs:element name='output' type='xs:string' minOccurs='1' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='input_output_type'>
+    <xs:sequence>
+      <xs:element name='input' type='xs:string'/>
+      <xs:element name='output' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='file_info_type'>
+    <xs:sequence>
+      <xs:element name='filename' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='basename' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='size' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='readonly' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='extension' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='ctime' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='atime' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='wtime' type='xs:string' minOccurs='0' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='file_substring_type'>
+    <xs:sequence>
+      <xs:element name='file' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='offset' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='length' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='output' type='xs:string' minOccurs='1' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='multi_input_output_type'>
+    <xs:sequence>
+      <xs:element name='input' type='xs:string' maxOccurs='unbounded'/>
+      <xs:element name='output' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='date_add_type'>
+    <xs:sequence>
+      <xs:element name='input' type='xs:string'/>
+      <xs:element name='unit' type='xs:string'/>
+      <xs:element name='increment' type='xs:string'/>
+      <xs:element name='output' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='garbage_collect_type'>
+    <xs:sequence>
+      <xs:element name='frequency' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='date_diff_type'>
+    <xs:sequence>
+      <xs:element name='first_date' >
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base='xs:string'>
+              <xs:attribute name='format' type='xs:string' use='optional'/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='second_date' >
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base='xs:string'>
+              <xs:attribute name='format' type='xs:string' use='optional'/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name='output' >
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base='xs:string'>
+              <xs:attribute name='type' type='xs:string' use='optional'/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='substring_type'>
+    <xs:sequence>
+      <xs:element name='input' type='xs:string'/>
+      <xs:element name='offset' type='xs:string' minOccurs='0'/>
+      <xs:element name='length' type='xs:string' minOccurs='0'/>
+      <xs:element name='output' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='get_file_type'>
+    <xs:sequence>
+      <xs:element name='dir' type='xs:string'/>
+      <xs:element name='match' type='xs:string'/>
+      <xs:element name='file' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='file_convert_type'>
+    <xs:sequence>
+      <xs:element name='input_file' type='xs:string'/>
+      <xs:element name='input_ctrl' type='xs:string'/>
+      <xs:element name='output_file' type='xs:string'/>
+      <xs:element name='output_ctrl' type='xs:string'/>
+      <xs:element name='new_field_delim' type='xs:string'/>
+      <xs:element name='new_record_delim' type='xs:string'/>
+      <xs:element name='bad_file' type='xs:string'/>
+      <xs:element name='num_good' type='xs:string'/>
+      <xs:element name='num_bad' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='file_grep_type'>
+    <xs:sequence>
+      <xs:element name='input_file' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='output_file' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='ctrl_file' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='field' minOccurs='0' maxOccurs='unbounded'>
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base='xs:string'>
+              <xs:attribute name='name' type='xs:string' use='optional'/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='file_sort_type'>
+    <xs:sequence>
+      <xs:element name='input_file' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='sorted_file' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='ctrl' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='field' type='xs:string' minOccurs='1' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='slave_node_id_select_type'>
+    <xs:sequence>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='file_select_type'>
+    <xs:sequence>
+      <xs:element name='input_dir' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:choice>
+        <xs:element name='input_match' type='xs:string' minOccurs='1' maxOccurs='1'/>
+        <xs:element name='input_file' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      </xs:choice>
+      <xs:element name='record_offset_tag' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='record_length_tag' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='encoding' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='cursor_type' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:choice minOccurs='0' maxOccurs='1'>
+        <xs:element name='ctrl' type='xs:string' minOccurs='1' maxOccurs='1'/>
+        <xs:element name='format' type='format_type' minOccurs='1' maxOccurs='1'/>
+      </xs:choice>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='sorted_object_file_write_type'>
+    <xs:sequence>
+      <xs:element name='file' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='object_id' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='in_order' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='key_field' type='xs:string' minOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='sorted_object_file_close_type'>
+    <xs:sequence>
+      <xs:element name='file' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='flush' type='xs:string' minOccurs='0' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='sorted_object_file_select_type'>
+    <xs:sequence>
+      <xs:element name='name' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='input_file_match' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:group ref='cursor_operation_group'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='create_index_on_sorted_file_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='index' type='xs:string'/>
+        <xs:element name='file' type='xs:string'/>
+        <xs:element name='ctrl' type='xs:string'/>
+        <xs:element name='key_field' type='xs:string' minOccurs='1' maxOccurs='unbounded'/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='push_before_type'>
+    <xs:complexContent>
+      <xs:extension base='proc_type'>
+        <xs:attribute name='name' type='xs:string' use='required'/>
+        <xs:attribute name='order' type='xs:string' use='optional'/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name='print_file_type'>
+    <xs:sequence>
+      <xs:element name='file' type='xs:string'/>
+      <xs:element name='format' type='format_type' />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name='print_text_to_file_type'>
+    <xs:sequence>
+      <xs:element name='file' type='xs:string'/>
+      <xs:element name='text' type='xs:string'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='print_record_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='file' type='xs:string'/>
+        <xs:element name='output_filename' type='xs:string' minOccurs='0'/>
+        <xs:element name='field_delim' type='xs:string'/>
+        <xs:element name='record_delim' type='xs:string'/>
+        <xs:element name='encoding' type='xs:string' minOccurs='0'/>
+        <xs:element name='data' minOccurs='1' maxOccurs='1'>
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name='field' minOccurs='0' maxOccurs='unbounded'>
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base='xs:string'>
+                      <xs:attribute name='name' type='xs:string' use='optional'/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='record_type_type'>
+    <xs:sequence>
+      <xs:element name='base_record_type' type='xs:string' minOccurs='0'/>
+      <xs:element name='phase' type='xs:string' minOccurs='0'/>
+      <xs:element name='stage' type='xs:string' minOccurs='0'/>
+      <xs:element name='namespace' type='xs:string' minOccurs='0'/>
+      <xs:element name='file_regex' type='xs:string' minOccurs='0'/>
+      <xs:element name='fields' type='record_type_field_list_type' minOccurs='0'/>
+      <xs:element name='primary_key' type='record_type_key_type' minOccurs='0'/>
+      <xs:element name='parent_key' type='record_type_key_type' minOccurs='0'/>
+      <xs:element name='events' type='record_type_event_list_type' minOccurs='0'/>
+      <xs:element name='database_lookup' type='record_type_database_lookup_type' minOccurs='0'/>
+      <xs:element name='parent_inclusion' type='xs:string' minOccurs='0'/>
+      <xs:element name='sort_key' type='xs:string' minOccurs='0'/>
+      <xs:element name='stable_sort' type='xs:string' minOccurs='0'/>
+    </xs:sequence>
+    <xs:attribute name='name' type='xs:string' use='required'/>
+    <xs:attribute name='exists' type='xs:string' use='optional'/>
+    <xs:attribute name='visibility' type='xs:string' use='optional'/>
+    <xs:attribute name='display' type='xs:string' use='optional'/>
+  </xs:complexType>
+
+  <xs:complexType name='record_type_key_type'>
+    <xs:sequence>
+      <xs:element name='field' type='named_field_type' minOccurs='1' maxOccurs='unbounded'/>
+    </xs:sequence>
+    <xs:attribute name='namespace' type='xs:string' use='optional'/>
+  </xs:complexType>
+
+  <xs:complexType name='record_type_field_list_type'>
+    <xs:sequence>
+      <xs:element name='field' type='record_type_field_type' minOccurs='1' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='record_type_field_type'>
+    <xs:choice minOccurs='0' maxOccurs='unbounded'>
+      <xs:element name='format' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='default' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='override' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='type' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='length' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='scale' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='enum' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='nullable' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='ignored' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='missing' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='required' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='target' type='xs:string' minOccurs='0' maxOccurs='1'/>
+    </xs:choice>
+    <xs:attribute name='name' type='xs:string' use='required'/>
+  </xs:complexType>
+
+  <xs:complexType name='record_type_event_list_type'>
+    <xs:choice minOccurs='0' maxOccurs='unbounded'>
+      <xs:element name='field_mapping' type='record_type_mapping_type'/>
+      <xs:element name='create_record' type='record_type_create_record_type'/>
+    </xs:choice>
+    <xs:attribute name='override' type='xs:string' use='optional'/>
+  </xs:complexType>
+
+  <xs:complexType name='record_type_create_record_type'>
+    <xs:sequence>
+      <xs:element name='alias' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:element name='enum' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+      <xs:element name='condition' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='inherit_fields' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='from_cursor' type='wildcard_type' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='child_field_mapping' type='record_type_mapping_type' minOccurs='0' maxOccurs='1'/>
+    </xs:sequence>
+    <xs:attribute name='type' type='xs:string' use='optional'/>
+    <xs:attribute name='database' type='xs:string' use='optional'/>
+    <xs:attribute name='table' type='xs:string' use='optional'/>
+    <xs:attribute name='selected' type='xs:string' use='optional'/>
+    <xs:attribute name='pass' type='xs:string' use='optional'/>
+  </xs:complexType>
+
+  <xs:complexType name='record_type_mapping_type'>
+    <xs:sequence>
+      <xs:choice minOccurs='0' maxOccurs='unbounded'>
+        <xs:element name='map' minOccurs='0' maxOccurs='unbounded'>
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base='xs:string'>
+                <xs:attribute name='condition' type='xs:string' use='optional'/>
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name='def' minOccurs='0' maxOccurs='unbounded'>
+          <xs:complexType>
+            <xs:simpleContent>
+              <xs:extension base='xs:string'>
+                <xs:attribute name='condition' type='xs:string' use='optional'/>
+              </xs:extension>
+            </xs:simpleContent>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name='debug' minOccurs='0' maxOccurs='unbounded' type='wildcard_type'/>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name='before_parent' type='xs:string' use='optional'/>
+    <xs:attribute name='pass' type='xs:string' use='optional'/>
+  </xs:complexType>
+
+  <xs:complexType name='record_type_database_lookup_type'>
+    <xs:sequence>
+      <xs:element name='select_fields' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='from' type='xs:string' minOccurs='0' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='md5_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='input' type='xs:string'/>
+        <xs:element name='output' type='xs:string'/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='produce_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='producer_cursor_field' type='xs:string' minOccurs='0'/>
+        <xs:element name='object_type' type='xs:string'/>
+        <xs:element name='inherit_parent' type='xs:string' minOccurs='0'/>
+        <xs:element name='batch_size' type='xs:string' minOccurs='0'/>
+        <xs:element name='consumer_proc_name' type='xs:string'/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='while_type'>
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name='condition' type='xs:string'/>
+        <xs:element name='loop' type='proc_type'/>
+      </xs:sequence>
+    </xs:sequence>
+    <xs:attribute name='nest' type='xs:boolean' use='optional'/>
+  </xs:complexType>
+
+  <!-- Not implemented yet. TBD: decide what type of equality to use by default-->
+  <xs:complexType name='switch_type'>
+    <xs:sequence>
+      <xs:element name='operator' type='xs:string' minOccurs='0'/>
+      <xs:element name='value' type='xs:string'/>
+      <xs:sequence minOccurs='1' maxOccurs='unbounded'>
+        <xs:element name='case' type='xs:string' minOccurs='1' maxOccurs='1'/>
+        <xs:element name='then' type='proc_type' minOccurs='0' maxOccurs='1'/>
+      </xs:sequence>
+      <xs:element name='default' type='proc_type' minOccurs='0' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name='if_type'>
+    <xs:sequence>
+      <xs:sequence minOccurs='1' maxOccurs='unbounded'>
+        <xs:element name='condition' type='xs:string' minOccurs='1' maxOccurs='1'/>
+        <xs:element name='then' type='proc_type' minOccurs='0' maxOccurs='1'/>
+      </xs:sequence>
+      <xs:element name='else' type='proc_type' minOccurs='0' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name='procs'>
+    <xs:complexType>
+      <xs:choice minOccurs='0' maxOccurs='unbounded'>
+        <xs:element name='proc' type='named_proc_type'/>
+        <xs:element name='proc_info' type='proc_info_type'/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name='initialize_type'>
+    <xs:complexContent>
+      <xs:extension base='proc_type'>
+        <xs:attribute name='namespace' type='xs:string' use='optional'/>
+        <xs:attribute name='priority' type='xs:string' use='optional'/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:element name='proc' type='named_proc_type'>
+  </xs:element>
+
+  <xs:complexType name='named_proc_type'>
+    <xs:complexContent>
+      <xs:extension base='proc_type'>
+        <xs:attribute name='name' type='xs:string' use='required'/>
+        <xs:attribute name='namespace' type='xs:string' use='optional'/>
+        <xs:attribute name='run_after' type='xs:string' use='optional'/>
+        <xs:attribute name='object_type' type='xs:string' use='optional'/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name='proc_info_type'>
+    <xs:sequence minOccurs='1' maxOccurs='1'>
+      <xs:element name='category' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='description' type='xs:string' minOccurs='1' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='get_proc_text_type'>
+    <xs:sequence>
+      <xs:element name='name' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='output' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='success' type='xs:string' minOccurs='0' maxOccurs='1'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='call_proc_type'>
+    <xs:sequence>
+      <xs:element name='name' type='xs:string' minOccurs='1' maxOccurs='1'/>
+      <xs:element name='object_type' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='callback_proc_name' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='callback_object_id' type='xs:string' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='proc_inst_id' minOccurs='0' maxOccurs='1'/>
+      <xs:element name='param' type='named_field_type' minOccurs='0' maxOccurs='unbounded'/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="spawn_type">
+    <xs:sequence>
+      <xs:element name="internal_type" type="xs:string" minOccurs="0"/>
+      <xs:element name="feedback_name" type="xs:string" minOccurs="0"/>
+      <xs:element name="object_type" type="xs:string" minOccurs="1" maxOccurs="1"></xs:element>
+      <xs:element name="object_id" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+      <xs:element name="inherit_parent" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+      <xs:element name="delta_tracking_support" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+      <xs:element name="delta_tracking_on" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+      <xs:element name="pin_to_proc" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name='sync_type'>
+    <xs:complexContent>
+      <xs:extension base='proc_type'>
+        <xs:attribute name='name' type='xs:string' use='optional'/>
+        <xs:attribute name='dynamic_name' type='xs:string' use='optional'/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name='synchronized_type'>
+    <xs:complexContent>
+      <xs:extension base='proc_type'>
+        <xs:attribute name='name' type='xs:string' use='optional'/>
+        <xs:attribute name='dynamic_name' type='xs:string' use='optional'/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name='input_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='name' type='xs:string' use='required'/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name='output_type'>
+    <xs:simpleContent>
+      <xs:extension base='xs:string'>
+        <xs:attribute name='name' type='xs:string' use='required'/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+</xs:schema>

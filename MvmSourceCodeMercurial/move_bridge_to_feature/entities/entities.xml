@@ -1,0 +1,356 @@
+﻿<entity_config>
+  
+  <entity_group>
+    <name>default</name>
+    <!-- group profile can automatically set these-->
+    <group_profile>date_aware</group_profile>
+    <get_children_proc>date_aware_child_to_parent_mapping</get_children_proc>
+    <map>ENTITY.start_date=PARENT.start_date</map>
+    <map>ENTITY.end_date=PARENT.end_date</map>
+    <map>ENTITY.operation=PARENT.operation</map>
+    <!-- these are automaps that happen for every entity-->
+    <map>ENTITY.id_acc=PARENT.id_acc</map>
+    <map>ENTITY.rate_type=PARENT.rate_type</map>
+    <map>ENTITY.id_sub=PARENT.id_sub</map>
+    <map>ENTITY.id_po=PARENT.id_po</map>
+  </entity_group>
+  
+  <entity>
+    <name>IC_FEATURERATES</name>
+    <child>IC_FEATURERATE1</child>
+    <child>IC_FEATURERATE2</child>
+  </entity>
+
+  <entity>
+    <name>IC_FEATURERATE1</name>
+    <map>ENTITY.feature_rate=PARENT.feature_rate1</map>
+    <dynamic_operation name="get">map_feature_code1</dynamic_operation>
+    <dynamic_operation name="put">map_feature_code1</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='FeatureRate'</map_down_before>
+      <map_down_before>CHILD.feature_code=ENTITY.feature_code</map_down_before>
+      <map_down_before>CHILD.exclude_wildcards='0'</map_down_before>
+      <map_down_before>CHILD.exclude_icb_rates='0'</map_down_before>
+      <map_down_before>CHILD.exclude_po_rates='1'</map_down_before>
+      <map_down_before>CHILD.exclude_default_rates='1'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='0'</map_down_before>
+      <map_after>ENTITY.feature_rate=CHILD.feature_rate</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>IC_FEATURERATE2</name>
+    <map>ENTITY.feature_rate=PARENT.feature_rate2</map>
+    <dynamic_operation name="get">map_feature_code2</dynamic_operation>
+    <dynamic_operation name="put">map_feature_code2</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='FeatureRate'</map_down_before>
+      <map_down_before>CHILD.feature_code=ENTITY.feature_code</map_down_before>
+      <map_down_before>CHILD.exclude_wildcards='0'</map_down_before>
+      <map_down_before>CHILD.exclude_icb_rates='0'</map_down_before>
+      <map_down_before>CHILD.exclude_po_rates='1'</map_down_before>
+      <map_down_before>CHILD.exclude_default_rates='1'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='0'</map_down_before>
+      <map_after>ENTITY.feature_rate=CHILD.feature_rate</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>IC_BRIDGERATES</name>
+    <operation name="get">cache_rate_schedules</operation>
+    <child>IC_BRIDGERATE1</child>
+    <child>IC_BRIDGERATE2</child>
+  </entity>
+
+  <entity>
+    <name>IC_BRIDGERATE1</name>
+    <map>ENTITY.bridge_rate=PARENT.feature_rate1</map>
+    <dynamic_operation name="get">map_product_code1</dynamic_operation>
+    <dynamic_operation name="put">map_product_code1</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='BridgeRate'</map_down_before>
+      <map_down_before>CHILD.product=ENTITY.product_code</map_down_before>
+      <map_down_before>CHILD.transport='NULL'</map_down_before>
+      <map_down_before>CHILD.call_type='NULL'</map_down_before>
+      <map_down_before>CHILD.setup_charge='0'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='1'</map_down_before>
+      <map_after>ENTITY.bridge_rate=CHILD.bridge_rate</map_after>
+    </child>
+
+  </entity>
+
+  <entity>
+    <name>IC_BRIDGERATE2</name>
+    <map>ENTITY.bridge_rate=PARENT.feature_rate2</map>
+    <dynamic_operation name="get">map_product_code2</dynamic_operation>
+    <dynamic_operation name="put">map_product_code2</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='BridgeRate'</map_down_before>
+      <map_down_before>CHILD.product=ENTITY.product_code</map_down_before>
+      <map_down_before>CHILD.transport='NULL'</map_down_before>
+      <map_down_before>CHILD.call_type='NULL'</map_down_before>
+      <map_down_before>CHILD.setup_charge='0'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='1'</map_down_before>
+      <map_after>ENTITY.bridge_rate=CHILD.bridge_rate</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>IC_PO_FEATURERATES</name>
+    <child>IC_PO_FEATURERATE1</child>
+    <child>IC_PO_FEATURERATE2</child>
+  </entity>
+
+  <entity>
+    <name>IC_PO_FEATURERATE1</name>
+    <map>ENTITY.feature_rate=PARENT.feature_rate1</map>
+    <dynamic_operation name="get">map_feature_code1</dynamic_operation>
+    <dynamic_operation name="put">map_feature_code1</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='FeatureRate'</map_down_before>
+      <map_down_before>CHILD.feature_code=ENTITY.feature_code</map_down_before>
+      <map_down_before>CHILD.exclude_wildcards='0'</map_down_before>
+      <map_down_before>CHILD.exclude_icb_rates='1'</map_down_before>
+      <map_down_before>CHILD.exclude_po_rates='0'</map_down_before>
+      <map_down_before>CHILD.exclude_default_rates='1'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='0'</map_down_before>
+      <map_after>ENTITY.feature_rate=CHILD.feature_rate</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>IC_PO_FEATURERATE2</name>
+    <map>ENTITY.feature_rate=PARENT.feature_rate2</map>
+    <dynamic_operation name="get">map_feature_code2</dynamic_operation>
+    <dynamic_operation name="put">map_feature_code2</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='FeatureRate'</map_down_before>
+      <map_down_before>CHILD.feature_code=ENTITY.feature_code</map_down_before>
+      <map_down_before>CHILD.exclude_wildcards='0'</map_down_before>
+      <map_down_before>CHILD.exclude_icb_rates='1'</map_down_before>
+      <map_down_before>CHILD.exclude_po_rates='0'</map_down_before>
+      <map_down_before>CHILD.exclude_default_rates='1'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='0'</map_down_before>
+      <map_after>ENTITY.feature_rate=CHILD.feature_rate</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>IC_PO_BRIDGERATES</name>
+    <operation name="get">cache_rate_schedules</operation>
+    <child>IC_PO_BRIDGERATE1</child>
+    <child>IC_PO_BRIDGERATE2</child>
+  </entity>
+
+  <entity>
+    <name>IC_PO_BRIDGERATE1</name>
+    <map>ENTITY.bridge_rate=PARENT.feature_rate1</map>
+    <dynamic_operation name="get">map_product_code1</dynamic_operation>
+    <dynamic_operation name="put">map_product_code1</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='BridgeRate'</map_down_before>
+      <map_down_before>CHILD.product=ENTITY.product_code</map_down_before>
+      <map_down_before>CHILD.transport='NULL'</map_down_before>
+      <map_down_before>CHILD.call_type='NULL'</map_down_before>
+      <map_down_before>CHILD.setup_charge='0'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='1'</map_down_before>
+      <map_after>ENTITY.bridge_rate=CHILD.bridge_rate</map_after>
+    </child>
+
+  </entity>
+
+  <entity>
+    <name>IC_PO_BRIDGERATE2</name>
+    <map>ENTITY.bridge_rate=PARENT.feature_rate2</map>
+    <dynamic_operation name="get">map_product_code2</dynamic_operation>
+    <dynamic_operation name="put">map_product_code2</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='BridgeRate'</map_down_before>
+      <map_down_before>CHILD.product=ENTITY.product_code</map_down_before>
+      <map_down_before>CHILD.transport='NULL'</map_down_before>
+      <map_down_before>CHILD.call_type='NULL'</map_down_before>
+      <map_down_before>CHILD.setup_charge='0'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='1'</map_down_before>
+      <map_after>ENTITY.bridge_rate=CHILD.bridge_rate</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>IC_FEATURECODEPRODUCTS</name>
+    <child>IC_FEATURECODEPRODUCT1</child>
+    <child>IC_FEATURECODEPRODUCT2</child>
+  </entity>
+
+  <entity>
+    <name>IC_FEATURECODEPRODUCT1</name>
+    <map>ENTITY.unlimited=PARENT.unlimited1</map>
+    <dynamic_operation name="get">map_feature_code1</dynamic_operation>
+    <dynamic_operation name="put">map_feature_code1</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='FeatureCodeProducts'</map_down_before>
+      <map_down_before>CHILD.feature_code=ENTITY.feature_code</map_down_before>
+      <map_down_before>CHILD.exclude_wildcards='0'</map_down_before>
+      <map_down_before>CHILD.exclude_icb_rates='0'</map_down_before>
+      <map_down_before>CHILD.exclude_po_rates='1'</map_down_before>
+      <map_down_before>CHILD.exclude_default_rates='1'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='0'</map_down_before>
+      <map_after>ENTITY.unlimited=CHILD.unlimited</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>IC_FEATURECODEPRODUCT2</name>
+    <map>ENTITY.unlimited=PARENT.unlimited2</map>
+    <dynamic_operation name="get">map_feature_code2</dynamic_operation>
+    <dynamic_operation name="put">map_feature_code2</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='FeatureCodeProducts'</map_down_before>
+      <map_down_before>CHILD.feature_code=ENTITY.feature_code</map_down_before>
+      <map_down_before>CHILD.exclude_wildcards='0'</map_down_before>
+      <map_down_before>CHILD.exclude_icb_rates='0'</map_down_before>
+      <map_down_before>CHILD.exclude_po_rates='1'</map_down_before>
+      <map_down_before>CHILD.exclude_default_rates='1'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='0'</map_down_before>
+      <map_after>ENTITY.unlimited=CHILD.unlimited</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>IC_BILLCODEPRODUCTS</name>
+    <operation name="get">cache_rate_schedules</operation>
+    <child>IC_BILLCODEPRODUCT1</child>
+    <child>IC_BILLCODEPRODUCT2</child>
+  </entity>
+
+  <entity>
+    <name>IC_BILLCODEPRODUCT1</name>
+    <map>ENTITY.unlimited=PARENT.unlimited1</map>
+    <dynamic_operation name="get">map_product_code1</dynamic_operation>
+    <dynamic_operation name="put">map_product_code1</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='BillCodeProducts'</map_down_before>
+      <map_down_before>CHILD.product=ENTITY.product_code</map_down_before>
+      <map_down_before>CHILD.transport='NULL'</map_down_before>
+      <map_down_before>CHILD.call_type='NULL'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='1'</map_down_before>
+      <map_after>ENTITY.unlimited=CHILD.unlimited</map_after>
+    </child>
+
+  </entity>
+
+  <entity>
+    <name>IC_BILLCODEPRODUCT2</name>
+    <map>ENTITY.unlimited=PARENT.unlimited2</map>
+    <dynamic_operation name="get">map_product_code2</dynamic_operation>
+    <dynamic_operation name="put">map_product_code2</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='BillCodeProducts'</map_down_before>
+      <map_down_before>CHILD.product=ENTITY.product_code</map_down_before>
+      <map_down_before>CHILD.transport='NULL'</map_down_before>
+      <map_down_before>CHILD.call_type='NULL'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='1'</map_down_before>
+      <map_after>ENTITY.unlimited=CHILD.unlimited</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>IC_PO_FEATURECODEPRODUCTS</name>
+    <child>IC_PO_FEATURECODEPRODUCT1</child>
+    <child>IC_PO_FEATURECODEPRODUCT2</child>
+  </entity>
+
+  <entity>
+    <name>IC_PO_FEATURECODEPRODUCT1</name>
+    <map>ENTITY.unlimited=PARENT.unlimited1</map>
+    <dynamic_operation name="get">map_feature_code1</dynamic_operation>
+    <dynamic_operation name="put">map_feature_code1</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='FeatureCodeProducts'</map_down_before>
+      <map_down_before>CHILD.feature_code=ENTITY.feature_code</map_down_before>
+      <map_down_before>CHILD.exclude_wildcards='0'</map_down_before>
+      <map_down_before>CHILD.exclude_icb_rates='1'</map_down_before>
+      <map_down_before>CHILD.exclude_po_rates='0'</map_down_before>
+      <map_down_before>CHILD.exclude_default_rates='1'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='0'</map_down_before>
+      <map_after>ENTITY.unlimited=CHILD.unlimited</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>IC_PO_FEATURECODEPRODUCT2</name>
+    <map>ENTITY.unlimited=PARENT.unlimited2</map>
+    <dynamic_operation name="get">map_feature_code2</dynamic_operation>
+    <dynamic_operation name="put">map_feature_code2</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='FeatureCodeProducts'</map_down_before>
+      <map_down_before>CHILD.feature_code=ENTITY.feature_code</map_down_before>
+      <map_down_before>CHILD.exclude_wildcards='0'</map_down_before>
+      <map_down_before>CHILD.exclude_icb_rates='1'</map_down_before>
+      <map_down_before>CHILD.exclude_po_rates='0'</map_down_before>
+      <map_down_before>CHILD.exclude_default_rates='1'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='0'</map_down_before>
+      <map_after>ENTITY.unlimited=CHILD.unlimited</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>IC_PO_BILLCODEPRODUCTS</name>
+    <operation name="get">cache_rate_schedules</operation>
+    <child>IC_PO_BILLCODEPRODUCT1</child>
+    <child>IC_PO_BILLCODEPRODUCT2</child>
+  </entity>
+
+  <entity>
+    <name>IC_PO_BILLCODEPRODUCT1</name>
+    <map>ENTITY.unlimited=PARENT.unlimited1</map>
+    <dynamic_operation name="get">map_product_code1</dynamic_operation>
+    <dynamic_operation name="put">map_product_code1</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='BillCodeProducts'</map_down_before>
+      <map_down_before>CHILD.product=ENTITY.product_code</map_down_before>
+      <map_down_before>CHILD.transport='NULL'</map_down_before>
+      <map_down_before>CHILD.call_type='NULL'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='1'</map_down_before>
+      <map_after>ENTITY.unlimited=CHILD.unlimited</map_after>
+    </child>
+
+  </entity>
+
+  <entity>
+    <name>IC_PO_BILLCODEPRODUCT2</name>
+    <map>ENTITY.unlimited=PARENT.unlimited2</map>
+    <dynamic_operation name="get">map_product_code2</dynamic_operation>
+    <dynamic_operation name="put">map_product_code2</dynamic_operation>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='BillCodeProducts'</map_down_before>
+      <map_down_before>CHILD.product=ENTITY.product_code</map_down_before>
+      <map_down_before>CHILD.transport='NULL'</map_down_before>
+      <map_down_before>CHILD.call_type='NULL'</map_down_before>
+      <map_down_before>CHILD.require_complete_row='1'</map_down_before>
+      <map_after>ENTITY.unlimited=CHILD.unlimited</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>PARAM_TABLE</name>
+    <operation name="metadata">param_table_structure</operation>
+    <dynamic_operation name="put">param_table_put</dynamic_operation>
+    <dynamic_operation name="get">get_rscheds</dynamic_operation>
+  </entity>
+</entity_config>

@@ -1,0 +1,13 @@
+(
+  foreach
+    (
+      Ast_Element => myitem
+      Ast_Element => mylist
+    )
+    {
+      print
+        (
+          myitem
+        )
+    }
+)

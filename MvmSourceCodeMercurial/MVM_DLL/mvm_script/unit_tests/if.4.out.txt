@@ -1,0 +1,20 @@
+(
+  if
+    (
+      condition
+        (
+          true
+        )
+      then
+        {
+          print
+            (
+              "true"
+            )
+          print
+            (
+              "true"
+            )
+        }
+    )
+)

@@ -1,0 +1,1 @@
+myfunc(x=>1,x=>2); // parser should allow this even if runtime does not

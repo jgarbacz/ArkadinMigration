@@ -1,0 +1,15 @@
+(
+  brace
+    {
+      brace
+        {
+          brace
+            {
+              print
+                (
+                  '3 deep'
+                )
+            }
+        }
+    }
+)

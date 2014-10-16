@@ -1,0 +1,12 @@
+﻿define_proc(
+	name: appliedProc;
+	apply_to_phase: my_phase;
+	
+	funcy(x+7);
+	TEMP->STRUCT.push(OBJ.field){'hi'}[99];
+	x=-1+22;
+	y=-22/2;
+	z=c++;
+	a=--b+33;
+	m=true?1:2;
+);

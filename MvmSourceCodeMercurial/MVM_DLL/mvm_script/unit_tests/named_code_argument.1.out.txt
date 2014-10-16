@@ -1,0 +1,25 @@
+(
+  myfunc
+    (
+      Ast_Element => brace
+        {
+          =
+            (
+              x
+              y
+            )
+          =
+            (
+              a
+              b
+            )
+        }
+      Ast_Element => brace
+        {
+          print
+            (
+              'yours'
+            )
+        }
+    )
+)

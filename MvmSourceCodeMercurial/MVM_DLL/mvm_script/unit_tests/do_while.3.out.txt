@@ -1,0 +1,16 @@
+(
+  do_while
+    (
+      Ast_Element => 11
+    )
+    {
+      print
+        (
+          11
+        )
+      print
+        (
+          11
+        )
+    }
+)

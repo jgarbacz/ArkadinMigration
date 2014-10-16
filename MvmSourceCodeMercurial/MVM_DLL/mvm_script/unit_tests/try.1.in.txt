@@ -1,0 +1,13 @@
+try{
+	print("in try");
+}
+catch(e1 as MyE1){
+	print("in e1");
+}
+catch(e2 as MyE2){
+	print("in e2");
+}
+finally{
+	print("in finally");
+}
+

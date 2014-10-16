@@ -1,0 +1,16 @@
+// make sure nesting works
+if(11){
+	print("11");
+	print("11");
+}
+else if(22){
+	print("22");
+	print("22");
+}
+else if(33){
+	print("33");
+}
+else{
+	print("33 else");
+	print("33 else");
+}

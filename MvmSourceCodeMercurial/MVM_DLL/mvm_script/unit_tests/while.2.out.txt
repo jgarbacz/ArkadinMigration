@@ -1,0 +1,18 @@
+(
+  while
+    (
+      condition => a
+    )
+    {
+      while
+        (
+          condition => b
+        )
+        {
+          print
+            (
+              "a,b"
+            )
+        }
+    }
+)

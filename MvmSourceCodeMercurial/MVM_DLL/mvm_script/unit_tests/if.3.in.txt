@@ -1,0 +1,6 @@
+// make sure second else binds with inner if
+if(a)
+	if(b) 
+		print("b");
+	else 
+		print("b else");

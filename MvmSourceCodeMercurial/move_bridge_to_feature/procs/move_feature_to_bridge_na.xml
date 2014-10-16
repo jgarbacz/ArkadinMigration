@@ -1,0 +1,306 @@
+﻿<procs>
+
+  <proc name='startup first'>
+    <startup>
+      <c>Setup the minimal log level to print on our console logger</c>
+      <spawn>
+        <object_type>'LOGGER'</object_type>
+        <object_id>GLOBAL.logger</object_id>
+      </spawn>
+      <do>OBJECT(GLOBAL.logger).log_type='console'</do>
+      <do>OBJECT(GLOBAL.logger).log_level='info'</do>
+      <spawn>
+        <object_type>'LOGIN'</object_type>
+        <object_id>GLOBAL.target_login</object_id>
+      </spawn>
+
+      <do>GLOBAL.null_value = 'NULL'</do>
+      <do>GLOBAL.unset_value = 'UNSET'</do>
+      <do>GLOBAL.unset_force_value = 'UNSET_FORCE'</do>
+
+      <do>OBJECT(GLOBAL.target_login).database_type='oracle'</do>
+      <do>OBJECT(GLOBAL.target_login).database_name='NAMBSQA '</do>
+      <do>OBJECT(GLOBAL.target_login).database_user='SWN01ZTAPP05'</do>
+      <do>OBJECT(GLOBAL.target_login).database_password='SWN01ZTAPP05'</do>
+
+    </startup>
+  </proc>
+
+  <proc name="main">
+    <!-- 
+  so run like:
+  C:\Users\rparks\Documents\_SOURCE\MVM\_TESTS\rapid_rate>..\..\bin\Debug\mvm.exe -file=*.xml -proc=jonah
+  or 
+  for IDE setup GLOBAL.test_name='rapid_rate' and GLOBAL.test_proc='move_feature_to_bridge' in main.xml
+  -->
+
+    <!-- point to the entities dir you want and initialize -->
+    <do>GLOBAL.main_dir=GLOBAL.main_dir ne ''?GLOBAL.main_dir:'.'</do>
+    <do>GLOBAL.entities_dir=GLOBAL.main_dir~'/IC_entities'</do>
+
+    <do>GLOBAL.source_feature_code1='UM'</do>
+    <do>GLOBAL.source_feature_code2='UMAB'</do>
+    <do>GLOBAL.target_product_code1='UMP'</do>
+    <do>GLOBAL.target_product_code2='UMABP'</do>
+
+    <call_proc>'initialize'</call_proc>
+
+    <db_execute>
+      <login_object>GLOBAL.target_login</login_object>
+      <statement type="oracle">
+        "DELETE T_SUB WHERE id_sub=-7000"
+      </statement>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute>
+
+
+    <info>'SPAWN BME TO GET:'</info>
+    <spawn>
+      <object_type>'IC_FEATURECODEPRODUCTS'</object_type>
+      <object_id>TEMP.bme</object_id>
+    </spawn>
+
+    <!--<db_select>
+      <login_object>GLOBAL.target_login</login_object>
+      <query type="oracle">
+        "SELECT /*+ ORDERED USE_NL(B E C) USE_HASH(d) */ MIN(A.id_acc) id_acc FROM T_AV_AREAKEY A
+        INNER JOIN T_AV_INTERNAL B ON A.id_acc = B.id_acc
+        INNER JOIN T_ACCOUNT E ON E.id_acc = A.id_acc
+        LEFT OUTER JOIN T_GSUBMEMBER C ON C.id_acc = A.id_acc
+        LEFT OUTER JOIN T_SUB D ON D.id_acc = A.id_acc
+        WHERE 1=1
+        AND D.id_sub IS NULL
+        AND C.id_group IS NULL"
+      </query>
+      <cursor>TEMP.account_cursor</cursor>
+      <loop>
+        <do>GLOBAL.fake_id_acc=OBJECT(TEMP.account_cursor).id_acc</do>
+      </loop>
+      <else>
+        <fatal>'Unable to find suitable fake id_acc'</fatal>
+      </else>
+    </db_select>-->
+
+    <do>GLOBAL.fake_id_acc=137</do>
+
+    <db_select>
+      <login_object>GLOBAL.target_login</login_object>
+      <query type="oracle">
+        "SELECT /*+ ORDERED USE_NL(C D E F Q R) */ DISTINCT NVL(R.id_folder,F.id_acc) id_acc, Q.id_group, E.id_sub, D.id_po, C.id_pt, F.id_group id_grp_mbr
+        FROM T_PT_FEATURECODEPRODUCTS A
+        INNER JOIN T_ENUM_DATA B ON A.c_feature_code = B.id_enum_data
+        INNER JOIN T_RSCHED C ON C.id_sched = A.id_sched
+        INNER JOIN T_PL_MAP D ON D.id_pricelist = C.id_pricelist AND D.id_pi_template = C.id_pi_template AND D.id_paramtable = C.id_pt
+        INNER JOIN T_SUB E ON E.id_sub = D.id_sub
+        LEFT OUTER JOIN T_ACC_TEMPLATE_SUBS Q ON Q.id_group = E.id_group
+        LEFT OUTER JOIN T_ACC_TEMPLATE R ON R.id_acc_template = Q.id_acc_template
+        LEFT OUTER JOIN T_GSUBMEMBER F ON F.id_group = E.id_group
+        WHERE 1=1
+        AND B.nm_enum_data IN ('intercall.com/ConfCommon/FeatureCode/UM', 'intercall.com/ConfCommon/FeatureCode/UMAB')
+        "
+      </query>
+      <cursor>TEMP.account_cursor</cursor>
+      <loop>
+        <if>
+          <condition>OBJECT(TEMP.account_cursor).id_grp_mbr eq ''</condition>
+          <then>
+            <db_execute>
+              <login_object>GLOBAL.target_login</login_object>
+              <statement type="oracle">
+                "INSERT INTO T_GSUBMEMBER (id_group, id_acc, vt_start, vt_end) SELECT A.id_group, "~GLOBAL.fake_id_acc~", A.vt_start, A.vt_end FROM T_SUB A LEFT OUTER JOIN T_GSUBMEMBER B ON A.id_group = B.id_group WHERE A.id_group IS NOT NULL AND B.id_group IS NULL AND A.id_sub = "~OBJECT(TEMP.account_cursor).id_sub
+              </statement>
+              <num_rows>TEMP.num_rows</num_rows>
+            </db_execute>
+            <do>OBJECT(TEMP.bme).id_acc=GLOBAL.fake_id_acc</do>
+          </then>
+          <else>
+            <do>OBJECT(TEMP.bme).id_acc=OBJECT(TEMP.account_cursor).id_acc</do>
+          </else>
+        </if>
+        <do>OBJECT(TEMP.bme).id_sub=OBJECT(TEMP.account_cursor).id_sub</do>
+        <do>OBJECT(TEMP.bme).start_date='20100601000000'</do>
+        <do>OBJECT(TEMP.bme).end_date=''</do>
+        <do>OBJECT(TEMP.bme).operation='get'</do>
+        <info>'Moving rates for account:['~OBJECT(TEMP.bme).id_acc~'] subscription:['~OBJECT(TEMP.bme).id_sub~']'</info>
+        <call_proc_for_object>
+          <name>'ic_featurecodeproducts_call_entity'</name>
+          <object_id>TEMP.bme</object_id>
+        </call_proc_for_object>
+        <call_proc_for_current_object>
+          <name>'date_aware_merge'</name>
+          <param name="static_oid">TEMP.bme</param>
+        </call_proc_for_current_object>
+        <index_select>
+          <index>'DYNAMIC_ENTITIES'</index>
+          <field name="static_oid">TEMP.bme</field>
+          <cursor>TEMP.dynamic_csr</cursor>
+          <loop>
+            <do>TEMP.curr_oid=OBJECT(TEMP.dynamic_csr).dynamic_oid</do>
+            <do>OBJECT(TEMP.curr_oid).operation='put'</do>
+            <do>OBJECT(TEMP.curr_oid).rate_type='ICB'</do>
+            <info>'Copying rates for obj['~TEMP.curr_oid~'] account:['~OBJECT(TEMP.bme).id_acc~'] subscription:['~OBJECT(TEMP.bme).id_sub~'] for ['~OBJECT(TEMP.curr_oid).start_date~']['~OBJECT(TEMP.curr_oid).end_date~']'</info>
+            <call_proc_for_object>
+              <name>'ic_billcodeproducts_call_entity'</name>
+              <object_id>TEMP.curr_oid</object_id>
+            </call_proc_for_object>
+            <call_proc_for_object>
+              <name>'persist_rate_schedules_to_db'</name>
+              <object_id>TEMP.curr_oid</object_id>
+            </call_proc_for_object>
+            <print>'Did I write to the db? If this is empty I did ['~OBJECT(TEMP.curr_oid).entity_error~']'</print>
+            <index_remove>
+              <index>'DYNAMIC_ENTITIES'</index>
+              <field name="static_oid">TEMP.curr_oid</field>
+            </index_remove>
+          </loop>
+        </index_select>
+        <index_remove>
+          <index>'DYNAMIC_ENTITIES'</index>
+          <field name="static_oid">TEMP.bme</field>
+        </index_remove>
+        <call_proc_for_current_object>
+          <name>'clear_structures'</name>
+        </call_proc_for_current_object>
+        <if>
+          <condition>OBJECT(TEMP.account_cursor).id_grp_mbr eq ''</condition>
+          <then>
+            <db_execute>
+              <login_object>GLOBAL.target_login</login_object>
+              <statement type="oracle">
+                "DELETE T_GSUBMEMBER WHERE id_acc="~GLOBAL.fake_id_acc
+              </statement>
+              <num_rows>TEMP.num_rows</num_rows>
+            </db_execute>
+          </then>
+          <else>
+            <db_call_proc>
+              <login_object>GLOBAL.target_login</login_object>
+              <name>'templt_recursive_inherit_pt'</name>
+              <param name="v_id_acc">OBJECT(TEMP.bme).id_acc</param>
+              <param name="v_id_sub">OBJECT(TEMP.bme).id_sub</param>
+              <param name="v_id_po">OBJECT(TEMP.account_cursor).id_po</param>
+              <param name="v_id_pt">OBJECT(TEMP.account_cursor).id_pt</param>
+              <param name="v_id_group">OBJECT(TEMP.account_cursor).id_group</param>
+            </db_call_proc>
+          </else>
+        </if>
+      </loop>
+    </db_select>
+
+    <info>'PO Rates'</info>
+    <info>'SPAWN BME TO GET:'</info>
+    <spawn>
+      <object_type>'IC_PO_FEATURECODEPRODUCTS'</object_type>
+      <object_id>TEMP.bme</object_id>
+    </spawn>
+
+    <db_select>
+      <login_object>GLOBAL.target_login</login_object>
+      <query type="oracle">
+        "SELECT
+        MIN(E.id_acc) id_acc, D.id_po
+        FROM T_PT_FEATURECODEPRODUCTS A
+        INNER JOIN T_ENUM_DATA B ON A.c_feature_code = B.id_enum_data
+        INNER JOIN T_RSCHED C ON C.id_sched = A.id_sched
+        INNER JOIN T_PL_MAP D ON D.id_pricelist = C.id_pricelist
+        AND D.id_pi_template = C.id_pi_template
+        AND D.id_paramtable = C.id_pt
+        AND D.id_sub IS NULL
+        LEFT OUTER JOIN T_SUB E ON E.id_po = D.id_po AND E.id_acc IS NOT NULL
+        WHERE 1=1
+        AND B.nm_enum_data IN ('intercall.com/ConfCommon/FeatureCode/UM', 'intercall.com/ConfCommon/FeatureCode/UMAB')
+        GROUP BY D.id_po
+        "
+      </query>
+      <cursor>TEMP.account_cursor</cursor>
+      <loop>
+        <if>
+          <condition>OBJECT(TEMP.account_cursor).id_acc eq ''</condition>
+          <then>
+            <db_execute>
+              <login_object>GLOBAL.target_login</login_object>
+              <statement type="oracle">
+                "INSERT INTO T_SUB (id_sub, id_sub_ext, id_acc, id_group, id_po, dt_crt, vt_start, vt_end) VALUES(-7000, sys_guid(), "~GLOBAL.fake_id_acc~", NULL, "~OBJECT(TEMP.account_cursor).id_po~", mtmindate(), mtmindate(), mtmaxdate())"
+              </statement>
+              <num_rows>TEMP.num_rows</num_rows>
+            </db_execute>
+            <do>OBJECT(TEMP.bme).id_acc=GLOBAL.fake_id_acc</do>
+          </then>
+          <else>
+            <do>OBJECT(TEMP.bme).id_acc=OBJECT(TEMP.account_cursor).id_acc</do>
+          </else>
+        </if>
+        <do>OBJECT(TEMP.bme).id_po=OBJECT(TEMP.account_cursor).id_po</do>
+        <do>OBJECT(TEMP.bme).start_date='20100601000000'</do>
+        <do>OBJECT(TEMP.bme).end_date=''</do>
+        <do>OBJECT(TEMP.bme).operation='get'</do>
+        <info>'Moving rates for account:['~OBJECT(TEMP.bme).id_acc~'] po:['~OBJECT(TEMP.bme).id_po~']'</info>
+        <call_proc_for_object>
+          <name>'ic_po_featurecodeproducts_call_entity'</name>
+          <object_id>TEMP.bme</object_id>
+        </call_proc_for_object>
+        <call_proc_for_current_object>
+          <name>'date_aware_merge'</name>
+          <param name="static_oid">TEMP.bme</param>
+        </call_proc_for_current_object>
+        <index_select>
+          <index>'DYNAMIC_ENTITIES'</index>
+          <field name="static_oid">TEMP.bme</field>
+          <cursor>TEMP.dynamic_csr</cursor>
+          <loop>
+
+            <do>TEMP.curr_oid=OBJECT(TEMP.dynamic_csr).dynamic_oid</do>
+            <do>OBJECT(TEMP.curr_oid).operation='put'</do>
+            <do>OBJECT(TEMP.curr_oid).rate_type='PO'</do>
+            <info>'Copying rates for obj['~TEMP.curr_oid~'] account:['~OBJECT(TEMP.bme).id_acc~'] po:['~OBJECT(TEMP.bme).id_po~'] for ['~OBJECT(TEMP.curr_oid).start_date~']['~OBJECT(TEMP.curr_oid).end_date~']'</info>
+            <call_proc_for_object>
+              <name>'ic_po_billcodeproducts_call_entity'</name>
+              <object_id>TEMP.curr_oid</object_id>
+            </call_proc_for_object>
+            <call_proc_for_object>
+              <name>'persist_rate_schedules_to_db'</name>
+              <object_id>TEMP.curr_oid</object_id>
+              <param name="rate_type">OBJECT(TEMP.curr_oid).rate_type</param>
+            </call_proc_for_object>
+            <print>'Did I write to the db? If this is empty I did ['~OBJECT(TEMP.curr_oid).entity_error~']'</print>
+            <index_remove>
+              <index>'DYNAMIC_ENTITIES'</index>
+              <field name="static_oid">TEMP.curr_oid</field>
+            </index_remove>
+          </loop>
+        </index_select>
+        <index_remove>
+          <index>'DYNAMIC_ENTITIES'</index>
+          <field name="static_oid">TEMP.bme</field>
+        </index_remove>
+        <call_proc_for_current_object>
+          <name>'clear_structures'</name>
+        </call_proc_for_current_object>
+        <if>
+          <condition>OBJECT(TEMP.account_cursor).id_acc eq ''</condition>
+          <then>
+            <db_execute>
+              <login_object>GLOBAL.target_login</login_object>
+              <statement type="oracle">
+                "DELETE T_SUB WHERE id_acc="~GLOBAL.fake_id_acc
+              </statement>
+              <num_rows>TEMP.num_rows</num_rows>
+            </db_execute>
+          </then>
+        </if>
+      </loop>
+    </db_select>
+  </proc>
+  <proc name="map_feature_code1">
+    <do>OBJECT.feature_code=GLOBAL.source_feature_code1</do>
+  </proc>
+  <proc name="map_feature_code2">
+    <do>OBJECT.feature_code=GLOBAL.source_feature_code2</do>
+  </proc>
+  <proc name="map_product_code1">
+    <do>OBJECT.product_code=GLOBAL.target_product_code1</do>
+  </proc>
+  <proc name="map_product_code2">
+    <do>OBJECT.product_code=GLOBAL.target_product_code2</do>
+  </proc>
+</procs>

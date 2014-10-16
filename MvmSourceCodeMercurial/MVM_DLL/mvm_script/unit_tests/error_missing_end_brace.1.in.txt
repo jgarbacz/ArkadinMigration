@@ -1,0 +1,5 @@
+loop{
+	foreach(myitem in mylist){
+		print(a);
+	//error
+}

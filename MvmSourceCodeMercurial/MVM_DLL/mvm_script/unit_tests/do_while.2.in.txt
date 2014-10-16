@@ -1,0 +1,6 @@
+do
+	do
+		print("a,b");
+	while(b);
+while(a);
+

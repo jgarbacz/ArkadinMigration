@@ -1,0 +1,3 @@
+VAR.field_name='id_acc';
+if(OBJECT.id_acc eq OBJECT[VAR.field_name])
+	print('yes the will be equal');

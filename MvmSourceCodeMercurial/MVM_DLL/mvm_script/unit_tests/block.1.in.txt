@@ -1,0 +1,8 @@
+{
+	print('in block');
+	print('still in block');
+	{
+		print('in nested block');
+		print('still in nested block');
+	}
+}

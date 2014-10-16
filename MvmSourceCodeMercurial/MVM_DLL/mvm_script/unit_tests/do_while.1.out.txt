@@ -1,0 +1,12 @@
+(
+  do_while
+    (
+      Ast_Element => 1
+    )
+    {
+      print
+        (
+          1
+        )
+    }
+)

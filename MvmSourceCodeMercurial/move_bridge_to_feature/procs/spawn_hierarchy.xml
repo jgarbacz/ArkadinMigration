@@ -1,0 +1,3389 @@
+<procs>
+
+  <proc name='bound_dates_by_account_dates'>
+    <param name='id_acc'/>
+    <param name='start_date' mode='in out'/>
+    <param name='end_date' mode='in out'/>
+
+    <startup>
+    <define_memory_index>
+      <index>'ACCOUNT_MIN_MAX_DATES'</index>
+      <key_field>'id_acc'</key_field>
+      <key_field>'start_date'</key_field>
+      <key_field>'end_date'</key_field>
+    </define_memory_index>
+    </startup>
+    
+    <do>TEMP.cached_account_dates = '0'</do>
+    <do>TEMP.account_start_date = ''</do>
+    <do>TEMP.account_end_date = ''</do>
+    <index_select_keys>
+      <index>'ACCOUNT_MIN_MAX_DATES'</index>
+      <cursor>TEMP.acc_date_csr</cursor>
+      <loop>
+        <if>
+          <condition>OBJECT(TEMP.acc_date_csr).id_acc eq TEMP.id_acc</condition>
+          <then>
+            <do>TEMP.cached_account_dates = '1'</do>
+            <do>TEMP.account_start_date = OBJECT(TEMP.acc_date_csr).start_date</do>
+            <do>TEMP.account_end_date = OBJECT(TEMP.acc_date_csr).end_date</do>
+          </then>
+        </if>
+      </loop>
+    </index_select_keys>
+
+    <if>
+      <condition>TEMP.cached_account_dates eq '0'</condition>
+      <then>
+        <index_clear>
+          <index>'ACCOUNT_MIN_MAX_DATES'</index>
+        </index_clear>
+        <db_select>
+          <login_object>GLOBAL.target_login</login_object>
+          <query type='oracle'>"select dt_crt start_date, mtmaxdate() end_date from t_account a where a.id_acc = "~TEMP.id_acc</query>
+          <query type='sql'>"select dt_crt start_date, dbo.MTMaxDate() end_date from t_account a where a.id_acc = "~TEMP.id_acc</query>
+          <cursor>TEMP.acc_date_csr</cursor>
+          <then>
+            <index_insert>
+              <index>'ACCOUNT_MIN_MAX_DATES'</index>
+              <field name="id_acc">OBJECT.id_acc</field>
+              <field name="start_date">OBJECT(TEMP.acc_date_csr).start_date</field>
+              <field name="end_date">OBJECT(TEMP.acc_date_csr).end_date</field>
+            </index_insert>
+            <do>TEMP.account_start_date = OBJECT(TEMP.acc_date_csr).start_date</do>
+            <do>TEMP.account_end_date = OBJECT(TEMP.acc_date_csr).end_date</do>
+          </then>
+        </db_select>
+      </then>
+    </if>
+
+    <if>
+      <condition>TEMP.account_start_date gt TEMP.start_date or TEMP.start_date eq ''</condition>
+      <then>
+        <do>TEMP.start_date = TEMP.account_start_date</do>
+      </then>
+    </if>
+
+
+    <if>
+      <condition>TEMP.account_end_date lt TEMP.end_date or TEMP.end_date eq ''</condition>
+      <then>
+        <do>TEMP.end_date = TEMP.account_end_date</do>
+      </then>
+    </if>
+
+  </proc>
+
+  <proc name='param_table_structure'>
+    
+    <call_proc_for_current_object>
+      <name>'determine_id_paramtable'</name>
+      <param name='id_paramtable'>OBJECT.id_paramtable</param>
+      <param name='id_template'>OBJECT.id_pi_template</param>
+      <param name='paramtable_name'>OBJECT.paramtable_name</param>
+      <param name='template_name'>OBJECT.template_name</param>
+    </call_proc_for_current_object>
+
+    <index_select>
+      <index>'MY_PT_FIELDS'</index>
+      <field name="id_param_table">OBJECT.id_paramtable</field>
+      <field name="is_key">'1'</field>
+      <cursor>TEMP.pt_field_csr</cursor>
+      <loop>
+        <call_proc_for_current_object>
+          <name>'add_metadata'</name>
+          <param name='static_oid'>OBJECT.static_oid</param>
+          <param name='field_name'>OBJECT(TEMP.pt_field_csr).field_name</param>
+          <param name='datatype'>OBJECT(TEMP.pt_field_csr).column_type</param>
+          <param name='namespace'>OBJECT(TEMP.pt_field_csr).namespace</param>
+          <param name='length'>OBJECT(TEMP.pt_field_csr).column_length</param>
+        </call_proc_for_current_object>
+        </loop>
+    </index_select>
+    <index_select>
+      <index>'MY_PT_FIELDS'</index>
+      <field name="id_param_table">OBJECT.id_paramtable</field>
+      <field name="is_key">'0'</field>
+      <cursor>TEMP.pt_field_csr</cursor>
+      <loop>
+        <call_proc_for_current_object>
+          <name>'add_metadata'</name>
+          <param name='static_oid'>OBJECT.static_oid</param>
+          <param name='field_name'>OBJECT(TEMP.pt_field_csr).field_name</param>
+          <param name='datatype'>OBJECT(TEMP.pt_field_csr).column_type</param>
+          <param name='namespace'>OBJECT(TEMP.pt_field_csr).namespace</param>
+          <param name='length'>OBJECT(TEMP.pt_field_csr).column_length</param>
+        </call_proc_for_current_object>
+      </loop>
+    </index_select>
+  </proc>
+
+  <proc name='handle_null_dates'>
+    <param name='start_date' mode='in out'/>
+    <param name='end_date' mode='in out'/>
+
+    <!--<print>'Getting min date to ['~TEMP.start_date~'] and max to ['~TEMP.end_date~']'</print>-->
+    <startup>
+      <define_memory_index>
+        <index>'MY_MINMAX_DATES'</index>
+        <key_field>'dummy'</key_field>
+        <field>'min_date'</field>
+        <field>'max_date'</field>
+      </define_memory_index>
+    </startup>
+
+    <if>
+      <condition>TEMP.start_date eq '' or TEMP.end_date eq ''</condition>
+      <then>
+    <do>TEMP.min_date = ''</do>
+    <do>TEMP.max_date = ''</do>
+    <index_select>
+      <index>'MY_MINMAX_DATES'</index>
+      <field name="dummy">'1'</field>
+      <cursor>TEMP.minmax_csr</cursor>
+      <then>
+        <do>TEMP.min_date = OBJECT(TEMP.minmax_csr).min_date</do>
+        <do>TEMP.max_date = OBJECT(TEMP.minmax_csr).max_date</do>
+      </then>
+      <else>
+        <db_select>
+          <login_object>GLOBAL.target_login</login_object>
+          <query type="oracle">"select mtmindate() min_date, mtmaxdate() max_date from dual"</query>
+          <query type="sql">"select dbo.MTMinDate() min_date, dbo.MTMaxDate() max_date"</query>
+          <cursor>TEMP.minmax_dates_csr</cursor>
+          <then>
+            <index_insert>
+              <index>'MY_MINMAX_DATES'</index>
+              <field name="dummy">'1'</field>
+              <field name="min_date">OBJECT(TEMP.minmax_dates_csr).min_date</field>
+              <field name="max_date">OBJECT(TEMP.minmax_dates_csr).max_date</field>
+            </index_insert>
+            <do>TEMP.min_date = OBJECT(TEMP.minmax_dates_csr).min_date</do>
+            <do>TEMP.max_date = OBJECT(TEMP.minmax_dates_csr).max_date</do>
+          </then>
+        </db_select>
+      </else>
+    </index_select>
+        <if>
+          <condition>TEMP.start_date eq ''</condition>
+          <then>
+            <do>TEMP.start_date = TEMP.min_date</do>
+          </then>
+        </if>
+        <if>
+          <condition>TEMP.end_date eq ''</condition>
+          <then>
+            <do>TEMP.end_date = TEMP.max_date</do>
+          </then>
+        </if>
+      </then>
+    </if>
+    <!--<print>'Setting min date to ['~TEMP.start_date~'] and max to ['~TEMP.end_date~']'</print>-->
+    
+  </proc>
+
+  <proc name='clear_structures'>
+    <index_clear>
+      <index>'DYNAMIC_ENTITIES'</index>
+    </index_clear>
+    <index_clear>
+      <index>'DYNAMIC_CHILDREN'</index>
+    </index_clear>
+    <index_clear>
+      <index>'DYNAMIC_CHILDREN_APPLIED'</index>
+    </index_clear>
+    <index_clear>
+      <index>'RATE_SCHED_IDX'</index>
+    </index_clear>
+    <index_clear>
+      <index>'RATE_SCHED_ROWS_IDX'</index>
+    </index_clear>
+    <index_clear>
+      <index>'MY_CACHED_RATE_SCHEDULES'</index>
+    </index_clear>
+    <index_clear>
+      <index>'OBJECT_IDX'</index>
+    </index_clear>
+    <index_clear>
+      <index>'ALL_SCHEDULES'</index>
+    </index_clear>
+  </proc>
+
+  <proc name='pivot_nonnull_priority_fields'>
+
+    <startup>
+      <define_memory_index>
+        <index>'NONNULL_PRIORITY_FIELDS'</index>
+        <key_field>'field_name'</key_field>
+      </define_memory_index>
+    </startup>
+
+    <index_clear>
+      <index>'NONNULL_PRIORITY_FIELDS'</index>
+    </index_clear>
+    
+    <do>TEMP.regex='^nonnull_priority_field(\d+)$'</do>
+    <object_field_value_select>
+    <object_id>OBJECT.object_id</object_id>
+    <cursor>TEMP.csr</cursor>
+    <cursor_field>'field'</cursor_field>
+    <cursor_value>'value'</cursor_value>
+    <loop>
+      <match>
+        <input>OBJECT(TEMP.csr).field</input>
+        <regex>"^nonnull_priority_field(\d+)$"</regex>
+        <success>TEMP.success</success>
+        <capture>TEMP.field_number</capture>
+      </match>
+      <if>
+        <condition>TEMP.success eq '1'</condition>
+        <then>
+          <to_lower>
+            <input>OBJECT(TEMP.csr).value</input>
+            <output>OBJECT(TEMP.csr).value</output>
+          </to_lower>
+          <index_insert>
+            <index>'NONNULL_PRIORITY_FIELDS'</index>
+            <field name="field_name">OBJECT(TEMP.csr).value</field>
+          </index_insert>
+          <index_insert>
+            <index>'NONNULL_PRIORITY_FIELDS'</index>
+            <field name="field_name">'c_'~OBJECT(TEMP.csr).value</field>
+          </index_insert>
+        </then>
+      </if>
+    </loop>
+    </object_field_value_select>
+  </proc>
+
+  <proc name='splice_rate_schedule'>
+    <param name='id_sched'/>
+    <param name='rate_oid'/>
+    <param name='after_position'/>
+    <index_remove>
+      <index>'RATE_SCHED_ROWS_IDX'</index>
+      <field name='id_sched'>'temp_splice'</field>
+    </index_remove>
+    <do>TEMP.counter='0'</do>
+    <index_select>
+      <index>'RATE_SCHED_ROWS_IDX'</index>
+      <field name="id_sched">TEMP.id_sched</field>
+      <cursor>TEMP.rsched_row_csr</cursor>
+      <loop>
+        <if>
+          <condition>TEMP.counter eq TEMP.after_position</condition>
+          <then>
+            <index_insert>
+              <index>'RATE_SCHED_ROWS_IDX'</index>
+              <field name="id_sched">'temp_splice'</field>
+              <field name="object_id">TEMP.rate_oid</field>
+            </index_insert>
+          </then>
+        </if>
+        <index_insert>
+          <index>'RATE_SCHED_ROWS_IDX'</index>
+          <field name="id_sched">'temp_splice'</field>
+          <field name="object_id">OBJECT(TEMP.rsched_row_csr).object_id</field>
+        </index_insert>
+        <do>TEMP.counter=TEMP.counter + 1</do>
+      </loop>
+    </index_select>
+    <if>
+      <condition>TEMP.counter lte TEMP.after_position</condition>
+      <then>
+        <index_insert>
+          <index>'RATE_SCHED_ROWS_IDX'</index>
+          <field name="id_sched">'temp_splice'</field>
+          <field name="object_id">TEMP.rate_oid</field>
+        </index_insert>
+      </then>
+    </if>
+    <do>TEMP.counter=0</do>
+    <index_remove>
+      <index>'RATE_SCHED_ROWS_IDX'</index>
+      <field name='id_sched'>TEMP.id_sched</field>
+    </index_remove>
+    <index_select>
+      <index>'RATE_SCHED_ROWS_IDX'</index>
+      <field name="id_sched">'temp_splice'</field>
+      <cursor>TEMP.rsched_row_csr</cursor>
+      <loop>
+        <do>TEMP.counter=TEMP.counter + 1</do>
+        <index_insert>
+          <index>'RATE_SCHED_ROWS_IDX'</index>
+          <field name="id_sched">TEMP.id_sched</field>
+          <field name="object_id">OBJECT(TEMP.rsched_row_csr).object_id</field>
+        </index_insert>
+      </loop>
+    </index_select>
+  </proc>
+
+  <proc name='determine_sched_order'>
+    <param name='id_sched'/>
+    <param name='rate_oid'/>
+    <param name='id_paramtable'/>
+    <param name='row_order' mode='out'/>
+    <do>TEMP.row_order = 0</do>
+    <do>TEMP.row_counter = 0</do>
+    <index_select>
+      <index>'RATE_SCHED_ROWS_IDX'</index>
+      <field name="id_sched">TEMP.id_sched</field>
+      <cursor>TEMP.rsched_row_csr</cursor>
+      <loop>
+        <do>TEMP.row_counter = TEMP.row_counter + 1</do>
+        <do>TEMP.my_rsched_row=OBJECT(TEMP.rsched_row_csr).object_id</do>
+        <do>TEMP.has_priority = '1'</do>
+        <do>TEMP.gets_priority = '0'</do>
+        <index_select>
+          <index>'MY_PT_FIELDS'</index>
+          <field name="id_param_table">TEMP.id_paramtable</field>
+          <field name="is_key">'1'</field>
+          <cursor>TEMP.pt_field_csr</cursor>
+          <loop>
+            <do>TEMP.my_pt_field=OBJECT(TEMP.pt_field_csr).column_name</do>
+            <get_object_field>
+              <object_id>OBJECT(TEMP.rsched_row_csr).object_id</object_id>
+              <field_name>TEMP.my_pt_field</field_name>
+              <output>TEMP.pt_value</output>
+            </get_object_field>
+            <get_object_field>
+              <object_id>TEMP.rate_oid</object_id>
+              <field_name>TEMP.my_pt_field</field_name>
+              <output>TEMP.rate_value</output>
+            </get_object_field>
+
+            
+            <index_select>
+              <index>'NONNULL_PRIORITY_FIELDS'</index>
+              <field name="field_name">TEMP.my_pt_field</field>
+              <cursor>TEMP.nonnull_csr</cursor>
+              <then>
+                <!--<print>'Getting priority for field ['~TEMP.my_pt_field~'] rate value = ['~TEMP.rate_value~'], pt_value = ['~TEMP.pt_value~']'</print>-->
+                <do>TEMP.gets_priority = '1'</do>
+                <if>
+                  <condition>(TEMP.rate_value ne '' and TEMP.rate_value ne TEMP.pt_value)</condition>
+                  <then>
+                    <!--<print>'Losing non-null priority for field ['~TEMP.my_pt_field~'] rate value = ['~TEMP.rate_value~'], pt_value = ['~TEMP.pt_value~']'</print>-->
+                    <do>TEMP.has_priority = '0'</do>
+                  </then>
+                </if>
+              </then>
+              <else>
+                <if>
+                  <condition>TEMP.rate_value ne TEMP.pt_value and TEMP.pt_value ne ''</condition>
+                  <then>
+                    <!--<print>'Losing priority for field ['~TEMP.my_pt_field~'] rate value = ['~TEMP.rate_value~'], pt_value = ['~TEMP.pt_value~']'</print>-->
+                    <do>TEMP.has_priority = '0'</do>
+                  </then>
+                </if>
+              </else>
+            </index_select>
+          </loop>
+        </index_select>
+        <if>
+          <condition>TEMP.has_priority eq '1' and TEMP.gets_priority eq '1'</condition>
+          <then>
+            <do>TEMP.row_order=TEMP.row_counter</do>
+          </then>
+        </if>
+      </loop>
+    </index_select>
+  </proc>
+
+  <proc name='persist_rate_schedules_to_db'>
+    <param name='rate_type' default='"ICB"'/>
+
+    <!--<print>'Here I have rate type of ['~TEMP.rate_type~']'</print>-->
+    <startup>
+      <define_memory_index>
+        <index>'ALL_SCHEDULES'</index>
+        <key_field>'id_paramtable'</key_field>
+        <key_field>'paramtable_name'</key_field>
+        <key_field>'id_pi_template'</key_field>
+      </define_memory_index>
+    </startup>
+
+    <do>TEMP.total_validation_errors='0'</do>
+    <index_select_keys>
+      <index>'ALL_SCHEDULES'</index>
+      <cursor>TEMP.sched_csr</cursor>
+      <loop>
+        <do>TEMP.validation_error=''</do>
+        <call_proc_for_current_object>
+          <name>'validate_rate_schedule_type_to_db'</name>
+          <param name='id_paramtable'>OBJECT(TEMP.sched_csr).id_paramtable</param>
+          <param name='id_pi_template'>OBJECT(TEMP.sched_csr).id_pi_template</param>
+          <param name='paramtable_name'>OBJECT(TEMP.sched_csr).paramtable_name</param>
+          <param name='validation_error'>TEMP.validation_error</param>
+          <param name='rate_type'>TEMP.rate_type</param>
+        </call_proc_for_current_object>
+        <if>
+          <condition>TEMP.validation_error ne ''</condition>
+          <then>
+            <do>TEMP.total_validation_errors = TEMP.total_validation_errors + 1</do>
+          </then>
+        </if>
+        <if>
+          <condition>OBJECT.entity_error eq ''</condition>
+          <then>
+            <do>OBJECT.entity_error = TEMP.validation_error</do>
+          </then>
+        </if>
+      </loop>
+    </index_select_keys>
+
+    <if>
+      <condition>TEMP.total_validation_errors eq '0'</condition>
+      <then>
+    <index_select_keys>
+      <index>'ALL_SCHEDULES'</index>
+      <cursor>TEMP.sched_csr</cursor>
+      <loop>
+        <call_proc_for_current_object>
+          <name>'persist_rate_schedule_type_to_db'</name>
+          <param name='id_paramtable'>OBJECT(TEMP.sched_csr).id_paramtable</param>
+          <param name='id_pi_template'>OBJECT(TEMP.sched_csr).id_pi_template</param>
+          <param name='paramtable_name'>OBJECT(TEMP.sched_csr).paramtable_name</param>
+          <param name='rate_type'>TEMP.rate_type</param>
+        </call_proc_for_current_object>
+      </loop>
+    </index_select_keys>
+      </then>
+      <else>
+        <debug>'Skipping persist to DB due to validation errors!!!!!!!!!!'</debug>
+      </else>
+    </if>
+  </proc>
+
+  <proc name='validate_rate_schedule_type_to_db'>
+    <param name='id_paramtable'/>
+    <param name='id_pi_template'/>
+    <param name='paramtable_name'/>
+    <param name='validation_error' mode='out'/>
+    <param name='rate_type' default='"ICB"'/>
+    <do>TEMP.validation_error=''</do>
+    <do>TEMP.rsched_object_type=TEMP.rate_type~'_SCHEDULE_'~TEMP.id_paramtable~'_'~TEMP.id_pi_template</do>
+    <index_select>
+      <index>'OBJECT_IDX'</index>
+      <field name="object_type">TEMP.rsched_object_type</field>
+      <cursor>TEMP.rsched_csr</cursor>
+      <loop>
+        <do>TEMP.my_rsched=OBJECT(TEMP.rsched_csr).object_id</do>
+        <do>TEMP.orig_id_sched=OBJECT(TEMP.my_rsched).id_sched</do>
+        <if>
+          <condition>OBJECT(TEMP.my_rsched).has_changes eq '1'</condition>
+          <then>
+            <do>OBJECT(TEMP.my_rsched).has_valid_rows = '0'</do>
+            <do>TEMP.n_order='0'</do>
+            <do>TEMP.n_order_offset='0'</do>
+            <index_select>
+              <index>'RATE_SCHED_ROWS_IDX'</index>
+              <field name="id_sched">TEMP.orig_id_sched</field>
+              <cursor>TEMP.rsched_row_csr</cursor>
+              <loop>
+                <do>TEMP.my_rsched_row=OBJECT(TEMP.rsched_row_csr).object_id</do>
+                <do>OBJECT(TEMP.my_rsched_row).is_deleted_row = '0'</do>
+                <index_select>
+                  <index>'MY_PT_FIELDS'</index>
+                  <field name="id_param_table">TEMP.id_paramtable</field>
+                  <field name="is_key">'1'</field>
+                  <cursor>TEMP.pt_field_csr</cursor>
+                  <loop>
+                    <do>TEMP.my_pt_field=OBJECT(TEMP.pt_field_csr).column_name</do>
+                    <do>TEMP.my_object_field=OBJECT(TEMP.pt_field_csr).field_name</do>
+                    <get_object_field>
+                      <object_id>OBJECT(TEMP.rsched_row_csr).object_id</object_id>
+                      <field_name>TEMP.my_pt_field</field_name>
+                      <output>TEMP.pt_value</output>
+                    </get_object_field>
+                    <if>
+                      <condition>OBJECT(TEMP.pt_field_csr).namespace ne '' and TEMP.pt_value ne ''</condition>
+                      <then>
+                        <call_proc_for_current_object>
+                          <name>'convert_to_enum'</name>
+                          <param name='value'>TEMP.pt_value</param>
+                          <param name='namespace'>OBJECT(TEMP.pt_field_csr).namespace</param>
+                          <param name='success'>TEMP.enum_success</param>
+                        </call_proc_for_current_object>
+                        <if>
+                          <condition>TEMP.enum_success ne '1'</condition>
+                          <then>
+                            <debug>'VALIDATION ERROR: Invalid enum for table ['~TEMP.paramtable_name~'], column['~TEMP.my_pt_field~'], value['~TEMP.pt_value~']'</debug>
+                            <if>
+                              <condition>TEMP.validation_error eq ''</condition>
+                              <then>
+                                <do>TEMP.validation_error='VALIDATION ERROR: Invalid enum for table ['~TEMP.paramtable_name~'], column['~TEMP.my_pt_field~'], value['~TEMP.pt_value~']'</do>
+                              </then>
+                            </if>
+                           </then>
+                        </if>
+                      </then>
+                    </if>
+                  </loop>
+                </index_select>
+                <do>TEMP.have_unset = '0'</do>
+                <do>TEMP.have_unset_force = '0'</do>
+                <do>TEMP.have_set = '0'</do>
+                <do>TEMP.my_set_fields = ''</do>
+                <index_select>
+                  <index>'MY_PT_FIELDS'</index>
+                  <field name="id_param_table">TEMP.id_paramtable</field>
+                  <field name="is_key">'0'</field>
+                  <cursor>TEMP.pt_field_csr</cursor>
+                  <loop>
+                    <do>TEMP.my_pt_field=OBJECT(TEMP.pt_field_csr).column_name</do>
+                    <do>TEMP.my_object_field=OBJECT(TEMP.pt_field_csr).field_name</do>
+                    <get_object_field>
+                      <object_id>OBJECT(TEMP.rsched_row_csr).object_id</object_id>
+                      <field_name>TEMP.my_pt_field</field_name>
+                      <output>TEMP.pt_value</output>
+                    </get_object_field>
+                    <print>'table ['~TEMP.paramtable_name~'], column['~TEMP.my_pt_field~'], value['~TEMP.pt_value~'] '~OBJECT.object_id</print>
+                    <if>
+                      <condition>OBJECT(TEMP.pt_field_csr).namespace ne '' and TEMP.pt_value ne '' and TEMP.pt_value ne GLOBAL.unset_value and TEMP.pt_value ne GLOBAL.unset_force_value</condition>
+                      <then>
+                        <call_proc_for_current_object>
+                          <name>'convert_to_enum'</name>
+                          <param name='value'>TEMP.pt_value</param>
+                          <param name='namespace'>OBJECT(TEMP.pt_field_csr).namespace</param>
+                          <param name='success'>TEMP.enum_success</param>
+                        </call_proc_for_current_object>
+                        <if>
+                          <condition>TEMP.enum_success ne '1'</condition>
+                          <then>
+                            <debug>'VALIDATION ERROR: Invalid enum for table ['~TEMP.paramtable_name~'], column['~TEMP.my_pt_field~'], value['~TEMP.pt_value~']'</debug>
+                            <if>
+                              <condition>TEMP.validation_error eq ''</condition>
+                              <then>
+                                <do>TEMP.validation_error='VALIDATION ERROR: Invalid enum for table ['~TEMP.paramtable_name~'], column['~TEMP.my_pt_field~'], value['~TEMP.pt_value~']'</do>
+                              </then>
+                            </if>
+                          </then>
+                        </if>
+                      </then>
+                    </if>
+                    <if>
+                      <condition>TEMP.pt_value ne GLOBAL.unset_value and TEMP.pt_value ne GLOBAL.unset_force_value and TEMP.pt_value ne ''</condition>
+                      <then>
+                        <do>TEMP.my_set_fields = TEMP.my_set_fields~'['~TEMP.paramtable_name~'.'~TEMP.my_pt_field~']'</do>
+                        <do>TEMP.have_set='1'</do>
+                        <do>OBJECT(TEMP.my_rsched).has_valid_rows = '1'</do>
+                      </then>
+                    </if>
+                    <if>
+                      <condition>TEMP.pt_value eq GLOBAL.unset_value</condition>
+                      <then>
+                        <print>'In here with UNSET of ['~TEMP.pt_value~']'</print>
+                        <do>TEMP.have_unset='1'</do>
+                      </then>
+                    </if>
+                    <if>
+                      <condition>TEMP.pt_value eq GLOBAL.unset_force_value</condition>
+                      <then>
+                        <do>TEMP.have_unset_force='1'</do>
+                      </then>
+                    </if>
+                    <if>
+                      <condition>TEMP.pt_value eq ''</condition>
+                      <then>
+                        <debug>'VALIDATION ERROR: No value for table ['~TEMP.paramtable_name~'], column['~TEMP.my_pt_field~'], value['~TEMP.pt_value~']'</debug>
+                        <if>
+                          <condition>TEMP.validation_error eq ''</condition>
+                          <then>
+                            <do>TEMP.validation_error='VALIDATION ERROR: No value for table ['~TEMP.paramtable_name~'], column['~TEMP.my_pt_field~'], value['~TEMP.pt_value~']'</do>
+                          </then>
+                        </if>
+                      </then>
+                    </if>
+                  </loop>
+                </index_select>
+                <if>
+                  <condition>TEMP.have_unset eq '1' and TEMP.have_set eq '1'</condition>
+                  <then>
+                    <info>'VALIDATION ERROR: The following fields will be blown away by an unset: '~TEMP.my_set_fields</info>
+                    <if>
+                      <condition>TEMP.validation_error eq ''</condition>
+                      <then>
+                        <do>TEMP.validation_error='VALIDATION ERROR: The following fields will be blown away by an unset: '~TEMP.my_set_fields</do>
+                      </then>
+                    </if>
+                  </then>
+                </if>
+                <if>
+                  <condition>TEMP.have_unset eq '1' or TEMP.have_unset_force eq '1'</condition>
+                  <then>
+                    <do>OBJECT(TEMP.my_rsched_row).is_deleted_row = '1'</do>
+                  </then>
+                </if>
+              </loop>
+            </index_select>
+          </then>
+        </if>
+      </loop>
+    </index_select>
+  </proc>
+    
+
+  <proc name='persist_rate_schedule_type_to_db'>
+    <param name='id_paramtable'/>
+    <param name='id_pi_template'/>
+    <param name='paramtable_name'/>
+    <param name='rate_type' default='"ICB"'/>
+    <do>TEMP.rsched_object_type=TEMP.rate_type~'_SCHEDULE_'~TEMP.id_paramtable~'_'~TEMP.id_pi_template</do>
+    <index_select>
+      <index>'OBJECT_IDX'</index>
+      <field name="object_type">TEMP.rsched_object_type</field>
+      <cursor>TEMP.rsched_csr</cursor>
+      <loop>
+        <do>TEMP.my_rsched=OBJECT(TEMP.rsched_csr).object_id</do>
+        <do>TEMP.orig_id_sched=OBJECT(TEMP.my_rsched).id_sched</do>
+        <if>
+          <condition>OBJECT(TEMP.my_rsched).has_valid_rows eq '0' and TEMP.orig_id_sched GT '0'</condition>
+          <then>
+            <print>'I WANT TO DELETE THE SCHEDULE ['~TEMP.orig_id_sched~']'</print>
+          </then>
+        </if>
+        <if>
+          <condition>(OBJECT(TEMP.my_rsched).id_sched LT '0' or OBJECT(TEMP.my_rsched).dates_changed eq '1') and OBJECT(TEMP.my_rsched).has_valid_rows ne '0'</condition>
+          <then>
+            <if>
+              <condition>OBJECT(TEMP.my_rsched).id_sched LT '0'</condition>
+              <then>
+                <do>OBJECT(TEMP.my_rsched).id_sched=''</do>
+              </then>
+            </if>
+                <do>OBJECT(TEMP.my_rsched).dates_changed='0'</do>
+            <db_call_proc>
+              <login_object>GLOBAL.target_login</login_object>
+          <name>'mvm_persist_rsched'</name>
+          <alias>'new_sched'</alias>
+          <param name="my_id_pt">TEMP.id_paramtable</param>
+          <param name="v_id_sched">OBJECT(TEMP.my_rsched).id_sched</param>
+          <param name="my_id_pricelist">OBJECT(TEMP.my_rsched).id_pricelist</param>
+          <param name="my_id_pi_template">OBJECT(TEMP.my_rsched).id_pi_template</param>
+          <param name="v_start_dt">OBJECT(TEMP.my_rsched).orig_start_date</param>
+          <param name="v_start_type">OBJECT(TEMP.my_rsched).n_begintype</param>
+          <param name="v_begin_offset">OBJECT(TEMP.my_rsched).n_beginoffset</param>
+          <param name="v_end_dt">OBJECT(TEMP.my_rsched).orig_end_date</param>
+          <param name="v_end_type">OBJECT(TEMP.my_rsched).n_endtype</param>
+          <param name="v_end_offset">OBJECT(TEMP.my_rsched).n_endoffset</param>
+          <param name="is_public">'0'</param>
+          <param name="my_id_sub">OBJECT(TEMP.my_rsched).id_sub</param>
+          <param name="v_id_csr">'129'</param>
+        </db_call_proc>
+          </then>
+        </if>
+        <if>
+          <condition>OBJECT(TEMP.my_rsched).has_changes eq '1' and OBJECT(TEMP.my_rsched).has_valid_rows ne '0'</condition>
+          <then>
+            <db_call_proc>
+              <login_object>GLOBAL.target_login</login_object>
+              <name>'getcurrentid'</name>
+              <param name="nm_current">'id_audit'</param>
+              <param name="id_current">TEMP.id_audit</param>
+              <param name="p_nm_current">'id_audit'</param>
+              <param name="p_id_current">TEMP.id_audit</param>
+            </db_call_proc>
+
+            <do>TEMP.old_tt_end = ''</do>
+            <do>TEMP.new_tt_start = ''</do>
+            <do>TEMP.new_tt_end = ''</do>
+            <db_select>
+              <login_object>GLOBAL.target_login</login_object>
+              <query type="oracle">"select sysdate - 1/86400 old_tt_end, sysdate new_tt_start, mtmaxdate() new_tt_end from dual"</query>
+              <query type="sql">"select dateadd(second,-1,convert(datetime,convert(varchar(19), getdate(), 120))) old_tt_end, convert(datetime,convert(varchar(19), getdate(), 120)) new_tt_start, dbo.MTMaxDate() new_tt_end"</query>
+              <cursor>TEMP.tt_dates_csr</cursor>
+              <loop>
+                <do>TEMP.old_tt_end = OBJECT(TEMP.tt_dates_csr).old_tt_end</do>
+                <do>TEMP.new_tt_start = OBJECT(TEMP.tt_dates_csr).new_tt_start</do>
+                <do>TEMP.new_tt_end = OBJECT(TEMP.tt_dates_csr).new_tt_end</do>
+              </loop>
+            </db_select>
+
+            <if>
+              <condition>TEMP.orig_id_sched GT '0'</condition>
+              <then>
+                <db_execute>
+                  <login_object>GLOBAL.target_login</login_object>
+                  <statement type="oracle">
+                    "update "~TEMP.paramtable_name~" a set tt_end = to_date("~TEMP.old_tt_end~",'YYYYMMDDHH24MISS') where a.id_sched = "~TEMP.orig_id_sched~" and a.tt_end = mtmaxdate()"
+                  </statement>
+                  <statement type="sql">
+                    "update jonah_"~TEMP.paramtable_name~" set tt_end = convert(datetime,'"~TEMP.old_tt_end~"',121) where id_sched = "~TEMP.orig_id_sched~" and tt_end = dbo.MTMaxDate()"
+                  </statement>
+                  <num_rows>TEMP.num_rows</num_rows>
+                </db_execute>
+              </then>
+            </if>
+            <do>TEMP.n_order='-1'</do>
+            <do>TEMP.n_order_offset='0'</do>
+        <index_select>
+          <index>'RATE_SCHED_ROWS_IDX'</index>
+          <field name="id_sched">TEMP.orig_id_sched</field>
+          <cursor>TEMP.rsched_row_csr</cursor>
+          <loop>
+            <do>TEMP.my_rsched_row=OBJECT(TEMP.rsched_row_csr).object_id</do>
+                <if>
+                  <condition>OBJECT(TEMP.my_rsched_row).n_order eq ''</condition>
+                  <then>
+                    <!-- Here we can assign n-order in the order we got them because it's a new schedule and we see them LIFO -->
+                    <do>TEMP.n_order=TEMP.n_order + 1</do>
+                    <do>TEMP.n_order_offset=TEMP.n_order_offset + 1</do>
+                  </then>
+                  <else>
+                    <!-- here we have to offset the existing n_order by however many blanks we've seen so far. This is only guaranteed 
+                        to work if the rows come in in n_order order with blank n_orders interleaved                          -->
+                    <do>TEMP.n_order=OBJECT(TEMP.my_rsched_row).n_order + TEMP.n_order_offset</do>
+                  </else>
+                </if>
+                    <do>OBJECT(TEMP.my_rsched_row).n_order = TEMP.n_order</do>
+                    <do>OBJECT(TEMP.my_rsched_row).tt_start = TEMP.new_tt_start</do>
+                    <do>OBJECT(TEMP.my_rsched_row).tt_end = TEMP.new_tt_end</do>
+                    <do>OBJECT(TEMP.my_rsched_row).id_sched = OBJECT(TEMP.my_rsched).id_sched</do>
+            <do>OBJECT(TEMP.my_rsched_row).id_audit = TEMP.id_audit</do>
+            <do>TEMP.hack_table_name=TEMP.paramtable_name</do>
+            <if>
+              <condition>OBJECT(GLOBAL.target_login).database_type eq 'sql'</condition>
+              <then>
+                <do>TEMP.hack_table_name='jonah_'~TEMP.paramtable_name</do>
+              </then>
+            </if>
+            <if>
+              <condition>OBJECT(TEMP.my_rsched_row).is_deleted_row ne '1'</condition>
+              <then>
+                    <db_insert_dynamic>
+                      <login_object>GLOBAL.target_login</login_object>
+                      <name>TEMP.hack_table_name</name>
+                      <object_id>TEMP.my_rsched_row</object_id>
+                    </db_insert_dynamic>
+              </then>
+            </if>
+               
+            <if>
+              <condition>OBJECT(TEMP.my_rsched_row).id_sched ne TEMP.orig_id_sched</condition>
+              <then>
+                <index_insert>
+                  <index>'RATE_SCHED_ROWS_IDX'</index>
+                  <field name="id_sched">OBJECT(TEMP.my_rsched).id_sched</field>
+                  <field name="object_id">TEMP.my_rsched_row</field>
+                </index_insert>
+              </then>
+            </if>
+          </loop>
+        </index_select>
+        <if>
+          <condition>OBJECT(TEMP.my_rsched).id_sched ne TEMP.orig_id_sched</condition>
+          <then>
+        <index_remove>
+          <index>'RATE_SCHED_ROWS_IDX'</index>
+          <field name='id_sched'>TEMP.orig_id_sched</field>
+        </index_remove>
+          </then>
+        </if>
+        <do>OBJECT(TEMP.my_rsched).has_changes = '0'</do>
+          </then>
+        </if>
+      </loop>
+    </index_select>
+    
+  </proc>
+
+  <proc name='test_print_self'>
+    <print>'My object_type = ['~OBJECT.object_type~']['~OBJECT.object_id~'] and dates ['~OBJECT.start_date~']['~OBJECT.end_date~'] and rate of ['~OBJECT.c_bridge_rate~']'</print>
+  </proc>
+
+  <proc name='determine_id_paramtable'>
+    <param name='id_paramtable' mode='in out'/>
+    <param name='id_template' mode='in out'/>
+    <param name='paramtable_name' mode='in out'/>
+    <param name='template_name' mode='in'/>
+    <to_lower>
+      <input>TEMP.paramtable_name</input>
+      <output>TEMP.paramtable_name</output>
+    </to_lower>
+    <to_lower>
+      <input>TEMP.template_name</input>
+      <output>TEMP.template_name</output>
+    </to_lower>
+    <startup>
+      <define_memory_index>
+        <index>'MY_PT_NAMES'</index>
+        <key_field>'id_paramtable'</key_field>
+        <field>'paramtable_name'</field>
+      </define_memory_index>
+      <define_memory_index>
+        <index>'MY_PT_LOOKUP'</index>
+        <key_field>'paramtable_name'</key_field>
+        <field>'id_paramtable'</field>
+        <field>'full_paramtable_name'</field>
+      </define_memory_index>
+      
+    <db_select>
+      <login_object>GLOBAL.target_login</login_object>
+      <query type='oracle'>"select id_paramtable, substr(lower(nm_instance_tablename),6,100) paramtable_name, lower(nm_instance_tablename) nm_instance_tablename  from t_rulesetdefinition"</query>
+      <query type='sql'>"select id_paramtable, substring(lower(nm_instance_tablename),6,100) paramtable_name, lower(nm_instance_tablename) nm_instance_tablename  from t_rulesetdefinition"</query>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <index_insert>
+          <index>'MY_PT_NAMES'</index>
+          <field name="id_paramtable">OBJECT(TEMP.csr).id_paramtable</field>
+          <field name="paramtable_name">OBJECT(TEMP.csr).nm_instance_tablename</field>
+        </index_insert>
+        <index_insert>
+          <index>'MY_PT_LOOKUP'</index>
+          <field name="id_paramtable">OBJECT(TEMP.csr).id_paramtable</field>
+          <field name="paramtable_name">OBJECT(TEMP.csr).nm_instance_tablename</field>
+          <field name="full_paramtable_name">OBJECT(TEMP.csr).nm_instance_tablename</field>
+        </index_insert>
+        <index_insert>
+          <index>'MY_PT_LOOKUP'</index>
+          <field name="id_paramtable">OBJECT(TEMP.csr).id_paramtable</field>
+          <field name="paramtable_name">OBJECT(TEMP.csr).paramtable_name</field>
+          <field name="full_paramtable_name">OBJECT(TEMP.csr).nm_instance_tablename</field>
+        </index_insert>
+      </loop>
+    </db_select>
+
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query>
+          "select d.id_pt id_paramtable, c.id_template from (select a.id_pt, count(*) my_count from t_pi_rulesetdef_map a
+          inner join t_pi b on a.id_pi = b.id_pi and (b.nm_productview not like 'intercall.com/pc%' or b.nm_productview='intercall.com/pc54')
+          inner join t_pi_template c on b.id_pi = c.id_pi
+          group by a.id_pt having count(*) = 1) d
+          inner join t_pi_rulesetdef_map a on d.id_pt = a.id_pt
+          inner join t_pi b on a.id_pi = b.id_pi and (b.nm_productview not like 'intercall.com/pc%' or b.nm_productview='intercall.com/pc54')
+          inner join t_pi_template c on b.id_pi = c.id_pi"</query>
+        <cursor>TEMP.csr</cursor>
+        <run>
+          <create_memory_index_from_cursor>
+            <index>'MY_SINGLE_TEMPLATE_PTS'</index>
+            <cursor>TEMP.csr</cursor>
+            <key_field>'id_paramtable'</key_field>
+          </create_memory_index_from_cursor>
+        </run>
+      </db_select>
+
+      <define_memory_index>
+        <index>'MY_PI_TEMPLATE_IDS'</index>
+        <key_field>'template_name'</key_field>
+        <field>'id_template'</field>
+      </define_memory_index>
+      <define_memory_index>
+        <index>'MY_PI_TEMPLATE_NAMES'</index>
+        <key_field>'id_template'</key_field>
+        <field>'template_name'</field>
+      </define_memory_index>
+
+      <!--<define_memory_index>
+        <index>'OBJECT_FIELDS'</index>
+        <key_field>'static_oid'</key_field>
+        <field>'field_name'</field>
+      </define_memory_index>-->
+      
+      <!--<define_memory_index>
+        <index>'OBJECT_FIELD_METADATA'</index>
+        <key_field>'static_oid'</key_field>
+        <key_field>'field_name'</key_field>
+        <field>'datatype'</field>
+        <field>'namespace'</field>
+        <field>'length'</field>
+      </define_memory_index>-->
+      
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <query>
+          "select lower(b.nm_name) template_name, a.id_template
+          from t_pi_template a
+          inner join t_base_props b on a.id_template = b.id_prop
+          where b.nm_name IS NOT NULL"
+        </query>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <index_insert>
+            <index>'MY_PI_TEMPLATE_IDS'</index>
+            <field name="template_name">OBJECT(TEMP.csr).template_name</field>
+            <field name="id_template">OBJECT(TEMP.csr).id_template</field>
+          </index_insert>
+          <index_insert>
+            <index>'MY_PI_TEMPLATE_NAMES'</index>
+            <field name="template_name">OBJECT(TEMP.csr).template_name</field>
+            <field name="id_template">OBJECT(TEMP.csr).id_template</field>
+          </index_insert>
+        </loop>
+      </db_select>
+
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <!--<query type="oracle">
+          "select decode(b_required,'Y','0','1') is_key, lower(nm_column_name) column_name, lower(nm_name) field_name, decode(nm_space,NULL,'',lower(nm_space||'/'||nm_enum)) namespace, display_name,
+          is_condition, column_operator, is_operator, has_operator_name, is_action, column_type, column_length, is_required, default_value from mvm_param_table_prop a"</query>-->
+        <query type="oracle">"select case b_required when 'Y' then '0' else '1' end is_key, lower(nm_column_name) column_name, lower(nm_name) field_name, decode(nm_space,NULL,'',lower(nm_space||'/'||nm_enum)) namespace, a.* from t_param_table_prop a"</query>
+        <!--<query type="sql">
+          "select case b_required when 'N' then '1' else '0' end is_key, lower(b.name) column_name, lower(substring(b.name,3,100)) field_name, 
+          case nm_space when NULL then '' else lower(nm_space+'/'+nm_enum) end namespace, d.id_param_table_prop, 
+          c.id_paramtable id_param_table, d.nm_name, d.nm_data_type, d.nm_column_name, d.b_required, 
+          d.b_composite_idx, d.b_single_idx, d.b_part_of_key, d.b_exportable, d.b_filterable, d.b_user_visible,
+          d.nm_default_value, d.n_prop_type, d.nm_space, d.nm_enum, d.b_core, d.b_columnoperator, d.nm_operatorval
+          from t_rulesetdefinition c
+          inner join sysobjects a on UPPER(a.name) = UPPER(c.nm_instance_tablename)
+          inner join syscolumns b on a.id = b.id
+          left outer join t_param_Table_prop d on LOWER(b.name) = LOWER(d.nm_column_name) and c.id_paramtable = d.id_param_table
+          where lower(b.name) not in('id_sched','n_order','tt_start','tt_end','id_audit')"</query>-->
+        <query type="sql">
+          "select b.id_paramtable id_param_table, case lower(a.is_condition) when 'y' then 1 else 0 end is_key, 'c_'+lower(a.column_name) column_name, lower(a.column_name) field_name,
+          case a.column_type when 'enum' then lower(a.enum_namespace + '/' + a.enum_type) end namespace, display_name,
+          is_condition, column_operator, is_operator, has_operator_name, is_action, column_type, column_length, is_required, default_value
+          from mvm_param_table_props a
+          inner join t_rulesetdefinition b on ('t_pt_'+ LOWER(a.paramtable_name)) = LOWER(nm_instance_tablename)
+          where a.is_condition = 'Y' or a.is_action = 'Y'"</query>
+        <cursor>TEMP.csr</cursor>
+        <run>
+          <create_memory_index_from_cursor>
+            <index>'MY_PT_FIELDS'</index>
+            <cursor>TEMP.csr</cursor>
+            <key_field>'id_param_table'</key_field>
+            <key_field>'is_key'</key_field>
+          </create_memory_index_from_cursor>
+        </run>
+      </db_select>
+
+    </startup>
+    
+    <do>TEMP.found_template eq '0'</do>
+    <do>TEMP.found_pt='0'</do>
+    <index_select>
+      <index>'MY_PT_LOOKUP'</index>
+      <field name="paramtable_name">TEMP.paramtable_name</field>
+      <cursor>TEMP.pt_id_csr</cursor>
+      <then>
+        <do>TEMP.id_paramtable = OBJECT(TEMP.pt_id_csr).id_paramtable</do>
+        <do>TEMP.paramtable_name = OBJECT(TEMP.pt_id_csr).full_paramtable_name</do>
+        <do>TEMP.found_pt='1'</do>
+      </then>
+
+    </index_select>
+
+    <if>
+      <condition>TEMP.found_pt eq '0'</condition>
+      <then>
+        <index_select>
+          <index>'MY_PT_NAMES'</index>
+          <field name="id_paramtable">TEMP.id_paramtable</field>
+          <cursor>TEMP.pt_name_csr</cursor>
+          <then>
+            <do>TEMP.paramtable_name = OBJECT(TEMP.pt_name_csr).paramtable_name</do>
+            <do>TEMP.found_pt='1'</do>
+          </then>
+          <else>
+            <print>'Cannot find paramtable for given id['~TEMP.id_paramtable~'] and name['~TEMP.paramtable_name~']'</print>
+          </else>
+        </index_select>
+      </then>
+    </if>
+
+        <index_select>
+          <index>'MY_SINGLE_TEMPLATE_PTS'</index>
+          <field name="id_paramtable">TEMP.id_paramtable</field>
+          <cursor>TEMP.pi_template_csr</cursor>
+          <then>
+            <do>TEMP.id_template = OBJECT(TEMP.pi_template_csr).id_template</do>
+            <do>TEMP.found_template='1'</do>
+          </then>
+        </index_select>
+
+    <!-- Put this second so that we match the template to the paramtable if there's only 1 possible match. I.e. avoid incorrect info passed in.
+              The index_select above will set the id_template before we look up the name to ensure consistenct.                                -->
+    <index_select>
+      <index>'MY_PI_TEMPLATE_NAMES'</index>
+      <field name="id_template">TEMP.id_template</field>
+      <cursor>TEMP.template_name_csr</cursor>
+      <then>
+        <do>TEMP.template_name = OBJECT(TEMP.template_name_csr).template_name</do>
+        <do>TEMP.found_template='1'</do>
+      </then>
+    </index_select>
+    
+    <if>
+      <condition>TEMP.found_template eq '0'</condition>
+      <then>
+            <index_select>
+              <index>'MY_PI_TEMPLATE_IDS'</index>
+              <field name="template_name">TEMP.template_name</field>
+              <cursor>TEMP.pi_template_id_csr</cursor>
+              <then>
+                <do>TEMP.id_template = OBJECT(TEMP.pi_template_id_csr).id_template</do>
+                <do>TEMP.found_template='1'</do>
+              </then>
+              <else>
+                <print>'Cannot find pi_template for given id['~TEMP.id_paramtable~'], name['~TEMP.paramtable_name~'] and template_name['~TEMP.template_name~']'</print>
+              </else>
+            </index_select>
+      </then>
+    </if>
+  </proc>
+
+  <proc name='determine_date_overlaps'>
+    <param name='main_start_date'/>
+    <param name='main_end_date'/>
+    <param name='other_start_date'/>
+    <param name='other_end_date'/>
+    <param name='overlap_type' mode='out'/>
+    <if>
+      <condition>TEMP.main_start_date lt TEMP.other_end_date and TEMP.main_end_date gt TEMP.other_start_date</condition>
+      <!-- We have an overlaps! -->
+      <then>
+      <if>
+        <condition>TEMP.other_start_date gte TEMP.main_start_date</condition>
+        <then>
+          <!-- new range starts after main range -->
+          <if>
+            <condition>TEMP.other_end_date lte TEMP.main_end_date</condition>
+            <then>
+              <!-- print>'Found a range that is fully contained by the main range'</print -->
+              <do>TEMP.overlap_type='fully_contained'</do>
+            </then>
+            <else>
+              <!-- print>'Found a range that ends after the main range'</print -->
+              <do>TEMP.overlap_type='start_contained'</do>
+            </else>
+          </if>
+        </then>
+        <else>
+          <!-- new range starts before main range -->
+          <if>
+            <condition>TEMP.other_end_date lte TEMP.main_end_date</condition>
+            <then>
+              <!-- print>'Found a range that starts before the main range and ends before the main range'</print -->
+              <do>TEMP.overlap_type='end_contained'</do>
+            </then>
+            <else>
+              <!-- print>'Found a range fully contains by the main range'</print -->
+              <do>TEMP.overlap_type='not_contained'</do>
+            </else>
+          </if>
+        </else>
+      </if>
+      </then>
+      <else>
+        <do>TEMP.overlap_type='no_overlap'</do>
+      </else>
+    </if>
+  </proc>
+    
+
+  <proc name='manage_add_rate_gaps'>
+    <param name='rsched_oid'/>
+    <param name='rate_oid'/>
+
+    <startup>
+      <define_memory_index>
+        <index>'ADD_RATE_GAPS'</index>
+        <key_field>'start_date'</key_field>
+        <key_field>'end_date'</key_field>
+      </define_memory_index>
+    </startup>
+    
+    <index_select_keys>
+      <index>'ADD_RATE_GAPS'</index>
+      <cursor>TEMP.gap_csr</cursor>
+      <loop>
+        <call_proc_for_current_object>
+          <name>'determine_date_overlaps'</name>
+          <param name='main_start_date'>OBJECT(TEMP.rsched_oid).start_date</param>
+          <param name='main_end_date'>OBJECT(TEMP.rsched_oid).end_date</param>
+          <param name='other_start_date'>OBJECT(TEMP.gap_csr).start_date</param>
+          <param name='other_end_date'>OBJECT(TEMP.gap_csr).end_date</param>
+          <param name='overlap_type'>TEMP.overlap_type</param>
+        </call_proc_for_current_object>
+        <!--<print>'Inserting0 ['~TEMP.overlap_type~']['~OBJECT(TEMP.gap_csr).start_date~']['~OBJECT(TEMP.gap_csr).end_date~']'</print>-->
+        <if>
+          <condition>TEMP.overlap_type eq 'fully_contained'</condition>
+          <then>
+            <!-- schedule fully contains gap, i.e. we're done with this gap -->
+            <index_remove>
+              <index>'ADD_RATE_GAPS'</index>
+              <field name='start_date'>OBJECT(TEMP.gap_csr).start_date</field>
+              <field name='end_date'>OBJECT(TEMP.gap_csr).end_date</field>
+            </index_remove>
+          </then>
+        </if>
+        <if>
+          <condition>TEMP.overlap_type eq 'start_contained'</condition>
+          <then>
+            <!-- gap starts on or after schedule but ends after schedule, i.e. bisect gap-->
+            <index_remove>
+              <index>'ADD_RATE_GAPS'</index>
+              <field name='start_date'>OBJECT(TEMP.gap_csr).start_date</field>
+              <field name='end_date'>OBJECT(TEMP.gap_csr).end_date</field>
+            </index_remove>
+            <!--<print>'Inserting1 ['~OBJECT(TEMP.rsched_oid).end_date~']['~OBJECT(TEMP.gap_csr).end_date~']'</print>-->
+            <index_insert>
+              <index>'ADD_RATE_GAPS'</index>
+              <field name='start_date'>OBJECT(TEMP.rsched_oid).end_date</field>
+              <field name='end_date'>OBJECT(TEMP.gap_csr).end_date</field>
+            </index_insert>
+          </then>
+        </if>
+        <if>
+          <condition>TEMP.overlap_type eq 'end_contained'</condition>
+          <then>
+            <!-- gap starts before the schedule and ends before the schedule, i.e. bisect -->
+            <index_remove>
+              <index>'ADD_RATE_GAPS'</index>
+              <field name='start_date'>OBJECT(TEMP.gap_csr).start_date</field>
+              <field name='end_date'>OBJECT(TEMP.gap_csr).end_date</field>
+            </index_remove>
+            <!--<print>'Inserting2 ['~OBJECT(TEMP.gap_csr).start_date~']['~OBJECT(TEMP.rsched_oid).start_date~']'</print>-->
+            <index_insert>
+              <index>'ADD_RATE_GAPS'</index>
+              <field name='start_date'>OBJECT(TEMP.gap_csr).start_date</field>
+              <field name='end_date'>OBJECT(TEMP.rsched_oid).start_date</field>
+            </index_insert>
+          </then>
+        </if>
+        <if>
+          <condition>TEMP.overlap_type eq 'not_contained'</condition>
+          <then>
+            <!-- Rate schedule fully contained by the date gap, i.e. trisect -->
+            <index_remove>
+              <index>'ADD_RATE_GAPS'</index>
+              <field name='start_date'>OBJECT(TEMP.gap_csr).start_date</field>
+              <field name='end_date'>OBJECT(TEMP.gap_csr).end_date</field>
+            </index_remove>
+            <!--<print>'Inserting3 ['~OBJECT(TEMP.gap_csr).start_date~']['~OBJECT(TEMP.rsched_oid).start_date~']'</print>-->
+            <index_insert>
+              <index>'ADD_RATE_GAPS'</index>
+              <field name='start_date'>OBJECT(TEMP.gap_csr).start_date</field>
+              <field name='end_date'>OBJECT(TEMP.rsched_oid).start_date</field>
+            </index_insert>
+            <!--<print>'Inserting4 ['~OBJECT(TEMP.rsched_oid).end_date~']['~OBJECT(TEMP.gap_csr).end_date~']'</print>-->
+            <index_insert>
+              <index>'ADD_RATE_GAPS'</index>
+              <field name='start_date'>OBJECT(TEMP.rsched_oid).end_date</field>
+              <field name='end_date'>OBJECT(TEMP.gap_csr).end_date</field>
+            </index_insert>
+          </then>
+        </if>
+      </loop>
+    </index_select_keys>
+  </proc>
+
+  <proc name='bisect_rate_schedule'>
+    <param name='curr_schedule'/>
+    <param name='bisect_date'/>
+    <param name='is_new_first'/>
+    <param name='my_new_schedule' mode='out'/>
+
+    <call_proc_for_current_object>
+      <name>'cache_pt_schedule'</name>
+      <param name='curr_rsched'>TEMP.curr_schedule</param>
+    </call_proc_for_current_object>
+
+    <spawn>
+      <object_type>OBJECT(TEMP.curr_schedule).object_type</object_type>
+      <object_id>TEMP.my_new_schedule</object_id>
+    </spawn>
+    <inherit_object>
+      <source>TEMP.curr_schedule</source>
+      <target>TEMP.my_new_schedule</target>
+    </inherit_object>
+
+    <if>
+      <condition>TEMP.is_new_first eq '0'</condition>
+      <then>
+        <do>OBJECT(TEMP.curr_schedule).end_date=TEMP.bisect_date</do>
+        <do>OBJECT(TEMP.curr_schedule).orig_end_date=TEMP.bisect_date</do>
+        <do>OBJECT(TEMP.my_new_schedule).start_date=TEMP.bisect_date</do>
+        <do>OBJECT(TEMP.my_new_schedule).orig_start_date=TEMP.bisect_date</do>
+        <do>OBJECT(TEMP.curr_schedule).n_endoffset='0'</do>
+        <do>OBJECT(TEMP.curr_schedule).n_endtype='1'</do>
+        <do>OBJECT(TEMP.my_new_schedule).n_beginoffset='0'</do>
+        <do>OBJECT(TEMP.my_new_schedule).n_begintype='1'</do>
+      </then>
+      <else>
+        <do>OBJECT(TEMP.curr_schedule).start_date=TEMP.bisect_date</do>
+        <do>OBJECT(TEMP.my_new_schedule).end_date=TEMP.bisect_date</do>
+        <do>OBJECT(TEMP.curr_schedule).orig_start_date=TEMP.bisect_date</do>
+        <do>OBJECT(TEMP.my_new_schedule).orig_end_date=TEMP.bisect_date</do>
+        <do>OBJECT(TEMP.my_new_schedule).n_endoffset='0'</do>
+        <do>OBJECT(TEMP.my_new_schedule).n_endtype='1'</do>
+        <do>OBJECT(TEMP.curr_schedule).n_beginoffset='0'</do>
+        <do>OBJECT(TEMP.curr_schedule).n_begintype='1'</do>
+      </else>
+    </if>
+
+    <do>OBJECT(TEMP.curr_schedule).dates_changed='1'</do>
+    <do>OBJECT(TEMP.my_new_schedule).has_changes='1'</do>
+
+    <index_insert>
+      <index>'OBJECT_IDX'</index>
+      <field name="object_type">OBJECT(TEMP.my_new_schedule).object_type</field>
+      <field name="object_id">TEMP.my_new_schedule</field>
+    </index_insert>
+    <startup>
+      <do>GLOBAL.new_schedule_counter=0</do>
+    </startup>
+    <do>GLOBAL.new_schedule_counter=GLOBAL.new_schedule_counter - 1</do>
+    <do>OBJECT(TEMP.my_new_schedule).id_sched=GLOBAL.new_schedule_counter</do>
+    <!-- print>'Splitting schedule ['~OBJECT(TEMP.curr_schedule).id_sched~'] into ['~OBJECT(TEMP.my_new_schedule).id_sched~']'</print -->
+    <index_select>
+      <index>'RATE_SCHED_ROWS_IDX'</index>
+      <field name="id_sched">OBJECT(TEMP.curr_schedule).id_sched</field>
+      <cursor>TEMP.pt_row_csr</cursor>
+      <cursor_order>'forward'</cursor_order>
+      <loop>
+        <do>TEMP.curr_pt_row=OBJECT(TEMP.pt_row_csr).object_id</do>
+        <spawn>
+          <object_type>OBJECT(TEMP.curr_pt_row).object_type</object_type>
+          <object_id>TEMP.my_new_pt_row</object_id>
+        </spawn>
+        <inherit_object>
+          <source>TEMP.curr_pt_row</source>
+          <target>TEMP.my_new_pt_row</target>
+        </inherit_object>
+        <do>OBJECT(TEMP.my_new_pt_row).id_sched=''</do>
+        <do>OBJECT(TEMP.my_new_pt_row).n_order=''</do>
+        <do>OBJECT(TEMP.my_new_pt_row).parent=TEMP.my_new_schedule</do>
+        <index_insert>
+          <index>'RATE_SCHED_ROWS_IDX'</index>
+          <field name="id_sched">OBJECT(TEMP.my_new_schedule).id_sched</field>
+          <field name="object_id">TEMP.my_new_pt_row</field>
+        </index_insert>
+      </loop>
+    </index_select>
+
+  </proc>
+    
+
+  <proc name='convert_to_enum'>
+    <param name='value' mode='in out'/>
+    <param name='namespace'/>
+    <param name='success' mode='out'/>
+
+    <startup>
+    <define_memory_index>
+      <index>'ENUMS_BY_ID'</index>
+      <key_field>'id_enum_data'</key_field>
+      <field>'namespace'</field>
+      <field>'enum_value'</field>
+    </define_memory_index>
+
+    <define_memory_index>
+      <index>'ENUMS_BY_NAME'</index>
+      <key_field>'namespace'</key_field>
+      <key_field>'enum_value'</key_field>
+      <field>'id_enum_data'</field>
+    </define_memory_index>
+    </startup>
+
+    <index_select>
+      <index>'ENUMS_BY_ID'</index>
+      <field name="id_enum_data">'-1'</field>
+      <cursor>TEMP.nm_enum_csr</cursor>
+      <else>
+        <print>'Building the list of enums!'</print>
+        <index_insert>
+          <index>'ENUMS_BY_ID'</index>
+          <field name="id_enum_data">'-1'</field>
+          <field name="namespace">'data loaded indicator'</field>
+          <field name="enum_value">'data loaded indicator'</field>
+        </index_insert>
+        <time ms='TEMP.t'>
+          <db_select>
+            <login_object>GLOBAL.target_login</login_object>
+            <query type='oracle'>
+              "select lower(regexp_substr(nm_enum_data,'[^/]*$')) enum_value,
+              lower(trim(TRAILING '/' from regexp_substr(nm_enum_data,'.*/'))) namespace,
+              id_enum_data from t_enum_data a"
+            </query>
+            <query type='sql'>
+              "select
+              lower(case CHARINDEX ('/' ,reverse(nm_enum_data),0 ) when 0 then nm_enum_data else SUBSTRING(nm_enum_data,len(nm_enum_data) - CHARINDEX ('/' ,reverse(nm_enum_data),0 ) + 2,CHARINDEX ('/' ,reverse(nm_enum_data),0)) end) enum_value,
+              lower(case CHARINDEX ('/' ,reverse(nm_enum_data),0 ) when 0 then '' else substring(nm_enum_data,1,len(nm_enum_data) - CHARINDEX ('/' ,reverse(nm_enum_data),0 )) end) namespace,
+              id_enum_data
+              from t_enum_data"
+            </query>
+            <cursor>TEMP.csr</cursor>
+            <loop>
+              <index_insert>
+                <index>'ENUMS_BY_ID'</index>
+                <field name="id_enum_data">OBJECT(TEMP.csr).id_enum_data</field>
+                <field name="namespace">OBJECT(TEMP.csr).namespace</field>
+                <field name="enum_value">OBJECT(TEMP.csr).enum_value</field>
+              </index_insert>
+              <index_insert>
+                <index>'ENUMS_BY_NAME'</index>
+                <field name="id_enum_data">OBJECT(TEMP.csr).id_enum_data</field>
+                <field name="namespace">OBJECT(TEMP.csr).namespace</field>
+                <field name="enum_value">OBJECT(TEMP.csr).enum_value</field>
+              </index_insert>
+            </loop>
+          </db_select>
+        </time>
+        <print>'Enums TEMP.t='~TEMP.t~' ms'</print>
+      </else>
+    </index_select>
+
+    <do>TEMP.success=1</do>
+    <to_lower>
+      <input>TEMP.value</input>
+      <output>TEMP.value</output>
+    </to_lower>
+    <if>
+      <condition>TEMP.namespace ne ''</condition>
+      <then>
+        <index_select>
+          <index>'ENUMS_BY_ID'</index>
+          <field name="id_enum_data">TEMP.value</field>
+          <cursor>TEMP.id_enum_csr</cursor>
+          <run>
+            <if>
+              <condition>OBJECT(TEMP.id_enum_csr).namespace ne TEMP.namespace</condition>
+              <then>
+                <index_select>
+                  <index>'ENUMS_BY_NAME'</index>
+                  <field name="namespace">TEMP.namespace</field>
+                  <field name="enum_value">TEMP.value</field>
+                  <cursor>TEMP.nm_enum_csr</cursor>
+                  <loop>
+                    <debug>'Found an enum of ['~OBJECT(TEMP.nm_enum_csr).id_enum_data~'] for same namespace for value ['~TEMP.value~']'</debug>
+                    <do>TEMP.value=OBJECT(TEMP.nm_enum_csr).id_enum_data</do>
+                  </loop>
+                  <else>
+                    <index_select>
+                      <index>'ENUMS_BY_NAME'</index>
+                      <field name="namespace">TEMP.namespace</field>
+                      <field name="enum_value">OBJECT(TEMP.id_enum_csr).enum_value</field>
+                      <cursor>TEMP.nm_enum_csr2</cursor>
+                      <loop>
+                        <debug>'Found an enum of ['~OBJECT(TEMP.nm_enum_csr2).id_enum_data~'] for a different namespace for value ['~TEMP.value~']'</debug>
+                        <do>TEMP.value=OBJECT(TEMP.nm_enum_csr2).id_enum_data</do>
+                      </loop>
+                      <else>
+                        <do>TEMP.success=0</do>
+                        <debug>'I cant find any enum for value ['~TEMP.value~']'</debug>
+                      </else>
+                    </index_select>
+                  </else>
+                </index_select>
+              </then>
+              <else>
+                <debug>'Found a valid enum of ['~OBJECT(TEMP.id_enum_csr).id_enum_data~'] for same namespace for value ['~TEMP.value~']'</debug>
+              </else>
+            </if>
+          </run>
+        </index_select>
+      </then>
+      <else>
+        <index_select>
+          <index>'ENUMS_BY_ID'</index>
+          <field name="id_enum_data">TEMP.value</field>
+          <cursor>TEMP.id_enum_csr</cursor>
+          <loop>
+              <do>TEMP.value=OBJECT(TEMP.id_enum_csr).enum_value</do>
+          </loop>
+          <else>
+            <do>TEMP.success=0</do>
+          </else>
+        </index_select>
+      </else>
+    </if>
+  </proc>
+
+  <proc name='cache_pt_schedule'>
+    <param name='curr_rsched'/>
+    <index_select>
+      <index>'RATE_SCHED_IDX'</index>
+      <field name="id_sched">OBJECT(TEMP.curr_rsched).id_sched</field>
+      <cursor>TEMP.id_sched_csr</cursor>
+      <then>
+      </then>
+      <else>
+        <!-- Only attempt to cache the rate schedule if the id_sched > 0, otherwise it was created by the tool 
+                 and hasn't been persisted back, but the rows are in memory                                    -->
+        <if>
+          <condition>OBJECT(TEMP.curr_rsched).id_sched ne '' and OBJECT(TEMP.curr_rsched).id_sched > 0</condition>
+          <then>
+        <index_insert>
+          <index>'OBJECT_IDX'</index>
+          <field name="object_type">"RSCHED"</field>
+          <field name="object_id">TEMP.curr_rsched</field>
+        </index_insert>
+        <index_insert>
+          <index>'RATE_SCHED_IDX'</index>
+          <field name="id_sched">OBJECT(TEMP.curr_rsched).id_sched</field>
+          <field name="object_id">TEMP.curr_rsched</field>
+        </index_insert>
+            <!--print>"select * from "~OBJECT(TEMP.curr_rsched).paramtable_name~" a where a.id_sched = "~OBJECT(TEMP.curr_rsched).id_sched~" and tt_end = mtmaxdate() order by a.n_order desc"</print -->
+        <db_select>
+          <login_object>GLOBAL.target_login</login_object>
+          <query type="oracle">"select * from "~OBJECT(TEMP.curr_rsched).paramtable_name~" a where a.id_sched = "~OBJECT(TEMP.curr_rsched).id_sched~" and tt_end = mtmaxdate() order by a.n_order desc"</query>
+          <query type="sql">"select * from jonah_"~OBJECT(TEMP.curr_rsched).paramtable_name~" a where a.id_sched = "~OBJECT(TEMP.curr_rsched).id_sched~" and tt_end = dbo.MTMaxDate() order by a.n_order desc"</query>
+          <cursor>TEMP.pt_row_csr</cursor>
+          <loop>
+            <spawn>
+              <object_type>'RSCHED_ROW'</object_type>
+              <object_id>TEMP.rsched_row_oid</object_id>
+            </spawn>
+            <inherit_object>
+              <source>TEMP.pt_row_csr</source>
+              <target>TEMP.rsched_row_oid</target>
+            </inherit_object>
+            <do>OBJECT(TEMP.rsched_row_oid).parent=TEMP.curr_rsched</do>
+            <do>OBJECT(TEMP.rsched_row_oid).rate_type=OBJECT(TEMP.curr_rsched).rate_type</do>
+            <index_insert>
+              <index>'RATE_SCHED_ROWS_IDX'</index>
+              <field name="id_sched">OBJECT(TEMP.rsched_row_oid).id_sched</field>
+              <field name="object_id">TEMP.rsched_row_oid</field>
+            </index_insert>
+          </loop>
+        </db_select>
+          </then>
+        </if>
+      </else>
+    </index_select>
+  </proc>
+  
+  <proc name='add_rate_to_schedule'>
+    <param name='rsched_oid'/>
+    <param name='rate_oid'/>
+    <param name='make_changes'/>
+    <param name='made_changes' mode='out'/>
+
+    <!-- print>'Make changes = ['~TEMP.make_changes~']'</print -->
+
+    <do>TEMP.made_changes='0'</do>
+    <do>TEMP.found_rate='0'</do>
+    <do>TEMP.my_pt_row=''</do>
+    <call_proc_for_current_object>
+      <name>'cache_pt_schedule'</name>
+      <param name='curr_rsched'>TEMP.rsched_oid</param>
+    </call_proc_for_current_object>
+    <!-- look for exact match rate and replace if found -->
+    <index_select>
+      <index>'RATE_SCHED_ROWS_IDX'</index>
+      <field name="id_sched">OBJECT(TEMP.rsched_oid).id_sched</field>
+      <cursor>TEMP.pt_row_csr</cursor>
+      <loop>
+        <do>TEMP.my_pt_row=OBJECT(TEMP.pt_row_csr).object_id</do>
+        <if>
+          <condition>TEMP.found_rate eq '0'</condition>
+          <then>
+            <do>TEMP.found_row='1'</do>
+            <index_select>
+              <index>'MY_PT_FIELDS'</index>
+              <field name="id_param_table">OBJECT(TEMP.rsched_oid).id_paramtable</field>
+              <field name="is_key">'1'</field>
+              <cursor>TEMP.pt_field_csr</cursor>
+              <loop>
+                <do>TEMP.my_pt_field=OBJECT(TEMP.pt_field_csr).column_name</do>
+                <do>TEMP.my_object_field=OBJECT(TEMP.pt_field_csr).field_name</do>
+                <get_object_field>
+                  <object_id>TEMP.my_pt_row</object_id>
+                  <field_name>TEMP.my_pt_field</field_name>
+                  <output>TEMP.pt_value</output>
+                </get_object_field>
+                <get_object_field>
+                  <object_id>TEMP.rate_oid</object_id>
+                  <field_name>TEMP.my_object_field</field_name>
+                  <output>TEMP.rate_value</output>
+                </get_object_field>
+                <if>
+                  <condition>OBJECT(TEMP.pt_field_csr).namespace ne '' and TEMP.rate_value ne GLOBAL.null_value and TEMP.rate_value ne ''</condition>
+                  <then>
+                    <call_proc_for_current_object>
+                      <name>'convert_to_enum'</name>
+                      <param name='value'>TEMP.rate_value</param>
+                      <param name='namespace'>OBJECT(TEMP.pt_field_csr).namespace</param>
+                      <param name='success'>TEMP.enum_success</param>
+                    </call_proc_for_current_object>
+                  </then>
+                </if>
+
+                <if>
+                  <condition>!((TEMP.pt_value eq TEMP.rate_value and TEMP.rate_value ne GLOBAL.null_value) or (TEMP.pt_value eq '' and TEMP.rate_value eq GLOBAL.null_value))</condition>
+                  <then>
+                    <do>TEMP.found_row='0'</do>
+                  </then>
+                </if>
+              </loop>
+            </index_select>
+            <if>
+              <condition>TEMP.found_row eq '1'</condition>
+              <then>
+                <do>TEMP.found_rate='1'</do>
+                <index_select>
+                  <index>'MY_PT_FIELDS'</index>
+                  <field name="id_param_table">OBJECT(TEMP.rsched_oid).id_paramtable</field>
+                  <field name="is_key">'0'</field>
+                  <cursor>TEMP.pt_field_csr</cursor>
+                  <loop>
+                    <do>TEMP.my_pt_field=OBJECT(TEMP.pt_field_csr).column_name</do>
+                    <do>TEMP.my_object_field=OBJECT(TEMP.pt_field_csr).field_name</do>
+                    <get_object_field>
+                      <object_id>TEMP.rate_oid</object_id>
+                      <field_name>TEMP.my_object_field</field_name>
+                      <output>TEMP.pt_value</output>
+                    </get_object_field>
+                    <get_object_field>
+                      <object_id>TEMP.my_pt_row</object_id>
+                      <field_name>TEMP.my_pt_field</field_name>
+                      <output>TEMP.old_pt_value</output>
+                    </get_object_field>
+                    <if>
+                      <condition>OBJECT(TEMP.pt_field_csr).namespace ne '' and TEMP.pt_value ne '' and TEMP.pt_value ne GLOBAL.null_value and TEMP.pt_value ne GLOBAL.unset_value and TEMP.pt_value ne GLOBAL.unset_force_value</condition>
+                      <then>
+                        <call_proc_for_current_object>
+                          <name>'convert_to_enum'</name>
+                          <param name='value'>TEMP.pt_value</param>
+                          <param name='namespace'>OBJECT(TEMP.pt_field_csr).namespace</param>
+                          <param name='success'>TEMP.enum_success</param>
+                        </call_proc_for_current_object>
+                      </then>
+                    </if>
+                    <if>
+                      <condition>TEMP.pt_value ne '' and TEMP.pt_value ne TEMP.old_pt_value</condition>
+                      <then>
+                        <do>TEMP.made_changes = '1'</do>
+                        <if>
+                          <condition>TEMP.pt_value eq GLOBAL.null_value</condition>
+                          <then>
+                            <do>TEMP.pt_value = ''</do>
+                          </then>
+                        </if>
+                        <if>
+                          <condition>TEMP.make_changes eq '1'</condition>
+                          <then>
+                        <get_object_field>
+                          <object_id>TEMP.my_pt_row</object_id>
+                          <field_name>TEMP.my_pt_field~'_original_value'</field_name>
+                          <output>TEMP.orig_pt_value</output>
+                        </get_object_field>
+                        <if>
+                          <condition>TEMP.orig_pt_value eq ''</condition>
+                          <then>
+                            <set_object_field>
+                              <input>TEMP.old_pt_value</input>
+                              <object_id>TEMP.my_pt_row</object_id>
+                              <field_name>TEMP.my_pt_field~'_original_value'</field_name>
+                            </set_object_field>
+                          </then>
+                        </if>
+                        <set_object_field>
+                          <input>TEMP.pt_value</input>
+                          <object_id>TEMP.my_pt_row</object_id>
+                          <field_name>TEMP.my_pt_field</field_name>
+                        </set_object_field>
+                            <print>'Setting object field ['~TEMP.my_pt_field~'] to ['~TEMP.pt_value~']'</print>
+                        <do>OBJECT(TEMP.my_pt_row).updated='1'</do>
+                        <do>OBJECT(TEMP.rsched_oid).has_changes='1'</do>
+                          </then>
+                        </if>
+                      </then>
+                    </if>
+                  </loop>
+                </index_select>
+              </then>
+            </if>
+          </then>
+        </if>
+      </loop>
+    </index_select>
+    <if>
+      <condition>TEMP.found_rate eq '0'</condition>
+      <then>
+        <do>TEMP.made_changes='1'</do>
+        <if>
+          <condition>TEMP.make_changes eq '1'</condition>
+          <then>
+        <spawn>
+          <object_type>'RSCHED_ROW'</object_type>
+          <object_id>TEMP.rsched_row_oid</object_id>
+        </spawn>
+        <index_select>
+          <index>'MY_PT_FIELDS'</index>
+          <field name="id_param_table">OBJECT(TEMP.rsched_oid).id_paramtable</field>
+          <field name="is_key">'1'</field>
+          <cursor>TEMP.pt_field_csr</cursor>
+          <loop>
+            <do>TEMP.my_pt_field=OBJECT(TEMP.pt_field_csr).column_name</do>
+            <do>TEMP.my_object_field=OBJECT(TEMP.pt_field_csr).field_name</do>
+            <get_object_field>
+              <object_id>TEMP.rate_oid</object_id>
+              <field_name>TEMP.my_object_field</field_name>
+              <output>TEMP.rate_value</output>
+            </get_object_field>
+            <if>
+              <condition>TEMP.rate_value eq GLOBAL.null_value</condition>
+              <then>
+                <do>TEMP.rate_value = ''</do>
+              </then>
+            </if>
+            <if>
+              <condition>OBJECT(TEMP.pt_field_csr).namespace ne '' and TEMP.rate_value ne ''</condition>
+              <then>
+                <call_proc_for_current_object>
+                  <name>'convert_to_enum'</name>
+                  <param name='value'>TEMP.rate_value</param>
+                  <param name='namespace'>OBJECT(TEMP.pt_field_csr).namespace</param>
+                  <param name='success'>TEMP.enum_success</param>
+                </call_proc_for_current_object>
+              </then>
+            </if>
+            <set_object_field>
+              <input>TEMP.rate_value</input>
+              <object_id>TEMP.rsched_row_oid</object_id>
+              <field_name>TEMP.my_pt_field</field_name>
+            </set_object_field>
+          </loop>
+        </index_select>
+        <index_select>
+          <index>'MY_PT_FIELDS'</index>
+          <field name="id_param_table">OBJECT(TEMP.rsched_oid).id_paramtable</field>
+          <field name="is_key">'0'</field>
+          <cursor>TEMP.pt_field_csr</cursor>
+          <loop>
+            <do>TEMP.my_pt_field=OBJECT(TEMP.pt_field_csr).column_name</do>
+            <do>TEMP.my_object_field=OBJECT(TEMP.pt_field_csr).field_name</do>
+            <get_object_field>
+              <object_id>TEMP.rate_oid</object_id>
+              <field_name>TEMP.my_object_field</field_name>
+              <output>TEMP.rate_value</output>
+            </get_object_field>
+            <if>
+              <condition>TEMP.rate_value eq GLOBAL.null_value</condition>
+              <then>
+                <do>TEMP.rate_value eq ''</do>
+              </then>
+            </if>
+            <if>
+              <condition>OBJECT(TEMP.pt_field_csr).namespace ne '' and TEMP.rate_value ne ''</condition>
+              <then>
+                <call_proc_for_current_object>
+                  <name>'convert_to_enum'</name>
+                  <param name='value'>TEMP.rate_value</param>
+                  <param name='namespace'>OBJECT(TEMP.pt_field_csr).namespace</param>
+                  <param name='success'>TEMP.enum_success</param>
+                </call_proc_for_current_object>
+              </then>
+            </if>
+            <set_object_field>
+              <input>TEMP.rate_value</input>
+              <object_id>TEMP.rsched_row_oid</object_id>
+              <field_name>TEMP.my_pt_field</field_name>
+            </set_object_field>
+          </loop>
+        </index_select>
+        <do>OBJECT(TEMP.rsched_row_oid).parent=TEMP.rsched_oid</do>
+        <do>OBJECT(TEMP.rsched_row_oid).id_sched=OBJECT(TEMP.rsched_oid).id_sched</do>
+            <call_proc_for_current_object>
+              <name>'determine_sched_order'</name>
+              <param name='id_sched'>OBJECT(TEMP.rsched_oid).id_sched</param>
+              <param name='rate_oid'>TEMP.rsched_row_oid</param>
+              <param name='id_paramtable'>OBJECT(TEMP.rsched_oid).id_paramtable</param>
+              <param name='row_order'>TEMP.row_order</param>
+            </call_proc_for_current_object>
+            <call_proc_for_current_object>
+              <name>'splice_rate_schedule'</name>
+              <param name='id_sched'>OBJECT(TEMP.rsched_oid).id_sched</param>
+              <param name='rate_oid'>TEMP.rsched_row_oid</param>
+              <param name='after_position'>TEMP.row_order</param>
+            </call_proc_for_current_object>
+        <!--<index_insert>
+          <index>'RATE_SCHED_ROWS_IDX'</index>
+          <field name="id_sched">OBJECT(TEMP.rsched_oid).id_sched</field>
+          <field name="object_id">TEMP.rsched_row_oid</field>
+        </index_insert>-->
+        <do>OBJECT(TEMP.rsched_row_oid).updated='1'</do>
+        <do>OBJECT(TEMP.rsched_oid).has_changes='1'</do>
+      </then>
+    </if>
+      </then>
+    </if>
+  </proc>
+
+  
+  <proc name='add_rate_to_schedules'>
+    <param name='rate_type' default='"ICB"'/>
+
+    <!--<print>'HERE I AM WITH['~OBJECT.rate_type~']'</print>-->
+    <call_proc_for_current_object>
+      <name>'handle_null_dates'</name>
+      <param name='start_date'>OBJECT.start_date</param>
+      <param name='end_date'>OBJECT.end_date</param>
+    </call_proc_for_current_object>
+
+    <call_proc_for_current_object>
+      <name>'bound_dates_by_account_dates'</name>
+      <param name='id_acc'>OBJECT.id_acc</param>
+      <param name='start_date'>OBJECT.start_date</param>
+      <param name='end_date'>OBJECT.end_date</param>
+    </call_proc_for_current_object>
+
+    <if>
+      <condition>OBJECT.end_date gt OBJECT.start_date</condition>
+      <then>
+        <call_proc_for_current_object>
+          <name>'pivot_nonnull_priority_fields'</name>
+        </call_proc_for_current_object>
+        
+    <call_proc_for_current_object>
+      <name>'determine_id_paramtable'</name>
+      <param name='id_paramtable'>OBJECT.id_paramtable</param>
+      <param name='id_template'>OBJECT.id_pi_template</param>
+      <param name='paramtable_name'>OBJECT.paramtable_name</param>
+      <param name='template_name'>OBJECT.template_name</param>
+    </call_proc_for_current_object>
+
+    <do>TEMP.found_rate='0'</do>
+    <do>TEMP.found_unset_rate='0'</do>
+    <index_select>
+      <index>'MY_PT_FIELDS'</index>
+      <field name="id_param_table">OBJECT.id_paramtable</field>
+      <field name="is_key">'0'</field>
+      <cursor>TEMP.pt_field_csr</cursor>
+      <loop>
+        <do>TEMP.my_pt_field=OBJECT(TEMP.pt_field_csr).column_name</do>
+        <do>TEMP.my_object_field=OBJECT(TEMP.pt_field_csr).field_name</do>
+        <get_object_field>
+          <object_id>OBJECT.object_id</object_id>
+          <field_name>TEMP.my_object_field</field_name>
+          <output>TEMP.pt_value</output>
+        </get_object_field>
+
+        <if>
+          <condition>TEMP.pt_value ne '' and TEMP.pt_value ne GLOBAL.null_value</condition>
+          <then>
+            <do>TEMP.found_rate='1'</do>
+          </then>
+          <else>
+            <do>TEMP.found_unset_rate='1'</do>
+          </else>
+        </if>
+      </loop>
+    </index_select>
+        <if>
+          <condition>OBJECT.require_complete_row eq '1' and TEMP.found_unset_rate eq '1'</condition>
+          <then>
+            <print>'Skipping rate row because not all rates are defined'</print>
+            <do>TEMP.found_rate = '0'</do>
+          </then>
+        </if>
+
+    <if>
+      <condition>TEMP.found_rate eq '1'</condition>
+      <then>
+
+        <index_clear>
+          <index>'ADD_RATE_GAPS'</index>
+        </index_clear>
+
+        <!--<print>'Inserting 5 ['~OBJECT.start_date~']['~OBJECT.end_date~']'</print>-->
+        <index_insert>
+          <index>'ADD_RATE_GAPS'</index>
+          <field name="start_date">OBJECT.start_date</field>
+          <field name="end_date">OBJECT.end_date</field>
+        </index_insert>
+
+
+    <call_proc_for_current_object>
+      <name>'cache_rate_schedules'</name>
+    </call_proc_for_current_object>
+    
+      <do>TEMP.rate_object_type=TEMP.rate_type~'_SCHEDULE_'~OBJECT.id_paramtable~'_'~OBJECT.id_pi_template</do>
+    <index_select>
+      <index>'OBJECT_IDX'</index>
+      <field name="object_type">TEMP.rate_object_type</field>
+      <cursor>TEMP.object_csr</cursor>
+      <loop>
+        <do>TEMP.curr_schedule=OBJECT(TEMP.object_csr).object_id</do>
+        <call_proc_for_current_object>
+          <name>'determine_date_overlaps'</name>
+          <param name='main_start_date'>OBJECT.start_date</param>
+          <param name='main_end_date'>OBJECT.end_date</param>
+          <param name='other_start_date'>OBJECT(TEMP.curr_schedule).start_date</param>
+          <param name='other_end_date'>OBJECT(TEMP.curr_schedule).end_date</param>
+          <param name='overlap_type'>TEMP.overlap_type</param>
+        </call_proc_for_current_object>
+        
+        <if>
+          <condition>TEMP.overlap_type eq 'fully_contained'</condition>
+          <then>
+            <!-- print>'Found a rate schedule that is fully contained by the applied rate'</print -->
+            <!-- applied rate fully contains schedule, i.e. we're done with this parent -->
+            <call_proc_for_current_object>
+              <name>'add_rate_to_schedule'</name>
+              <param name='rsched_oid'>TEMP.curr_schedule</param>
+              <param name='rate_oid'>OBJECT.object_id</param>
+              <param name='make_changes'>'1'</param>
+              <param name='made_changes'>TEMP.made_changes</param>
+            </call_proc_for_current_object>
+            <call_proc_for_current_object>
+              <name>'manage_add_rate_gaps'</name>
+              <param name='rsched_oid'>TEMP.curr_schedule</param>
+              <param name='rate_oid'>OBJECT.object_id</param>
+            </call_proc_for_current_object>
+          </then>
+        </if>
+
+        <if>
+          <condition>TEMP.overlap_type eq 'start_contained'</condition>
+          <then>
+            <!-- print>'Found a rate schedule that starts after the applied rate'</print -->
+            <!-- rate schedule starts on or after rate but ends after rate, i.e. bisect schedule-->
+            <call_proc_for_current_object>
+              <name>'add_rate_to_schedule'</name>
+              <param name='rsched_oid'>TEMP.curr_schedule</param>
+              <param name='rate_oid'>OBJECT.object_id</param>
+              <param name='make_changes'>'0'</param>
+              <param name='made_changes'>TEMP.made_changes</param>
+            </call_proc_for_current_object>
+            <if>
+              <condition>TEMP.made_changes eq '1'</condition>
+              <then>                
+            <call_proc_for_current_object>
+              <name>'bisect_rate_schedule'</name>
+              <param name='curr_schedule'>TEMP.curr_schedule</param>
+              <param name='bisect_date'>OBJECT.end_date</param>
+              <param name='is_new_first'>'0'</param>
+              <param name='my_new_schedule'>TEMP.my_new_schedule</param>
+            </call_proc_for_current_object>
+            <call_proc_for_current_object>
+              <name>'add_rate_to_schedule'</name>
+              <param name='rsched_oid'>TEMP.curr_schedule</param>
+              <param name='rate_oid'>OBJECT.object_id</param>
+              <param name='make_changes'>'1'</param>
+              <param name='made_changes'>TEMP.made_changes</param>
+            </call_proc_for_current_object>
+              </then>
+            </if>
+            <call_proc_for_current_object>
+              <name>'manage_add_rate_gaps'</name>
+              <param name='rsched_oid'>TEMP.curr_schedule</param>
+              <param name='rate_oid'>OBJECT.object_id</param>
+            </call_proc_for_current_object>
+          </then>
+        </if>
+
+        <if>
+          <condition>TEMP.overlap_type eq 'end_contained'</condition>
+          <then>
+            <!-- print>'Found a rate schedule that ends before the applied rate'</print -->
+            <!-- rate schedule starts before the rate and ends before the rate, i.e. bisect -->
+            <call_proc_for_current_object>
+              <name>'add_rate_to_schedule'</name>
+              <param name='rsched_oid'>TEMP.curr_schedule</param>
+              <param name='rate_oid'>OBJECT.object_id</param>
+              <param name='make_changes'>'0'</param>
+              <param name='made_changes'>TEMP.made_changes</param>
+            </call_proc_for_current_object>
+            <if>
+              <condition>TEMP.made_changes eq '1'</condition>
+              <then>
+                <call_proc_for_current_object>
+                  <name>'bisect_rate_schedule'</name>
+                  <param name='curr_schedule'>TEMP.curr_schedule</param>
+                  <param name='bisect_date'>OBJECT.start_date</param>
+                  <param name='is_new_first'>'1'</param>
+                  <param name='my_new_schedule'>TEMP.my_new_schedule</param>
+                </call_proc_for_current_object>
+                <call_proc_for_current_object>
+                  <name>'add_rate_to_schedule'</name>
+                  <param name='rsched_oid'>TEMP.curr_schedule</param>
+                  <param name='rate_oid'>OBJECT.object_id</param>
+                  <param name='make_changes'>'1'</param>
+                  <param name='made_changes'>TEMP.made_changes</param>
+                </call_proc_for_current_object>
+              </then>
+            </if>
+            <call_proc_for_current_object>
+              <name>'manage_add_rate_gaps'</name>
+              <param name='rsched_oid'>TEMP.curr_schedule</param>
+              <param name='rate_oid'>OBJECT.object_id</param>
+            </call_proc_for_current_object>
+          </then>
+        </if>
+
+        <if>
+          <condition>TEMP.overlap_type eq 'not_contained'</condition>
+          <then>
+            <!-- print>'Found a rate schedule fully contained by the date gap'</print -->
+            <!-- rate schedule that fully contains the rate, i.e. tri-sect -->
+            <call_proc_for_current_object>
+              <name>'add_rate_to_schedule'</name>
+              <param name='rsched_oid'>TEMP.curr_schedule</param>
+              <param name='rate_oid'>OBJECT.object_id</param>
+              <param name='make_changes'>'0'</param>
+              <param name='made_changes'>TEMP.made_changes</param>
+            </call_proc_for_current_object>
+            <if>
+              <condition>TEMP.made_changes eq '1'</condition>
+              <then>
+            <call_proc_for_current_object>
+              <name>'bisect_rate_schedule'</name>
+              <param name='curr_schedule'>TEMP.curr_schedule</param>
+              <param name='bisect_date'>OBJECT.start_date</param>
+              <param name='is_new_first'>'1'</param>
+              <param name='my_new_schedule'>TEMP.my_new_schedule</param>
+            </call_proc_for_current_object>
+            <call_proc_for_current_object>
+              <name>'bisect_rate_schedule'</name>
+              <param name='curr_schedule'>TEMP.curr_schedule</param>
+              <param name='bisect_date'>OBJECT.end_date</param>
+              <param name='is_new_first'>'0'</param>
+              <param name='my_new_schedule'>TEMP.my_new_schedule1</param>
+            </call_proc_for_current_object>
+            <call_proc_for_current_object>
+              <name>'add_rate_to_schedule'</name>
+              <param name='rsched_oid'>TEMP.curr_schedule</param>
+              <param name='rate_oid'>OBJECT.object_id</param>
+              <param name='make_changes'>'1'</param>
+              <param name='made_changes'>TEMP.made_changes</param>
+            </call_proc_for_current_object>
+              </then>
+            </if>
+            <call_proc_for_current_object>
+              <name>'manage_add_rate_gaps'</name>
+              <param name='rsched_oid'>TEMP.curr_schedule</param>
+              <param name='rate_oid'>OBJECT.object_id</param>
+            </call_proc_for_current_object>
+          </then>
+        </if>
+      </loop>
+    </index_select>
+
+    <!-- print>'DONE APPLYING TO EXISTING SCHEDULES'</print -->
+
+    <do>TEMP.have_gaps='1'</do>
+    <index_select_keys>
+      <index>'ADD_RATE_GAPS'</index>
+      <cursor>TEMP.gap_csr</cursor>
+      <else>
+        <do>TEMP.have_gaps='0'</do>
+      </else>
+    </index_select_keys>
+
+    <if>
+      <condition>TEMP.have_gaps eq '1' and TEMP.rate_type ne 'DEF'</condition>
+      <then>
+        <print>'Looking for subscriptions that can handle schedules for the missing date gaps'</print>
+        <db_select>
+          <login_object>GLOBAL.target_login</login_object>
+          <query type='oracle'>
+            "select NULL id_group, SUB.id_sub, SUB.id_po, NULL tx_name, NULL gsub_start, NULL gsub_end,
+            SUB.vt_start sub_start, SUB.vt_end sub_end, PLM.id_pi_template, PLM.id_pricelist, PLM.id_paramtable, 2 rate_type
+            FROM T_SUB SUB
+            INNER JOIN T_PL_MAP PLM ON PLM.id_po = SUB.id_po and NVL2(PLM.id_sub,NULL,0) = 0
+            WHERE SUB.id_acc = "~OBJECT.id_acc~" AND PLM.id_paramtable = "~OBJECT.id_paramtable~"
+            union all
+            select GSB.id_group, SUB.id_sub, SUB.id_po, GSB.tx_name, MBR.vt_start gsub_start, MBR.vt_end gsub_end,
+            SUB.vt_start sub_start, SUB.vt_end sub_end, PLM.id_pi_template, PLM.id_pricelist, PLM.id_paramtable, 1 rate_type
+            FROM T_GSUBMEMBER MBR
+            INNER JOIN T_GROUP_SUB GSB ON GSB.id_group = MBR.id_group
+            INNER JOIN T_SUB SUB ON MBR.id_group = SUB.id_group
+            INNER JOIN T_PL_MAP PLM ON PLM.id_po = SUB.id_po and NVL2(PLM.id_sub,NULL,0) = 0
+            WHERE MBR.id_acc = "~OBJECT.id_acc~" AND PLM.id_paramtable = "~OBJECT.id_paramtable
+          </query>
+          <query type='sql'>
+            "select NULL id_group, SUB.id_sub, SUB.id_po, NULL tx_name, NULL gsub_start, NULL gsub_end,
+            SUB.vt_start sub_start, SUB.vt_end sub_end, PLM.id_pi_template, PLM.id_pricelist, PLM.id_paramtable, 2 rate_type
+            FROM T_SUB SUB
+            INNER JOIN T_PL_MAP PLM ON PLM.id_po = SUB.id_po and PLM.id_sub IS NULL
+            WHERE SUB.id_acc = "~OBJECT.id_acc~" AND PLM.id_paramtable = "~OBJECT.id_paramtable~"
+            union all
+            select GSB.id_group, SUB.id_sub, SUB.id_po, GSB.tx_name, MBR.vt_start gsub_start, MBR.vt_end gsub_end,
+            SUB.vt_start sub_start, SUB.vt_end sub_end, PLM.id_pi_template, PLM.id_pricelist, PLM.id_paramtable, 1 rate_type
+            FROM T_GSUBMEMBER MBR
+            INNER JOIN T_GROUP_SUB GSB ON GSB.id_group = MBR.id_group
+            INNER JOIN T_SUB SUB ON MBR.id_group = SUB.id_group
+            INNER JOIN T_PL_MAP PLM ON PLM.id_po = SUB.id_po and PLM.id_sub IS NULL
+            WHERE MBR.id_acc = "~OBJECT.id_acc~" AND PLM.id_paramtable = "~OBJECT.id_paramtable
+          </query>
+          <cursor>TEMP.csr</cursor>
+          <loop>
+            <!--<print>'Looping through subscription ['~OBJECT(TEMP.csr).id_group~'] start['~OBJECT(TEMP.csr).gsub_start~'] end['~OBJECT(TEMP.csr).gsub_end~']'</print>-->
+            <index_select_keys>
+              <index>'ADD_RATE_GAPS'</index>
+              <cursor>TEMP.gap_csr</cursor>
+              <loop>
+                <print>'Gap of ['~OBJECT(TEMP.gap_csr).start_date~'] and ['~OBJECT(TEMP.gap_csr).end_date~']'</print>
+                <if>
+                  <condition>
+                    (OBJECT(TEMP.csr).gsub_start lt OBJECT(TEMP.gap_csr).end_date and OBJECT(TEMP.csr).gsub_end gt OBJECT(TEMP.gap_csr).start_date)
+                    or (OBJECT(TEMP.csr).gsub_start eq '' and (OBJECT(TEMP.csr).sub_start lt OBJECT(TEMP.gap_csr).end_date and OBJECT(TEMP.csr).sub_end gt OBJECT(TEMP.gap_csr).start_date))
+                  </condition>
+                  <then>
+                    <print>'Spawning a rate schedule for ['~OBJECT(TEMP.csr).id_group~']'</print>
+                    <if>
+                      <condition>OBJECT(TEMP.csr).gsub_start eq ''</condition>
+                      <then>
+                        <do>OBJECT(TEMP.csr).start_date = OBJECT(TEMP.csr).sub_start</do>
+                        <do>OBJECT(TEMP.csr).end_date = OBJECT(TEMP.csr).sub_end</do>
+                      </then>
+                      <else>
+                        <do>OBJECT(TEMP.csr).start_date = OBJECT(TEMP.csr).gsub_start</do>
+                        <do>OBJECT(TEMP.csr).end_date = OBJECT(TEMP.csr).gsub_end</do>
+                      </else>
+                    </if>
+                    <!-- spawn a schedule for this subscription -->
+                    <do>TEMP.rsched_object_type=TEMP.rate_type~'_SCHEDULE_'~OBJECT.id_paramtable~'_'~OBJECT.id_pi_template</do>
+                    <index_insert>
+                      <index>'ALL_SCHEDULES'</index>
+                      <field name="id_paramtable">OBJECT.id_paramtable</field>
+                      <field name="paramtable_name">OBJECT.paramtable_name</field>
+                      <field name="id_pi_template">OBJECT.id_pi_template</field>
+                    </index_insert>
+                    <spawn>
+                      <object_type>TEMP.rsched_object_type</object_type>
+                      <object_id>TEMP.my_new_rsched</object_id>
+                    </spawn>
+                    <index_insert>
+                      <index>'OBJECT_IDX'</index>
+                      <field name="object_type">TEMP.rsched_object_type</field>
+                      <field name="object_id">TEMP.my_new_rsched</field>
+                    </index_insert>
+                    <do>TEMP.id_pricelist = '0'</do>
+                    <if>
+                      <condition>TEMP.rate_type ne 'PO'</condition>
+                      <then>
+                        <db_call_proc>
+                          <login_object>GLOBAL.target_login</login_object>
+                          <name>'mvm_get_id_pricelist'</name>
+                          <param name="my_id_acc">OBJECT.id_acc</param>
+                          <param name="my_id_sub">OBJECT(TEMP.csr).id_sub</param>
+                          <param name="my_id_pt">OBJECT(TEMP.csr).id_paramtable</param>
+                          <param name="my_id_pricelist">TEMP.id_pricelist</param>
+                        </db_call_proc>
+                      </then>
+                      <else>
+                        <do>TEMP.id_pricelist = OBJECT(TEMP.csr).id_pricelist</do>
+                      </else>
+                    </if>
+
+                    <do>OBJECT(TEMP.my_new_rsched).account=OBJECT.static_oid</do>
+                    <do>OBJECT(TEMP.my_new_rsched).id_sched=''</do>
+                    <do>OBJECT(TEMP.my_new_rsched).id_pi_template=OBJECT(TEMP.csr).id_pi_template</do>
+                    <do>OBJECT(TEMP.my_new_rsched).id_pricelist=TEMP.id_pricelist</do>
+                    <do>OBJECT(TEMP.my_new_rsched).id_paramtable=OBJECT(TEMP.csr).id_paramtable</do>
+                    <do>OBJECT(TEMP.my_new_rsched).start_date=OBJECT(TEMP.gap_csr).start_date</do>
+                    <do>OBJECT(TEMP.my_new_rsched).end_date=OBJECT(TEMP.gap_csr).end_date</do>
+                    <do>OBJECT(TEMP.my_new_rsched).orig_start_date=OBJECT(TEMP.gap_csr).start_date</do>
+                    <do>OBJECT(TEMP.my_new_rsched).orig_end_date=OBJECT(TEMP.gap_csr).end_date</do>
+                    <do>OBJECT(TEMP.my_new_rsched).n_begintype='1'</do>
+                    <do>OBJECT(TEMP.my_new_rsched).n_beginoffset='0'</do>
+                    <do>OBJECT(TEMP.my_new_rsched).n_endtype='1'</do>
+                    <do>OBJECT(TEMP.my_new_rsched).n_endoffset='0'</do>
+                    <do>OBJECT(TEMP.my_new_rsched).id_sub=OBJECT(TEMP.csr).id_sub</do>
+                    <do>OBJECT(TEMP.my_new_rsched).has_changes='1'</do>
+                    <do>GLOBAL.new_schedule_counter=GLOBAL.new_schedule_counter - 1</do>
+                    <do>OBJECT(TEMP.my_new_rsched).id_sched=GLOBAL.new_schedule_counter</do>
+
+                    <call_proc_for_current_object>
+                      <name>'add_rate_to_schedule'</name>
+                      <param name='rsched_oid'>TEMP.my_new_rsched</param>
+                      <param name='rate_oid'>OBJECT.object_id</param>
+                        <param name='make_changes'>'1'</param>
+                        <param name='made_changes'>TEMP.made_changes</param>
+                    </call_proc_for_current_object>
+                    
+                    <!-- manage date gaps for the entire subscription range as well-->
+                    <call_proc_for_current_object>
+                      <name>'manage_add_rate_gaps'</name>
+                      <param name='rsched_oid'>TEMP.csr</param>
+                      <param name='rate_oid'>OBJECT.object_id</param>
+                    </call_proc_for_current_object>
+                  </then>
+                </if>
+              </loop>
+            </index_select_keys>
+          </loop>
+        </db_select>
+      </then>
+    </if>
+
+    <index_select_keys>
+      <index>'ADD_RATE_GAPS'</index>
+      <cursor>TEMP.gap_csr</cursor>
+      <loop>
+        <print>'FOUND A DATE GAP WITH NO ACTIVE SUBSCRIPTION THAT CAN HANDLE IT:['~OBJECT(TEMP.gap_csr).start_date~']['~OBJECT(TEMP.gap_csr).end_date~']'</print>
+      </loop>
+    </index_select_keys>
+
+      </then>
+    </if>
+
+      </then>
+    </if>
+    
+  </proc>
+
+  <proc name='find_rate_for_object'>
+    <param name='rsched_oid'/>
+    <param name='rate_oid'/>
+    <do>TEMP.found_rate='0'</do>
+    <index_select>
+      <index>'RATE_SCHED_ROWS_IDX'</index>
+      <field name="id_sched">OBJECT(TEMP.rsched_oid).id_sched</field>
+      <cursor>TEMP.pt_row_csr</cursor>
+      <loop>
+        <if>
+          <condition>TEMP.found_rate eq '0'</condition>
+          <then>
+            <do>TEMP.found_row='1'</do>
+            <index_select>
+              <index>'MY_PT_FIELDS'</index>
+              <field name="id_param_table">OBJECT(TEMP.rsched_oid).id_paramtable</field>
+              <field name="is_key">'1'</field>
+              <cursor>TEMP.pt_field_csr</cursor>
+              <loop>
+                <do>TEMP.my_pt_field=OBJECT(TEMP.pt_field_csr).column_name</do>
+                <do>TEMP.my_object_field=OBJECT(TEMP.pt_field_csr).field_name</do>
+                <get_object_field>
+                  <object_id>OBJECT(TEMP.pt_row_csr).object_id</object_id>
+                  <field_name>TEMP.my_pt_field</field_name>
+                  <output>TEMP.pt_value</output>
+                </get_object_field>
+                <get_object_field>
+                  <object_id>TEMP.rate_oid</object_id>
+                  <field_name>TEMP.my_object_field</field_name>
+                  <output>TEMP.rate_value</output>
+                </get_object_field>
+
+                <if>
+                  <condition>OBJECT(TEMP.pt_field_csr).namespace ne '' and TEMP.rate_value ne GLOBAL.null_value and TEMP.rate_value ne ''</condition>
+                  <then>
+                  <call_proc_for_current_object>
+                    <name>'convert_to_enum'</name>
+                    <param name='value'>TEMP.rate_value</param>
+                    <param name='namespace'>OBJECT(TEMP.pt_field_csr).namespace</param>
+                    <param name='success'>TEMP.enum_success</param>
+                  </call_proc_for_current_object>
+                  </then>
+                </if>
+                <if>
+                  <condition>!(TEMP.pt_value eq TEMP.rate_value or TEMP.pt_value eq '' or TEMP.rate_value eq GLOBAL.null_value)</condition>
+                  <then>
+                    <do>TEMP.found_row='0'</do>
+                  </then>
+                </if>
+                <if>
+                  <condition>TEMP.pt_value ne TEMP.rate_value and OBJECT.exclude_wildcards eq '1'</condition>
+                  <then>
+                    <do>TEMP.found_row='0'</do>
+                  </then>
+                </if>
+              </loop>
+            </index_select>
+
+            <if>
+              <condition>TEMP.found_row eq '1'</condition>
+              <then>
+                <do>TEMP.found_rate='1'</do>
+                <do>OBJECT(TEMP.rate_oid).pt_row=TEMP.pt_row_csr</do>
+                <do>OBJECT(TEMP.rate_oid).child_count = '1'</do>
+                <do>OBJECT(TEMP.rate_oid).start_date = OBJECT(TEMP.rsched_oid).start_date</do>
+                <do>OBJECT(TEMP.rate_oid).end_date = OBJECT(TEMP.rsched_oid).end_date</do>
+                <index_select>
+                  <index>'MY_PT_FIELDS'</index>
+                  <field name="id_param_table">OBJECT(TEMP.rsched_oid).id_paramtable</field>
+                  <field name="is_key">'0'</field>
+                  <cursor>TEMP.pt_field_csr</cursor>
+                  <loop>
+                    <do>TEMP.my_pt_field=OBJECT(TEMP.pt_field_csr).column_name</do>
+                    <do>TEMP.my_object_field=OBJECT(TEMP.pt_field_csr).field_name</do>
+                    <get_object_field>
+                      <object_id>OBJECT(TEMP.pt_row_csr).object_id</object_id>
+                      <field_name>TEMP.my_pt_field</field_name>
+                      <output>TEMP.pt_value</output>
+                    </get_object_field>
+                    <set_object_field>
+                      <input>TEMP.pt_value</input>
+                      <object_id>TEMP.rate_oid</object_id>
+                      <field_name>TEMP.my_object_field</field_name>
+                    </set_object_field>
+                  </loop>
+                </index_select>
+              </then>
+            </if>
+          </then>
+        </if>
+      </loop>
+    </index_select>
+  </proc>
+
+  <proc name='check_for_open_parents'>
+    <param name='static_parent_oid'/>
+    <param name='more_children' mode='out'/>
+    <do>TEMP.more_children='0'</do>
+    <index_select>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name='static_oid'>TEMP.static_parent_oid</field>
+      <cursor>TEMP.parent_csr</cursor>
+      <loop>
+        <do>TEMP.curr_parent=OBJECT(TEMP.parent_csr).dynamic_oid</do>
+        <index_select>
+          <index>'DYNAMIC_CHILDREN'</index>
+          <field name='parent_oid'>TEMP.curr_parent</field>
+          <cursor>TEMP.child_csr</cursor>
+          <else>
+            <do>TEMP.more_children=TEMP.more_children + 1</do>
+          </else>
+        </index_select>
+      </loop>
+    </index_select>
+  </proc>
+
+  <proc name='check_for_open_overlap'>
+    <param name='static_parent_oid'/>
+    <param name='rsched_oid'/>
+    <param name='found_overlap' mode='out'/>
+    <do>TEMP.found_overlap='0'</do>
+    <index_select>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name='static_oid'>TEMP.static_parent_oid</field>
+      <cursor>TEMP.parent_csr</cursor>
+      <loop>
+        <do>TEMP.curr_parent=OBJECT(TEMP.parent_csr).dynamic_oid</do>
+        <index_select>
+          <index>'DYNAMIC_CHILDREN'</index>
+          <field name='parent_oid'>TEMP.curr_parent</field>
+          <cursor>TEMP.child_csr</cursor>
+          <else>
+            <if>
+              <condition>OBJECT(TEMP.curr_parent).start_date lt OBJECT(TEMP.rsched_oid).end_date and OBJECT(TEMP.curr_parent).end_date gt OBJECT(TEMP.rsched_oid).start_date</condition>
+              <then>
+                <do>TEMP.found_overlap='1'</do>
+              </then>
+            </if>
+          </else>
+        </index_select>
+      </loop>
+    </index_select>
+  </proc>
+
+  <proc name='perform_pt_child_to_parent_mapping'>
+    <param name='dynamic_child_oid'/>
+    <param name='dynamic_parent_oid'/>
+    <index_select>
+      <index>'MY_PT_FIELDS'</index>
+      <field name="id_param_table">OBJECT(TEMP.dynamic_child_oid).id_paramtable</field>
+      <field name="is_key">'0'</field>
+      <cursor>TEMP.pt_field_csr</cursor>
+      <loop>
+        <do>TEMP.my_pt_field=OBJECT(TEMP.pt_field_csr).column_name</do>
+        <do>TEMP.my_object_field=OBJECT(TEMP.pt_field_csr).field_name</do>
+        <get_object_field>
+          <object_id>TEMP.dynamic_child_oid</object_id>
+          <field_name>TEMP.my_object_field</field_name>
+          <output>TEMP.pt_value</output>
+        </get_object_field>
+        <set_object_field>
+          <input>TEMP.pt_value</input>
+          <object_id>TEMP.dynamic_parent_oid</object_id>
+          <field_name>TEMP.my_object_field</field_name>
+        </set_object_field>
+        <call_proc_for_current_object>
+          <name>'add_metadata'</name>
+          <param name='static_oid'>OBJECT.dynamic_parent_oid</param>
+          <param name='field_name'>TEMP.my_object_field</param>
+          <param name='rate_type'>OBJECT(TEMP.dynamic_child_oid).rate_type</param>
+          <param name='unique_rate_row'>OBJECT(TEMP.dynamic_child_oid).id_sched~'-'~OBJECT(TEMP.dynamic_child_oid).n_order~'-'~OBJECT(TEMP.dynamic_child_oid).tt_start</param>
+        </call_proc_for_current_object>
+      </loop>
+    </index_select>
+  </proc>
+  
+ 
+
+  <proc name='perform_parent_mapping'>
+    <param name='static_parent_oid'/>
+    <index_select>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name='static_oid'>TEMP.static_parent_oid</field>
+      <cursor>TEMP.parent_csr</cursor>
+      <loop>
+        <do>TEMP.curr_parent=OBJECT(TEMP.parent_csr).dynamic_oid</do>
+        <index_select>
+          <index>'DYNAMIC_CHILDREN'</index>
+          <field name='parent_oid'>TEMP.curr_parent</field>
+          <cursor>TEMP.child_csr</cursor>
+          <loop>
+            <do>TEMP.curr_child=OBJECT(TEMP.child_csr).child_oid</do>
+            <call_proc_for_current_object>
+              <name>'perform_child_to_parent_mapping'</name>
+              <param name='dynamic_parent_oid'>TEMP.curr_parent</param>
+              <param name='dynamic_child_oid'>TEMP.curr_child</param>
+            </call_proc_for_current_object>
+            <index_insert>
+              <index>'DYNAMIC_CHILDREN_APPLIED'</index>
+              <field name='parent_oid'>TEMP.curr_parent</field>
+              <field name='child_oid'>TEMP.curr_child</field>
+            </index_insert>
+          </loop>
+        </index_select>
+        <index_remove>
+          <index>'DYNAMIC_CHILDREN'</index>
+          <field name='parent_oid'>TEMP.curr_parent</field>
+        </index_remove>
+      </loop>
+    </index_select>
+  </proc>
+
+  <proc name='perform_pt_parent_mapping'>
+    <index_select>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name='static_oid'>OBJECT.static_oid</field>
+      <cursor>TEMP.parent_csr</cursor>
+      <loop>
+        <do>TEMP.curr_parent=OBJECT(TEMP.parent_csr).dynamic_oid</do>
+        <index_select>
+          <index>'DYNAMIC_CHILDREN'</index>
+          <field name='parent_oid'>TEMP.curr_parent</field>
+          <cursor>TEMP.child_csr</cursor>
+          <loop>
+            <do>TEMP.curr_child=OBJECT(TEMP.child_csr).child_oid</do>
+            <call_proc_for_current_object>
+              <name>'perform_pt_child_to_parent_mapping'</name>
+              <param name='dynamic_parent_oid'>TEMP.curr_parent</param>
+              <param name='dynamic_child_oid'>TEMP.curr_child</param>
+            </call_proc_for_current_object>
+            <index_insert>
+              <index>'DYNAMIC_CHILDREN_APPLIED'</index>
+              <field name='parent_oid'>TEMP.curr_parent</field>
+              <field name='child_oid'>TEMP.curr_child</field>
+            </index_insert>
+          </loop>
+        </index_select>
+        <index_remove>
+          <index>'DYNAMIC_CHILDREN'</index>
+          <field name='parent_oid'>TEMP.curr_parent</field>
+        </index_remove>
+      </loop>
+    </index_select>
+  </proc>
+
+  <proc name='push_child_to_parent'>
+    <param name='child_oid'/>
+    <param name='parent_oid'/>
+    <param name='curr_parent'/>
+
+    <call_proc_for_current_object>
+      <name>'handle_null_dates'</name>
+      <param name='start_date'>OBJECT(TEMP.child_oid).start_date</param>
+      <param name='end_date'>OBJECT(TEMP.child_oid).end_date</param>
+    </call_proc_for_current_object>
+    <call_proc_for_current_object>
+      <name>'handle_null_dates'</name>
+      <param name='start_date'>OBJECT(TEMP.parent_oid).start_date</param>
+      <param name='end_date'>OBJECT(TEMP.parent_oid).end_date</param>
+    </call_proc_for_current_object>
+    <call_proc_for_current_object>
+      <name>'handle_null_dates'</name>
+      <param name='start_date'>OBJECT(TEMP.curr_parent).start_date</param>
+      <param name='end_date'>OBJECT(TEMP.curr_parent).end_date</param>
+    </call_proc_for_current_object>
+    
+    <if>
+      <condition>OBJECT(TEMP.curr_parent).start_date lt OBJECT(TEMP.child_oid).end_date and OBJECT(TEMP.curr_parent).end_date gt OBJECT(TEMP.child_oid).start_date</condition>
+      <then>
+        <!-- print>'Date overlap of ['~OBJECT(TEMP.curr_parent).start_date~'] and ['~OBJECT(TEMP.curr_parent).end_date~'] versus ['~OBJECT(TEMP.child_oid).start_date~'] and ['~OBJECT(TEMP.child_oid).end_date~']'</print -->
+        <if>
+          <condition>OBJECT(TEMP.curr_parent).start_date gte OBJECT(TEMP.child_oid).start_date</condition>
+          <then>
+            <!-- parent starts after child -->
+            <if>
+              <condition>OBJECT(TEMP.curr_parent).end_date lte OBJECT(TEMP.child_oid).end_date</condition>
+              <then>
+                <!-- print>'Found a child that fully contains the parent'</print -->
+                <!-- child fully contains parent, i.e. we're done with this parent -->
+                <index_insert>
+                  <index>'DYNAMIC_CHILDREN'</index>
+                  <field name='parent_oid'>TEMP.curr_parent</field>
+                  <field name='child_oid'>TEMP.child_oid</field>
+                </index_insert>
+              </then>
+              <else>
+                <!-- print>'Found a child that ends before the parent'</print -->
+                <!-- child starts before parent but ends before parent, i.e. bisect-->
+                <spawn>
+                  <object_type>OBJECT(TEMP.curr_parent).object_type</object_type>
+                  <object_id>TEMP.my_new_parent</object_id>
+                </spawn>
+                <inherit_object>
+                  <source>TEMP.curr_parent</source>
+                  <target>TEMP.my_new_parent</target>
+                </inherit_object>
+                <do>OBJECT(TEMP.curr_parent).end_date=OBJECT(TEMP.child_oid).end_date</do>
+                <do>OBJECT(TEMP.my_new_parent).start_date=OBJECT(TEMP.child_oid).end_date</do>
+                <index_insert>
+                  <index>'DYNAMIC_ENTITIES'</index>
+                  <field name='static_oid'>TEMP.parent_oid</field>
+                  <field name='dynamic_oid'>TEMP.my_new_parent</field>
+                </index_insert>
+                <index_insert>
+                  <index>'DYNAMIC_CHILDREN'</index>
+                  <field name='parent_oid'>TEMP.curr_parent</field>
+                  <field name='child_oid'>TEMP.child_oid</field>
+                </index_insert>
+              </else>
+            </if>
+          </then>
+          <else>
+            <!-- child starts after parent -->
+            <if>
+              <condition>OBJECT(TEMP.curr_parent).end_date lte OBJECT(TEMP.child_oid).end_date</condition>
+              <then>
+                <!-- print>'Found a rate schedule that starts after the date gap'</print -->
+                <!-- child starts after parent but goes past the end of the parent, i.e. bisect -->
+                <spawn>
+                  <object_type>OBJECT(TEMP.curr_parent).object_type</object_type>
+                  <object_id>TEMP.my_new_parent</object_id>
+                </spawn>
+                <inherit_object>
+                  <source>TEMP.curr_parent</source>
+                  <target>TEMP.my_new_parent</target>
+                </inherit_object>
+                <do>OBJECT(TEMP.curr_parent).start_date=OBJECT(TEMP.child_oid).start_date</do>
+                <do>OBJECT(TEMP.my_new_parent).end_date=OBJECT(TEMP.child_oid).start_date</do>
+                <index_insert>
+                  <index>'DYNAMIC_ENTITIES'</index>
+                  <field name='static_oid'>TEMP.parent_oid</field>
+                  <field name='dynamic_oid'>TEMP.my_new_parent</field>
+                </index_insert>
+                <index_insert>
+                  <index>'DYNAMIC_CHILDREN'</index>
+                  <field name='parent_oid'>TEMP.curr_parent</field>
+                  <field name='child_oid'>TEMP.child_oid</field>
+                </index_insert>
+              </then>
+              <else>
+                <!-- print>'Found a rate schedule fully contained by the date gap'</print -->
+                <!-- rate schedule fully contained within date gap, i.e. tri-sect -->
+                <do>OBJECT(TEMP.child_oid).start_date=OBJECT(TEMP.child_oid).start_date</do>
+                <do>OBJECT(TEMP.child_oid).end_date=OBJECT(TEMP.child_oid).end_date</do>
+                <spawn>
+                  <object_type>OBJECT(TEMP.curr_parent).object_type</object_type>
+                  <object_id>TEMP.my_new_parent</object_id>
+                </spawn>
+                <inherit_object>
+                  <source>TEMP.curr_parent</source>
+                  <target>TEMP.my_new_parent</target>
+                </inherit_object>
+                <spawn>
+                  <object_type>OBJECT(TEMP.curr_parent).object_type</object_type>
+                  <object_id>TEMP.my_other_new_parent</object_id>
+                </spawn>
+                <inherit_object>
+                  <source>TEMP.curr_parent</source>
+                  <target>TEMP.my_other_new_parent</target>
+                </inherit_object>
+                <do>OBJECT(TEMP.curr_parent).start_date=OBJECT(TEMP.child_oid).start_date</do>
+                <do>OBJECT(TEMP.curr_parent).end_date=OBJECT(TEMP.child_oid).end_date</do>
+                <do>OBJECT(TEMP.my_new_parent).end_date=OBJECT(TEMP.child_oid).start_date</do>
+                <do>OBJECT(TEMP.my_other_new_parent).start_date=OBJECT(TEMP.child_oid).end_date</do>
+                <index_insert>
+                  <index>'DYNAMIC_ENTITIES'</index>
+                  <field name='static_oid'>TEMP.parent_oid</field>
+                  <field name='dynamic_oid'>TEMP.my_new_parent</field>
+                </index_insert>
+                <index_insert>
+                  <index>'DYNAMIC_ENTITIES'</index>
+                  <field name='static_oid'>TEMP.parent_oid</field>
+                  <field name='dynamic_oid'>TEMP.my_other_new_parent</field>
+                </index_insert>
+                <index_insert>
+                  <index>'DYNAMIC_CHILDREN'</index>
+                  <field name='parent_oid'>TEMP.curr_parent</field>
+                  <field name='child_oid'>TEMP.child_oid</field>
+                </index_insert>
+              </else>
+            </if>
+          </else>
+        </if>
+      </then>
+    </if>
+  </proc>
+
+  <proc name='push_exclusive_child_to_parents'>
+    <param name='child_oid'/>
+    <param name='parent_oid'/>
+    <index_select>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name='static_oid'>TEMP.parent_oid</field>
+      <cursor>TEMP.parent_csr</cursor>
+      <loop>
+        <do>TEMP.curr_parent=OBJECT(TEMP.parent_csr).dynamic_oid</do>
+        <index_select>
+          <index>'DYNAMIC_CHILDREN'</index>
+          <field name='parent_oid'>TEMP.curr_parent</field>
+          <cursor>TEMP.junk_csr</cursor>
+          <run></run>
+          <else>
+            <!--<print>'Checking ['~OBJECT(TEMP.curr_parent).start_date~'] and ['~OBJECT(TEMP.curr_parent).end_date~'] versus ['~OBJECT(TEMP.child_oid).start_date~'] and ['~OBJECT(TEMP.child_oid).end_date~']'</print>-->
+            <call_proc_for_current_object>
+              <name>'push_child_to_parent'</name>
+              <param name='curr_parent'>TEMP.curr_parent</param>
+              <param name='child_oid'>TEMP.child_oid</param>
+              <param name='parent_oid'>TEMP.parent_oid</param>
+            </call_proc_for_current_object>
+          </else>
+        </index_select>
+      </loop>
+    </index_select> 
+  </proc>
+
+  <proc name='push_child_to_parents'>
+    <param name='child_oid'/>
+    <param name='parent_oid'/>
+    
+    <index_select>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name='static_oid'>TEMP.parent_oid</field>
+      <cursor>TEMP.parent_csr</cursor>
+      <loop>
+        <do>TEMP.curr_parent=OBJECT(TEMP.parent_csr).dynamic_oid</do>
+        <!-- print>'Checking ['~OBJECT(TEMP.curr_parent).start_date~'] and ['~OBJECT(TEMP.curr_parent).end_date~'] versus ['~OBJECT(TEMP.child_oid).start_date~'] and ['~OBJECT(TEMP.child_oid).end_date~']'</print -->
+            <call_proc_for_current_object>
+              <name>'push_child_to_parent'</name>
+              <param name='curr_parent'>TEMP.curr_parent</param>
+              <param name='child_oid'>TEMP.child_oid</param>
+              <param name='parent_oid'>TEMP.parent_oid</param>
+            </call_proc_for_current_object>
+      </loop>
+    </index_select>   
+  </proc>
+
+  <proc name='push_children_to_parents'>
+    <param name='static_child_oid'/>
+    <param name='static_parent_oid'/>
+
+    <call_proc_for_current_object>
+      <name>'handle_null_dates'</name>
+      <param name='start_date'>OBJECT(TEMP.static_parent_oid).start_date</param>
+      <param name='end_date'>OBJECT(TEMP.static_parent_oid).end_date</param>
+    </call_proc_for_current_object>
+
+    
+    <index_select>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name='static_oid'>TEMP.static_child_oid</field>
+      <cursor>TEMP.child_csr</cursor>
+      <loop>
+        <do>TEMP.curr_child=OBJECT(TEMP.child_csr).dynamic_oid</do>
+        <call_proc_for_current_object>
+          <name>'push_child_to_parents'</name>
+          <param name='child_oid'>TEMP.curr_child</param>
+          <param name='parent_oid'>TEMP.static_parent_oid</param>
+        </call_proc_for_current_object>
+      </loop>
+    </index_select>
+    <call_proc_for_current_object>
+      <name>'perform_parent_mapping'</name>
+      <param name='static_parent_oid'>TEMP.static_parent_oid</param>
+    </call_proc_for_current_object>
+  </proc>
+
+  <proc name='get_rscheds'>
+    
+    <call_proc_for_current_object>
+      <name>'handle_null_dates'</name>
+      <param name='start_date'>OBJECT.start_date</param>
+      <param name='end_date'>OBJECT.end_date</param>
+    </call_proc_for_current_object>
+
+    <call_proc_for_current_object>
+      <name>'bound_dates_by_account_dates'</name>
+      <param name='id_acc'>OBJECT.id_acc</param>
+      <param name='start_date'>OBJECT.start_date</param>
+      <param name='end_date'>OBJECT.end_date</param>
+    </call_proc_for_current_object>
+
+    <call_proc_for_current_object>
+      <name>'determine_id_paramtable'</name>
+      <param name='id_paramtable'>OBJECT.id_paramtable</param>
+      <param name='id_template'>OBJECT.id_pi_template</param>
+      <param name='paramtable_name'>OBJECT.paramtable_name</param>
+      <param name='template_name'>OBJECT.template_name</param>
+    </call_proc_for_current_object>
+
+    <call_proc_for_current_object>
+      <name>'cache_rate_schedules'</name>
+    </call_proc_for_current_object>
+      
+    <do>TEMP.def_object_type='DEF_SCHEDULE_'~OBJECT.id_paramtable~'_'~OBJECT.id_pi_template</do>
+    <do>TEMP.po_object_type='PO_SCHEDULE_'~OBJECT.id_paramtable~'_'~OBJECT.id_pi_template</do>
+    <do>TEMP.rate_object_type='ICB_SCHEDULE_'~OBJECT.id_paramtable~'_'~OBJECT.id_pi_template</do>
+
+    <startup>
+    <define_memory_index>
+      <index>'RATE_SCHED_IDX'</index>
+      <key_field>'id_sched'</key_field>
+      <field>'object_id'</field>
+    </define_memory_index>
+
+    <define_memory_index>
+      <index>'RATE_SCHED_ROWS_IDX'</index>
+      <default_cursor_order>'reverse'</default_cursor_order>
+      <key_field>'id_sched'</key_field>
+      <field>'object_id'</field>
+    </define_memory_index>
+    </startup>
+
+
+
+    <!-- Spawn a dummy copy of ourselves to store the rate information we find. We'll make a new copy any time we find a rate. -->
+    <spawn>
+      <object_type>'DYNAMIC_PT'</object_type>
+      <object_id>OBJECT.my_lookup_copy</object_id>
+    </spawn>
+
+    <inherit_object>
+      <source>OBJECT.object_id</source>
+      <target>OBJECT.my_lookup_copy</target>
+    </inherit_object>
+
+    <index_select>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name='static_oid'>OBJECT.static_oid</field>
+      <cursor>TEMP.parent_csr</cursor>
+      <then>
+        <do>TEMP.curr_obj=OBJECT(TEMP.parent_csr).dynamic_oid</do>
+        <call_proc_for_current_object>
+          <name>'bound_dates_by_account_dates'</name>
+          <param name='id_acc'>OBJECT(TEMP.curr_obj).id_acc</param>
+          <param name='start_date'>OBJECT(TEMP.curr_obj).start_date</param>
+          <param name='end_date'>OBJECT(TEMP.curr_obj).end_date</param>
+        </call_proc_for_current_object>
+      </then>
+      <else>
+        <spawn>
+          <object_type>OBJECT.object_type</object_type>
+          <object_id>TEMP.new_parent_oid</object_id>
+        </spawn>
+        <inherit_object>
+          <source>OBJECT.object_id</source>
+          <target>TEMP.new_parent_oid</target>
+        </inherit_object>
+        <index_insert>
+          <index>'DYNAMIC_ENTITIES'</index>
+          <field name="static_oid">OBJECT.static_oid</field>
+          <field name="dynamic_oid">TEMP.new_parent_oid</field>
+        </index_insert>
+      </else>
+    </index_select>
+
+    <do>TEMP.more_children = '1'</do>
+    <if>
+      <condition>OBJECT.exclude_icb_rates ne '1'</condition>
+      <then>
+    <call_proc_for_current_object>
+      <name>'get_rscheds_by_type'</name>
+      <param name='curr_object_type'>TEMP.rate_object_type</param>
+      <param name='call_child_mapping'>'0'</param>
+    </call_proc_for_current_object>
+
+
+    <call_proc_for_current_object>
+      <name>'check_for_open_parents'</name>
+      <param name='static_parent_oid'>OBJECT.static_oid</param>
+      <param name='more_children'>TEMP.more_children</param>
+    </call_proc_for_current_object>
+
+      </then>
+    </if>
+
+    <if>
+      <condition>TEMP.more_children gt '0' and OBJECT.exclude_po_rates ne '1'</condition>
+      <then>
+        <call_proc_for_current_object>
+          <name>'get_rscheds_by_type'</name>
+          <param name='curr_object_type'>TEMP.po_object_type</param>
+          <param name='call_child_mapping'>'0'</param>
+        </call_proc_for_current_object>
+
+
+    <call_proc_for_current_object>
+      <name>'check_for_open_parents'</name>
+      <param name='static_parent_oid'>OBJECT.static_oid</param>
+      <param name='more_children'>TEMP.more_children</param>
+    </call_proc_for_current_object>
+
+      </then>
+    </if>
+
+    <if>
+      <condition>TEMP.more_children gt '0' and OBJECT.exclude_default_rates ne '1'</condition>
+      <then>
+        <call_proc_for_current_object>
+          <name>'get_rscheds_by_type'</name>
+          <param name='curr_object_type'>TEMP.def_object_type</param>
+          <param name='call_child_mapping'>'0'</param>
+        </call_proc_for_current_object>
+      </then>
+    </if>
+
+    <call_proc_for_current_object>
+      <name>'perform_pt_parent_mapping'</name>
+    </call_proc_for_current_object>
+  </proc>
+
+  <proc name='get_rscheds_by_type'>
+    <param name='curr_object_type'/>
+    <param name='call_child_mapping'/>
+    <index_select>
+      <index>'OBJECT_IDX'</index>
+      <field name="object_type">TEMP.curr_object_type</field>
+      <cursor>TEMP.object_csr</cursor>
+      <loop>
+        <do>TEMP.curr_rsched=OBJECT(TEMP.object_csr).object_id</do>
+        
+        <call_proc_for_current_object>
+          <name>'check_for_open_overlap'</name>
+          <param name='static_parent_oid'>OBJECT.static_oid</param>
+          <param name='rsched_oid'>TEMP.curr_rsched</param>
+          <param name='found_overlap'>TEMP.found_overlap</param>
+        </call_proc_for_current_object>
+
+        <!-- make sure the param table rows are already cached before checking to see if we have a hit -->
+
+        <if>
+          <condition>TEMP.found_overlap gt '0'</condition>
+          <then>
+
+            <call_proc_for_current_object>
+              <name>'cache_pt_schedule'</name>
+              <param name='curr_rsched'>TEMP.curr_rsched</param>
+            </call_proc_for_current_object>
+
+            <!-- done making sure we have all the param table rows in memory -->
+
+            <!-- find_rate_for_object will check to see if the rate keys on the specified object exist in the specified rate schedule assuming rows have been cached already -->
+            <call_proc_for_current_object>
+              <name>'find_rate_for_object'</name>
+              <param name='rate_oid'>OBJECT.my_lookup_copy</param>
+              <param name='rsched_oid'>TEMP.curr_rsched</param>
+            </call_proc_for_current_object>
+
+            <if>
+              <condition>OBJECT(OBJECT.my_lookup_copy).child_count gt '0'</condition>
+              <then>
+
+                <do>OBJECT.current_rsched=OBJECT.my_lookup_copy</do>
+                <!-- Spawn a new dummy copy of ourselves to store the rate information we find. We'll make a new copy any time we find a rate. -->
+                <spawn>
+                  <object_type>'DYNAMIC_PT'</object_type>
+                  <object_id>OBJECT.my_lookup_copy</object_id>
+                </spawn>
+                <inherit_object>
+                  <source>OBJECT.object_id</source>
+                  <target>OBJECT.my_lookup_copy</target>
+                </inherit_object>
+
+                
+                <call_proc_for_current_object>
+                  <name>'push_exclusive_child_to_parents'</name>
+                  <param name='child_oid'>OBJECT.current_rsched</param>
+                  <param name='parent_oid'>OBJECT.static_oid</param>
+                </call_proc_for_current_object>
+              </then>
+            </if>
+          </then>
+        </if>
+      </loop>
+    </index_select>
+  </proc>
+
+
+  <proc name='cache_rate_schedules'>
+    <do>TEMP.last_id_sub='-1'</do>
+    <do>TEMP.last_id_group='-1'</do>
+    <do>TEMP.last_id_po='-1'</do>
+    <do>TEMP.last_id_pricelist='-1'</do>
+    <do>TEMP.gsub_oid='0'</do>
+    <do>TEMP.sub_oid='0'</do>
+    <do>TEMP.pl_oid='0'</do>
+    <do>TEMP.po_oid='0'</do>
+    <do>TEMP.rsched_oid='0'</do>
+
+    <startup>
+      <define_memory_index>
+        <index>'MY_CACHED_RATE_SCHEDULES'</index>
+        <key_field>'id_acc'</key_field>
+        <field>'is_cached'</field>
+      </define_memory_index>
+    </startup>
+
+    <do>TEMP.need_to_cache='1'</do>
+    <index_select>
+      <index>'MY_CACHED_RATE_SCHEDULES'</index>
+      <field name="id_acc">OBJECT.id_acc</field>
+      <cursor>TEMP.dummy_csr</cursor>
+      <then>
+        <do>TEMP.need_to_cache='0'</do>
+      </then>
+      <else>
+        <index_insert>
+          <index>'MY_CACHED_RATE_SCHEDULES'</index>
+          <field name="id_acc">OBJECT.id_acc</field>
+          <field name="is_cached">'1'</field>
+        </index_insert>
+      </else>
+    </index_select>
+
+    <if>
+      <condition>TEMP.need_to_cache eq '1'</condition>
+      <then>
+        <do>TEMP.id_sub = 0</do>
+        <do>TEMP.id_group = 0</do>
+        <do>TEMP.id_po = 0</do>
+        <if>
+          <condition>OBJECT.id_sub ne ''</condition>
+          <then>
+            <do>TEMP.id_sub = OBJECT.id_sub</do>
+          </then>
+        </if>
+        <if>
+          <condition>OBJECT.id_group ne ''</condition>
+          <then>
+            <do>TEMP.id_group = OBJECT.id_group</do>
+          </then>
+        </if>
+        <if>
+          <condition>OBJECT.id_po ne ''</condition>
+          <then>
+            <do>TEMP.id_po = OBJECT.id_po</do>
+          </then>
+        </if>
+      <db_select>
+        <login_object>GLOBAL.target_login</login_object>
+        <!-- query>"select 9 jonah from dual "</query -->
+        <query type="sql">
+          "select * from vw_all_rate_schedules a where a.id_acc = "~OBJECT.id_acc~"
+          and (a.id_sub = "~TEMP.id_sub~" or "~TEMP.id_sub~" = 0)
+          and (a.id_group = "~TEMP.id_group~" or "~TEMP.id_group~" = 0)
+          and (a.id_po = "~TEMP.id_po~" or "~TEMP.id_po~" = 0)
+          order by a.id_acc, a.id_group, a.id_sub, a.id_po, a.rate_type, a.id_pricelist, a.rsched_start desc"</query>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <do>OBJECT.id_acc=OBJECT(TEMP.csr).id_acc</do>
+          <do>OBJECT.area=OBJECT(TEMP.csr).c_area</do>
+          <do>OBJECT.areakey=OBJECT(TEMP.csr).c_areakey</do>
+          <if>
+            <condition>OBJECT(TEMP.csr).id_group ne '' and TEMP.last_id_group ne OBJECT(TEMP.csr).id_group</condition>
+            <then>
+              <!-- print>'Spawning group subscription: '~OBJECT(TEMP.csr).id_group</print -->
+              <spawn>
+                <object_type>'GROUP_SUB'</object_type>
+                <object_id>TEMP.gsub_oid</object_id>
+              </spawn>
+              <index_insert>
+                <index>'OBJECT_IDX'</index>
+                <field name="object_type">"GROUP_SUB"</field>
+                <field name="object_id">TEMP.gsub_oid</field>
+              </index_insert>
+              <do>OBJECT(TEMP.gsub_oid).id_group=OBJECT(TEMP.csr).id_group</do>
+              <do>TEMP.last_id_sub='-1'</do>
+              <do>TEMP.last_id_po='-1'</do>
+              <do>TEMP.last_id_pricelist='-1'</do>
+              <do>OBJECT(TEMP.gsub_oid).group_name=OBJECT(TEMP.csr).tx_name</do>
+              <do>OBJECT(TEMP.gsub_oid).start_date=OBJECT(TEMP.csr).gsub_start</do>
+              <do>OBJECT(TEMP.gsub_oid).end_date=OBJECT(TEMP.csr).gsub_end</do>
+              <do>TEMP.last_id_group=OBJECT(TEMP.csr).id_group</do>
+              <do>OBJECT(TEMP.gsub_oid).parent=OBJECT.static_oid</do>
+            </then>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.csr).id_sub ne '' and TEMP.last_id_sub ne OBJECT(TEMP.csr).id_sub</condition>
+            <then>
+              <!-- print>'Spawning subscription: '~OBJECT(TEMP.csr).id_sub</print -->
+              <spawn>
+                <object_type>'SUB'</object_type>
+                <object_id>TEMP.sub_oid</object_id>
+              </spawn>
+              <index_insert>
+                <index>'OBJECT_IDX'</index>
+                <field name="object_type">"SUB"</field>
+                <field name="object_id">TEMP.sub_oid</field>
+              </index_insert>
+              <do>OBJECT(TEMP.sub_oid).id_sub=OBJECT(TEMP.csr).id_sub</do>
+              <do>TEMP.last_id_po='-1'</do>
+              <do>TEMP.last_id_pricelist='-1'</do>
+              <do>OBJECT(TEMP.sub_oid).id_po=OBJECT(TEMP.csr).id_po</do>
+              <do>OBJECT(TEMP.sub_oid).start_date=OBJECT(TEMP.csr).sub_start</do>
+              <do>OBJECT(TEMP.sub_oid).end_date=OBJECT(TEMP.csr).sub_end</do>
+              <do>TEMP.last_id_sub=OBJECT(TEMP.csr).id_sub</do>
+              <do>OBJECT(TEMP.sub_oid).account=OBJECT.static_oid</do>
+              <do>OBJECT(TEMP.sub_oid).parent=OBJECT.static_oid</do>
+              <if>
+                <condition>OBJECT(TEMP.csr).id_group ne ''</condition>
+                <then>
+                  <do>OBJECT(TEMP.sub_oid).parent=TEMP.gsub_oid</do>
+                  <do>OBJECT(TEMP.sub_oid).gsub=TEMP.gsub_oid</do>
+                  <do>OBJECT(TEMP.sub_oid).end_date = OBJECT(OBJECT(TEMP.sub_oid).parent).end_date</do>
+                  <do>OBJECT(TEMP.sub_oid).start_date = OBJECT(OBJECT(TEMP.sub_oid).parent).start_date</do>
+                </then>
+              </if>
+            </then>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.csr).id_po ne '' and OBJECT(TEMP.csr).rate_type_id eq '3' and TEMP.last_id_po ne OBJECT(TEMP.csr).id_po</condition>
+            <then>
+              <!-- print>"Spawning po-level for subscription: "~OBJECT(TEMP.csr).id_sub~" for po "~OBJECT(TEMP.csr).id_po</print -->
+              <spawn>
+                <object_type>'PRODUCTOFFERING'</object_type>
+                <object_id>TEMP.po_oid</object_id>
+              </spawn>
+              <index_insert>
+                <index>'OBJECT_IDX'</index>
+                <field name="object_type">"PRODUCTOFFERING"</field>
+                <field name="object_id">TEMP.po_oid</field>
+              </index_insert>
+              <do>OBJECT(TEMP.po_oid).id_sub=OBJECT(TEMP.csr).id_sub</do>
+              <do>TEMP.last_id_pricelist='-1'</do>
+              <do>OBJECT(TEMP.po_oid).id_po=OBJECT(TEMP.csr).id_po</do>
+              <do>TEMP.last_id_po=OBJECT(TEMP.csr).id_po</do>
+              <do>OBJECT(TEMP.po_oid).parent=TEMP.sub_oid</do>
+              <do>OBJECT(TEMP.po_oid).account=OBJECT.static_oid</do>
+              <do>OBJECT(TEMP.po_oid).end_date = OBJECT(OBJECT(TEMP.po_oid).parent).end_date</do>
+              <do>OBJECT(TEMP.po_oid).start_date = OBJECT(OBJECT(TEMP.po_oid).parent).start_date</do>
+            </then>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.csr).id_pricelist ne '' and TEMP.last_id_pricelist ne OBJECT(TEMP.csr).id_pricelist</condition>
+            <then>
+              <!-- print>'Spawning pricelist: '~OBJECT(TEMP.csr).id_pricelist</print -->
+              <spawn>
+                <object_type>'PRICELIST'</object_type>
+                <object_id>TEMP.pl_oid</object_id>
+              </spawn>
+              <index_insert>
+                <index>'OBJECT_IDX'</index>
+                <field name="object_type">"PRICELIST"</field>
+                <field name="object_id">TEMP.pl_oid</field>
+              </index_insert>
+              <do>OBJECT(TEMP.pl_oid).id_pricelist=OBJECT(TEMP.csr).id_pricelist</do>
+              <do>TEMP.last_id_pricelist=OBJECT(TEMP.csr).id_pricelist</do>
+              <do>OBJECT(TEMP.pl_oid).account=OBJECT.static_oid</do>
+              <if>
+                <condition>OBJECT(TEMP.csr).rate_type_id eq '1'</condition>
+                <then>
+                  <do>OBJECT(TEMP.pl_oid).parent=TEMP.sub_oid</do>
+                  <do>OBJECT(TEMP.pl_oid).sub=TEMP.sub_oid</do>
+                  <do>OBJECT(TEMP.pl_oid).gsub=TEMP.gsub_oid</do>
+                </then>
+              </if>
+              <if>
+                <condition>OBJECT(TEMP.csr).rate_type_id eq '2'</condition>
+                <then>
+                  <do>OBJECT(TEMP.pl_oid).parent=TEMP.sub_oid</do>
+                  <do>OBJECT(TEMP.pl_oid).sub=TEMP.sub_oid</do>
+                </then>
+              </if>
+              <if>
+                <condition>OBJECT(TEMP.csr).rate_type_id eq '3'</condition>
+                <then>
+                  <do>OBJECT(TEMP.pl_oid).parent=TEMP.po_oid</do>
+                  <do>OBJECT(TEMP.pl_oid).sub=TEMP.sub_oid</do>
+                </then>
+              </if>
+              <if>
+                <condition>OBJECT(TEMP.csr).rate_type_id eq '4'</condition>
+                <then>
+                  <do>OBJECT(TEMP.pl_oid).parent=OBJECT.static_oid</do>
+                </then>
+              </if>
+              <do>OBJECT(TEMP.pl_oid).end_date = OBJECT(OBJECT(TEMP.pl_oid).parent).end_date</do>
+              <do>OBJECT(TEMP.pl_oid).start_date = OBJECT(OBJECT(TEMP.pl_oid).parent).start_date</do>
+            </then>
+          </if>
+          <if>
+            <condition>OBJECT(TEMP.csr).id_sched ne '' </condition>
+            <then>
+              <!--<print>'Spawning rate schedule: '~OBJECT(TEMP.csr).id_sched</print>-->
+              <do>TEMP.rsched_type='ICB'</do>
+              <if>
+                <condition>OBJECT(TEMP.csr).rate_type_id eq '3'</condition>
+                <then>
+                  <do>TEMP.rsched_type='PO'</do>
+                </then>
+              </if>
+              <if>
+                <condition>OBJECT(TEMP.csr).rate_type_id eq '4'</condition>
+                <then>
+                  <do>TEMP.rsched_type='DEF'</do>
+                </then>
+              </if>
+              <spawn>
+                <object_type>TEMP.rsched_type~'_SCHEDULE_'~OBJECT(TEMP.csr).id_paramtable~'_'~OBJECT(TEMP.csr).id_pi_template</object_type>
+                <object_id>TEMP.rsched_oid</object_id>
+              </spawn>
+              <index_insert>
+                <index>'OBJECT_IDX'</index>
+                <field name="object_type">TEMP.rsched_type~'_SCHEDULE_'~OBJECT(TEMP.csr).id_paramtable~'_'~OBJECT(TEMP.csr).id_pi_template</field>
+                <field name="object_id">TEMP.rsched_oid</field>
+              </index_insert>
+              <do>OBJECT(TEMP.rsched_oid).account=OBJECT.static_oid</do>
+              <do>OBJECT(TEMP.rsched_oid).id_sched=OBJECT(TEMP.csr).id_sched</do>
+              <do>OBJECT(TEMP.rsched_oid).rate_type_id=OBJECT(TEMP.csr).rate_type_id</do>
+              <do>OBJECT(TEMP.rsched_oid).rate_type=OBJECT(TEMP.csr).rate_type</do>
+              <do>OBJECT(TEMP.rsched_oid).id_pi_template=OBJECT(TEMP.csr).id_pi_template</do>
+              <do>OBJECT(TEMP.rsched_oid).id_pricelist=OBJECT(TEMP.csr).id_pricelist</do>
+              <do>OBJECT(TEMP.rsched_oid).id_paramtable=OBJECT(TEMP.csr).id_paramtable</do>
+              <do>OBJECT(TEMP.rsched_oid).start_date=OBJECT(TEMP.csr).rsched_start</do>
+              <do>OBJECT(TEMP.rsched_oid).end_date=OBJECT(TEMP.csr).rsched_end</do>
+              <do>OBJECT(TEMP.rsched_oid).n_begintype=OBJECT(TEMP.csr).n_begintype</do>
+              <do>OBJECT(TEMP.rsched_oid).n_beginoffset=OBJECT(TEMP.csr).n_beginoffset</do>
+              <do>OBJECT(TEMP.rsched_oid).n_endtype=OBJECT(TEMP.csr).n_endtype</do>
+              <do>OBJECT(TEMP.rsched_oid).n_endoffset=OBJECT(TEMP.csr).n_endoffset</do>
+              <do>OBJECT(TEMP.rsched_oid).id_sub=OBJECT(TEMP.csr).id_sub</do>
+              <if>
+                <condition>OBJECT(TEMP.csr).rate_type_id eq '1' or OBJECT(TEMP.csr).rate_type_id eq '2'</condition>
+                <then>
+                  <call_proc_for_current_object>
+                    <name>'determine_id_paramtable'</name>
+                    <param name='id_paramtable'>OBJECT(TEMP.rsched_oid).id_paramtable</param>
+                    <param name='id_template'>OBJECT(TEMP.rsched_oid).id_pi_template</param>
+                    <param name='paramtable_name'>OBJECT(TEMP.rsched_oid).paramtable_name</param>
+                    <param name='template_name'>OBJECT(TEMP.rsched_oid).template_name</param>
+                  </call_proc_for_current_object>
+                  <index_insert>
+                    <index>'ALL_SCHEDULES'</index>
+                    <field name="id_paramtable">OBJECT(TEMP.rsched_oid).id_paramtable</field>
+                    <field name="paramtable_name">OBJECT(TEMP.rsched_oid).paramtable_name</field>
+                    <field name="id_pi_template">OBJECT(TEMP.rsched_oid).id_pi_template</field>
+                  </index_insert>
+                  <do>OBJECT(TEMP.rsched_oid).parent=TEMP.pl_oid</do>
+                  <do>OBJECT(TEMP.rsched_oid).sub=TEMP.sub_oid</do>
+                </then>
+              </if>
+              <if>
+                <condition>OBJECT(TEMP.csr).rate_type_id eq '1'</condition>
+                <then>
+                  <do>OBJECT(TEMP.rsched_oid).gsub=TEMP.gsub_oid</do>
+                </then>
+              </if>
+              <if>
+                <condition>OBJECT(TEMP.csr).rate_type_id eq '3'</condition>
+                <then>
+                  <call_proc_for_current_object>
+                    <name>'determine_id_paramtable'</name>
+                    <param name='id_paramtable'>OBJECT(TEMP.rsched_oid).id_paramtable</param>
+                    <param name='id_template'>OBJECT(TEMP.rsched_oid).id_pi_template</param>
+                    <param name='paramtable_name'>OBJECT(TEMP.rsched_oid).paramtable_name</param>
+                    <param name='template_name'>OBJECT(TEMP.rsched_oid).template_name</param>
+                  </call_proc_for_current_object>
+                  <index_insert>
+                    <index>'ALL_SCHEDULES'</index>
+                    <field name="id_paramtable">OBJECT(TEMP.rsched_oid).id_paramtable</field>
+                    <field name="paramtable_name">OBJECT(TEMP.rsched_oid).paramtable_name</field>
+                    <field name="id_pi_template">OBJECT(TEMP.rsched_oid).id_pi_template</field>
+                  </index_insert>
+                  <do>OBJECT(TEMP.rsched_oid).parent=TEMP.pl_oid</do>
+                  <do>OBJECT(TEMP.rsched_oid).sub=TEMP.sub_oid</do>
+                </then>
+              </if>
+              <if>
+                <condition>OBJECT(TEMP.csr).rate_type_id eq '4'</condition>
+                <then>
+                  <call_proc_for_current_object>
+                    <name>'determine_id_paramtable'</name>
+                    <param name='id_paramtable'>OBJECT(TEMP.rsched_oid).id_paramtable</param>
+                    <param name='id_template'>OBJECT(TEMP.rsched_oid).id_pi_template</param>
+                    <param name='paramtable_name'>OBJECT(TEMP.rsched_oid).paramtable_name</param>
+                    <param name='template_name'>OBJECT(TEMP.rsched_oid).template_name</param>
+                  </call_proc_for_current_object>
+                  <index_insert>
+                    <index>'ALL_SCHEDULES'</index>
+                    <field name="id_paramtable">OBJECT(TEMP.rsched_oid).id_paramtable</field>
+                    <field name="paramtable_name">OBJECT(TEMP.rsched_oid).paramtable_name</field>
+                    <field name="id_pi_template">OBJECT(TEMP.rsched_oid).id_pi_template</field>
+                  </index_insert>
+                  <do>OBJECT(TEMP.rsched_oid).parent=OBJECT.static_oid</do>
+                </then>
+              </if>
+              <do>OBJECT(TEMP.rsched_oid).orig_end_date = OBJECT(TEMP.rsched_oid).end_date</do>
+              <do>OBJECT(TEMP.rsched_oid).orig_start_date = OBJECT(TEMP.rsched_oid).start_date</do>
+              <if>
+                <condition>OBJECT(TEMP.rsched_oid).end_date eq ''</condition>
+                <then>
+                  <do>OBJECT(TEMP.rsched_oid).end_date = OBJECT(OBJECT(TEMP.rsched_oid).parent).end_date</do>
+                </then>
+              </if>
+              <if>
+                <condition>OBJECT(TEMP.rsched_oid).start_date eq ''</condition>
+                <then>
+                  <do>OBJECT(TEMP.rsched_oid).start_date = OBJECT(OBJECT(TEMP.rsched_oid).parent).start_date</do>
+                </then>
+              </if>
+              <index_select>
+                <index>'MY_PT_NAMES'</index>
+                <field name="id_paramtable">OBJECT(TEMP.rsched_oid).id_paramtable</field>
+                <cursor>TEMP.pt_name_csr</cursor>
+                <run>
+                  <do>OBJECT(TEMP.rsched_oid).paramtable_name = OBJECT(TEMP.pt_name_csr).paramtable_name</do>
+                </run>
+              </index_select>
+            </then>
+          </if>
+        </loop>
+        <else>
+          <print>'query returned no rows!'</print>
+        </else>
+      </db_select>
+      </then>
+    </if>
+  </proc>
+
+
+
+  <proc name='notmain'>
+    <startup>
+    <define_memory_index>
+      <index>'OBJECT_IDX'</index>
+      <key_field>'object_type'</key_field>
+      <field>'object_id'</field>
+    </define_memory_index>
+
+    <!--<define_memory_index>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <key_field>'static_oid'</key_field>
+      <field>'dynamic_oid'</field>
+    </define_memory_index>-->
+
+    <define_memory_index>
+      <index>'DYNAMIC_CHILDREN'</index>
+      <key_field>'parent_oid'</key_field>
+      <field>'child_oid'</field>
+    </define_memory_index>
+
+    <define_memory_index>
+      <index>'DYNAMIC_CHILDREN_APPLIED'</index>
+      <key_field>'parent_oid'</key_field>
+      <field>'child_oid'</field>
+    </define_memory_index>
+    </startup>
+    
+    <!-- HARD-CODING THE ACCOUNT  -->
+    <do>OBJECT.id_acc='4460382'</do>
+
+    <call_proc_for_current_object>
+      <name>'cache_rate_schedules'</name>
+    </call_proc_for_current_object>
+
+    <do>OBJECT.dummy_enum='d'</do>
+    <call_proc_for_current_object>
+      <name>'convert_to_enum'</name>
+      <param name='value'>OBJECT.dummy_enum</param>
+      <param name='namespace'>'intercall.com/confcommon/product'</param>
+      <param name='success'>TEMP.enum_success</param>
+    </call_proc_for_current_object>
+
+    <time ms='TEMP.full_t'>
+      <!--<time ms='TEMP.t'>-->
+        <do>OBJECT.paramtable_name='t_pt_BridgeRate'</do>
+        <!--do>OBJECT.id_paramtable='12'</do -->
+        <!-- do>OBJECT.id_pi_template='591'</do -->
+        <do>OBJECT.call_type='2012'</do>
+        <do>OBJECT.call_type='I'</do>
+        <do>OBJECT.call_type='349'</do>
+        <do>OBJECT.product='7525'</do>
+        <do>OBJECT.product='d'</do>
+        <do>OBJECT.transport='7618'</do>
+        <do>OBJECT.start_date='20080101000000'</do>
+        <do>OBJECT.end_date='20380101000000'</do>
+        <call_proc_for_current_object>
+          <name>'get_rscheds'</name>
+        </call_proc_for_current_object>
+
+
+      <!--</time>-->
+
+
+
+      <!-- do>GLOBAL.new_schedule_counter=1</do -->
+      <!--<print>'GET_RSCHEDS TEMP.t='~TEMP.t~' ms'</print>-->
+
+
+      <!--<time ms='TEMP.t'>-->
+        <do>OBJECT.bridge_rate='0.75'</do>
+        <do>OBJECT.setup_charge='0'</do>
+        <do>OBJECT.start_date='20090401000000'</do>
+        <do>OBJECT.end_date='20090801000000'</do>
+        <call_proc_for_current_object>
+          <name>'add_rate_to_schedules'</name>
+        </call_proc_for_current_object>
+      <!--</time>
+      <print>'ADD_RATE TEMP.t='~TEMP.t~' ms'</print>-->
+
+      <!--<time ms='TEMP.t'>-->
+        <do>OBJECT.bridge_rate='0.85'</do>
+        <do>OBJECT.setup_charge='0.34'</do>
+        <do>OBJECT.start_date='20090601000000'</do>
+        <do>OBJECT.end_date='20091201000000'</do>
+        <do>OBJECT.transport='7617'</do>
+        <call_proc_for_current_object>
+          <name>'add_rate_to_schedules'</name>
+        </call_proc_for_current_object>
+      <!--</time>
+      <print>'SECOND ADD_RATE TEMP.t='~TEMP.t~' ms'</print>-->
+
+      <!--<time ms='TEMP.t'>-->
+        <do>OBJECT.paramtable_name='FeatureRate'</do>
+        <do>OBJECT.id_paramtable=''</do>
+        <do>OBJECT.id_pi_template=''</do>
+        <do>OBJECT.template_name=''</do>
+        <do>OBJECT.feature_rate='12345'</do>
+        <do>OBJECT.start_date='20090101000000'</do>
+        <do>OBJECT.end_date='20100401000000'</do>
+        <do>OBJECT.feature_code='5289'</do>
+        <call_proc_for_current_object>
+          <name>'add_rate_to_schedules'</name>
+        </call_proc_for_current_object>
+      <!--</time>
+      <print>'THIRD ADD_RATE TEMP.t='~TEMP.t~' ms'</print>-->
+
+
+      <!--<time ms='TEMP.t'>-->
+        <do>OBJECT.start_date='20080101000000'</do>
+        <do>OBJECT.end_date='20380101000000'</do>
+        <do>OBJECT.bridge_rate=''</do>
+        <do>OBJECT.feature_rate=''</do>
+        <call_proc_for_current_object>
+          <name>'get_rscheds'</name>
+        </call_proc_for_current_object>
+
+        <do>OBJECT.paramtable_name='t_pt_BridgeRate'</do>
+        <do>OBJECT.id_paramtable=''</do>
+        <!-- do>OBJECT.id_pi_template='591'</do -->
+        <do>OBJECT.call_type='2012'</do>
+        <do>OBJECT.call_type='I'</do>
+        <do>OBJECT.call_type='349'</do>
+        <do>OBJECT.product='7525'</do>
+        <do>OBJECT.product='d'</do>
+        <do>OBJECT.transport='7618'</do>
+        <do>OBJECT.start_date='20080101000000'</do>
+        <do>OBJECT.end_date='20380101000000'</do>
+        <call_proc_for_current_object>
+          <name>'get_rscheds'</name>
+        </call_proc_for_current_object>
+      <!--</time>
+      <print>'Second GET_RSCHEDS TEMP.t='~TEMP.t~' ms'</print>-->
+
+
+      <!-- index_select>
+        <index>'DYNAMIC_ENTITIES'</index>
+        <field name='static_oid'>OBJECT.static_oid</field>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <do>TEMP.my_obj = OBJECT(TEMP.csr).dynamic_oid</do>
+          <print>'I have an object_type of ['~OBJECT(TEMP.my_obj).object_type~'] and start/end of ['~OBJECT(TEMP.my_obj).start_date~']['~OBJECT(TEMP.my_obj).end_date~'] and a bridge rate1 of ['~OBJECT(TEMP.my_obj).first_bridge_rate~'] and a bridge rate2 of ['~OBJECT(TEMP.my_obj).bridge_rate~'] and a feature rate of ['~OBJECT(TEMP.my_obj).feature_rate~']'</print>
+          <do>OBJECT(TEMP.my_obj).first_bridge_rate = OBJECT(TEMP.my_obj).bridge_rate</do>
+        </loop>
+      </index_select -->
+
+      <!--<time ms='TEMP.t'>-->
+      <do>OBJECT.transport='7617'</do>
+      <call_proc_for_current_object>
+        <name>'get_rscheds'</name>
+      </call_proc_for_current_object>
+      <!--</time>
+      <print>'Get RSCHEDS TEMP.t='~TEMP.t~' ms'</print>-->
+
+      <!-- index_select>
+        <index>'DYNAMIC_ENTITIES'</index>
+        <field name='static_oid'>OBJECT.static_oid</field>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <do>TEMP.my_obj = OBJECT(TEMP.csr).dynamic_oid</do>
+          <print>'I FINALLY have an object_type of ['~OBJECT(TEMP.my_obj).object_type~'] and start/end of ['~OBJECT(TEMP.my_obj).start_date~']['~OBJECT(TEMP.my_obj).end_date~'] and a bridge rate1 of ['~OBJECT(TEMP.my_obj).first_bridge_rate~'] and a bridge rate2 of ['~OBJECT(TEMP.my_obj).bridge_rate~'] and a feature rate of ['~OBJECT(TEMP.my_obj).feature_rate~']'</print>
+        </loop>
+      </index_select -->
+
+      <!-- call_proc_for_current_object>
+      <name>'determine_id_paramtable'</name>
+      <param name='id_paramtable'>OBJECT.id_paramtable</param>
+      <param name='id_template'>OBJECT.id_pi_template</param>
+      <param name='paramtable_name'>OBJECT.paramtable_name</param>
+      <param name='template_name'>OBJECT.template_name</param>
+    </call_proc_for_current_object -->
+
+      <!--<time ms='TEMP.t'>-->
+        <call_proc_for_current_object>
+          <name>'persist_rate_schedules_to_db'</name>
+        </call_proc_for_current_object>
+      <!--</time>
+      <print>'Persist RSCHEDS TEMP.t='~TEMP.t~' ms'</print>-->
+
+      <!--<time ms='TEMP.t'>-->
+      <call_proc_for_current_object>
+        <name>'clear_structures'</name>
+      </call_proc_for_current_object>
+      <!--</time>
+      <print>'Clear schedules TEMP.t='~TEMP.t~' ms'</print>-->
+
+
+
+      <!-- time ms='TEMP.t'>
+      <do>OBJECT.id_acc='4420382'</do>
+      <do>OBJECT.bridge_rate='0.75'</do>
+      <do>OBJECT.start_date='20090401000000'</do>
+      <do>OBJECT.end_date='20090801000000'</do>
+      <call_proc_for_current_object>
+        <name>'add_rate_to_schedules'</name>
+      </call_proc_for_current_object>
+
+        <call_proc_for_current_object>
+          <name>'persist_rate_schedules_to_db'</name>
+        </call_proc_for_current_object>
+
+
+      <do>OBJECT.bridge_rate=''</do>
+      <do>OBJECT.start_date='20080101000000'</do>
+      <do>OBJECT.end_date='20380101000000'</do>
+      <call_proc_for_current_object>
+        <name>'get_rscheds'</name>
+      </call_proc_for_current_object>
+    </time>
+    <print>'Second pass took ['~TEMP.t~'] ms'</print>
+
+    <index_select>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name='static_oid'>OBJECT.static_oid</field>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <do>TEMP.my_obj = OBJECT(TEMP.csr).dynamic_oid</do>
+        <print>'I have an object_type of ['~OBJECT(TEMP.my_obj).object_type~'] and start/end of ['~OBJECT(TEMP.my_obj).start_date~']['~OBJECT(TEMP.my_obj).end_date~'] and a bridge rate of ['~OBJECT(TEMP.my_obj).bridge_rate~']'</print>
+      </loop>
+    </index_select -->
+
+      <!-- call_proc_for_current_cluster>
+          <name>'test_print_self'</name>
+        </call_proc_for_current_cluster -->
+
+      <print>'Finishing with error of ['~OBJECT.entity_error~']'</print>
+    </time>
+    <print>'full pass took ['~TEMP.full_t~'] ms'</print>
+
+
+
+    <!--<time ms='TEMP.t'>
+      <counter_select>
+        <from>1</from>
+        <to>10</to>
+        <cursor>TEMP.csr</cursor>
+        <loop>
+          <db_select>
+            <login_object>GLOBAL.target_login</login_object>
+            <query>"select * from t_pt_bridgerate a where a.id_sched = 32970 and tt_end = mtmaxdate() order by a.n_order desc"</query>
+            <cursor>TEMP.pt_row_csr</cursor>
+            <loop>
+            </loop>
+          </db_select>
+        </loop>
+      </counter_select>
+    </time>
+    <print>'100 selects = ['~TEMP.t~']'</print>-->
+
+  </proc>
+</procs>

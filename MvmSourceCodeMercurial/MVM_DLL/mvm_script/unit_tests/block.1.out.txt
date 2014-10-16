@@ -1,0 +1,24 @@
+(
+  brace
+    {
+      print
+        (
+          'in block'
+        )
+      print
+        (
+          'still in block'
+        )
+      brace
+        {
+          print
+            (
+              'in nested block'
+            )
+          print
+            (
+              'still in nested block'
+            )
+        }
+    }
+)

@@ -1,0 +1,398 @@
+﻿<procs>
+  <proc name="test_sql_server">
+    <spawn>
+      <object_type>'LOGIN'</object_type>
+      <object_id>GLOBAL.login</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.login).database_type='sql'</do>
+    <do>OBJECT(GLOBAL.login).database_server='vmllckmig'</do>
+    <do>OBJECT(GLOBAL.login).database_server='pmnaprddb01'</do>
+    <do>OBJECT(GLOBAL.login).database_name='netmeter'</do>
+    <do>OBJECT(GLOBAL.login).database_user='nmdbo'</do>
+    <do>OBJECT(GLOBAL.login).database_password='MetraTech1'</do>
+
+    <do>TEMP.nm_current='id_acc'</do>
+    <db_call_proc>
+      <login_object>GLOBAL.login</login_object>
+      <name>'getcurrentid'</name>
+      <param name="nm_current">TEMP.nm_current</param>
+      <param name="id_current">TEMP.id_current</param>
+    </db_call_proc>
+  </proc>
+
+  <proc name="test_sqlserver">
+  <spawn>
+    <object_type>'LOGIN'</object_type>
+    <object_id>GLOBAL.source_login</object_id>
+  </spawn>
+  <do>OBJECT(GLOBAL.source_login).database_type='sql'</do>
+  <do>OBJECT(GLOBAL.source_login).database_server='vmllckmig'</do>
+  <do>OBJECT(GLOBAL.source_login).database_name='netmeter'</do>
+  <do>OBJECT(GLOBAL.source_login).database_user='nmdbo'</do>
+  <do>OBJECT(GLOBAL.source_login).database_password='MetraTech1'</do>
+  <do>OBJECT(GLOBAL.source_login).database_exception_proc='log_db_exception'</do>
+
+  <do>GLOBAL.source_login = GLOBAL.target_login</do>
+
+  <db_insert>
+    <login_object>GLOBAL.source_login</login_object>
+    <name>'MVM_LOG'</name>
+    <field name="mvm_run_id">99</field>
+    <field name="msg_dt" sql="true">'getdate()'</field>
+    <field name="msg">'hello rob'</field>
+  </db_insert>
+
+  <db_execute>
+    <login_object>GLOBAL.source_login</login_object>
+    <statement>
+      "
+      begin
+      drop procedure RJP_PROC
+      end
+      "
+    </statement>
+    <num_rows>TEMP.num_rows</num_rows>
+  </db_execute>
+  <do>'got num_rows='~TEMP.num_rows</do>
+
+  <db_execute>
+    <login_object>GLOBAL.source_login</login_object>
+    <statement>
+      "
+      CREATE procedure RJP_PROC(
+      @my_in_vc nvarchar(255),
+      @my_out_vc nvarchar(255) output,
+      @my_in_i int,
+      @my_out_i int output,
+      @my_in_d datetime,
+      @my_out_d datetime output
+      )as
+      --RAISERROR('This error is raised by me', 16, 1)
+      set @my_out_vc=@my_in_vc
+      SET @my_out_i=@my_in_i
+      SET @my_out_d=@my_in_d
+      "
+    </statement>
+    <num_rows>TEMP.num_rows</num_rows>
+  </db_execute>
+  <do>'got num_rows='~TEMP.num_rows</do>
+
+  <do>TEMP.my_in_vc="abc"</do>
+  <do>TEMP.my_out_vc=""</do>
+  <do>TEMP.my_in_d="2010-04-21 10:31:18.187"</do>
+  <do>TEMP.my_out_d=""</do>
+  <do>TEMP.my_in_i="99"</do>
+  <do>TEMP.my_out_i=""</do>
+  <db_call_proc>
+    <login_object>GLOBAL.source_login</login_object>
+    <name>'rjp_proc'</name>
+  </db_call_proc>
+  <print>'my_out_vc=['~TEMP.my_out_vc~']'</print>
+  <print>'my_out_d=['~TEMP.my_out_d~']'</print>
+  <print>'my_out_i=['~TEMP.my_out_i~']'</print>
+
+  <db_select>
+    <login_object>GLOBAL.source_login</login_object>
+    <query>'select '~"'abc'"~' first, 999 second, getdate() today'</query>
+    <!-- 2010-04-21 10:31:18.187 -->
+    <cursor>TEMP.csr</cursor>
+    <loop>
+      <print>'first='~OBJECT(TEMP.csr).first</print>
+      <print>'second='~OBJECT(TEMP.csr).second</print>
+      <print>'today='~OBJECT(TEMP.csr).today</print>
+    </loop>
+    <else>
+      <print>'query returned no rows!'</print>
+    </else>
+  </db_select>
+
+</proc>
+
+<proc name="jonah">
+  <!-- 
+  so run like:
+  C:\Users\rparks\Documents\_SOURCE\MVM\_TESTS\rapid_rate>..\..\bin\Debug\mvm.exe -file=*.xml -proc=jonah
+  or 
+  for IDE setup GLOBAL.test_name='rapid_rate' and GLOBAL.test_proc='jonah' in main.xml
+  -->
+  
+  <!-- point to the entities dir you want and initialize -->
+  <do>GLOBAL.main_dir=GLOBAL.main_dir ne ''?GLOBAL.main_dir:'.'</do>
+  <do>GLOBAL.entities_dir=GLOBAL.main_dir~'/jonah_entities'</do>
+  <call_proc>'initialize'</call_proc>
+
+
+
+  <do>OBJECT.dummy_enum='d'</do>
+  <call_proc_for_current_object>
+    <name>'convert_to_enum'</name>
+    <param name='value'>OBJECT.dummy_enum</param>
+    <param name='namespace'>'intercall.com/confcommon/product'</param>
+    <param name='success'>TEMP.enum_success</param>
+  </call_proc_for_current_object>
+
+  <!--<call_proc_for_current_object>
+    <name>'test_sqlserver'</name>
+  </call_proc_for_current_object>-->
+
+  <time ms='TEMP.full_t'>
+
+    <!-- do your test-->
+    <info>'SPAWN BME TO GET:'</info>
+    <spawn>
+      <object_type>'BME'</object_type>
+      <object_id>TEMP.bme</object_id>
+    </spawn>
+    <do>OBJECT(TEMP.bme).id_acc='4460382'</do>
+    <do>OBJECT(TEMP.bme).id_acc='2722'</do>
+    <do>OBJECT(TEMP.bme).id_acc='878037'</do>
+    <do>OBJECT(TEMP.bme).start_date='20080101000000'</do>
+    <do>OBJECT(TEMP.bme).start_date='2001-01-01 00:00:00.000'</do>
+    <do>OBJECT(TEMP.bme).end_date='20380101000000'</do>
+    <do>OBJECT(TEMP.bme).end_date='2038-01-01 00:00:00.000'</do>
+    <!--<do>OBJECT(TEMP.bme).tt_date_relative='2010-07-01 15:37:45.000'</do>-->
+    <do>OBJECT(TEMP.bme).operation='get'</do>
+    <!--<do>OBJECT.tt_date_relative='2010-06-25 00:00:00.000'</do>-->
+
+    <info>'GET THE BME:'</info>
+    <call_proc_for_object>
+      <name>'big_bme_call_entity'</name>
+      <object_id>TEMP.bme</object_id>
+    </call_proc_for_object>
+
+    <info>'GET BME RESULTS:'</info>
+    <call_proc_for_object>
+      <name>'print_dynamic_entities'</name>
+      <object_id>TEMP.bme</object_id>
+    </call_proc_for_object>
+
+    <info>'CLEAR THE OLD BME_RESULTS'</info>
+    <index_remove>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name="static_oid">TEMP.bme</field>
+    </index_remove>
+
+    <info>'UPDATE SOME FIELDS AND PUT THE BME:'</info>
+    <do>OBJECT(TEMP.bme).operation='put'</do>
+    <do>OBJECT(TEMP.bme).toll_free_reservationless_bridgerate='24.900000'</do>
+    <do>OBJECT(TEMP.bme).toll_free_reservationless_mincharge='4.330000'</do>
+    <do>OBJECT(TEMP.bme).toll_free_reservationless_setupcharge='UNSET_FORCE'</do>
+    <do>OBJECT(TEMP.bme).toll_free_reservationless_setupcharge='3.220000'</do>
+    <do>OBJECT(TEMP.bme).big_bridgerate1='1.010000'</do>
+    <do>OBJECT(TEMP.bme).big_mincharge1='2.010000'</do>
+    <do>OBJECT(TEMP.bme).big_setupcharge1='3.010000'</do>
+    <do>OBJECT(TEMP.bme).big_bridgerate2='1.020000'</do>
+    <do>OBJECT(TEMP.bme).big_mincharge2='2.020000'</do>
+    <do>OBJECT(TEMP.bme).big_setupcharge2='3.020000'</do>
+    <do>OBJECT(TEMP.bme).big_bridgerate3='1.030000'</do>
+    <do>OBJECT(TEMP.bme).big_mincharge3='2.030000'</do>
+    <do>OBJECT(TEMP.bme).big_setupcharge3='3.030000'</do>
+    <do>OBJECT(TEMP.bme).big_bridgerate4='1.040000'</do>
+    <do>OBJECT(TEMP.bme).big_mincharge4='2.040000'</do>
+    <do>OBJECT(TEMP.bme).big_setupcharge4='3.040000'</do>
+    <do>OBJECT(TEMP.bme).big_bridgerate5='1.050000'</do>
+    <do>OBJECT(TEMP.bme).big_mincharge5='2.050000'</do>
+    <do>OBJECT(TEMP.bme).big_setupcharge5='3.050000'</do>
+    <do>OBJECT(TEMP.bme).big_bridgerate6='1.060000'</do>
+    <do>OBJECT(TEMP.bme).big_mincharge6='2.060000'</do>
+    <do>OBJECT(TEMP.bme).big_setupcharge6='3.060000'</do>
+    <do>OBJECT(TEMP.bme).big_bridgerate7='1.070000'</do>
+    <do>OBJECT(TEMP.bme).big_mincharge7='2.070000'</do>
+    <do>OBJECT(TEMP.bme).big_setupcharge7='3.070000'</do>
+    <do>OBJECT(TEMP.bme).big_bridgerate8='1.080000'</do>
+    <do>OBJECT(TEMP.bme).big_mincharge8='2.080000'</do>
+    <do>OBJECT(TEMP.bme).big_setupcharge8='3.080000'</do>
+    <do>OBJECT(TEMP.bme).big_bridgerate9='1.090000'</do>
+    <do>OBJECT(TEMP.bme).big_mincharge9='2.090000'</do>
+    <do>OBJECT(TEMP.bme).big_setupcharge9='3.090000'</do>
+    <do>OBJECT(TEMP.bme).my_basetransportminuom='Minutes'</do>
+    <do>OBJECT(TEMP.bme).my_basetransportrate='2.200000'</do>
+    <do>OBJECT(TEMP.bme).my_basetransportsetupcharge='3.300000'</do>
+    <do>OBJECT(TEMP.bme).my_basetransportmincharge='4.400000'</do>
+    <do>OBJECT(TEMP.bme).start_date='20090201000000'</do>
+    <do>OBJECT(TEMP.bme).end_date='20100101000000'</do>
+    <do>OBJECT(TEMP.bme).start_date='2001-01-01 00:00:00.000'</do>
+    <do>OBJECT(TEMP.bme).end_date='2038-01-01 00:00:00.000'</do>
+    <do>OBJECT(TEMP.bme).rate_type='ICB'</do>
+
+    <call_proc_for_object>
+      <name>'big_bme_call_entity'</name>
+      <object_id>TEMP.bme</object_id>
+    </call_proc_for_object>
+
+    <!--<info>'GET SECOND BME RESULTS:'</info>
+  <call_proc_for_object>
+    <name>'print_dynamic_entities'</name>
+    <object_id>TEMP.bme</object_id>
+  </call_proc_for_object>-->
+
+    <call_proc_for_object>
+      <name>'persist_rate_schedules_to_db'</name>
+      <object_id>TEMP.bme</object_id>
+    </call_proc_for_object>
+
+    <!--<info>'NOW I CLEAR THE OLD BME_RESULTS'</info>
+    <index_remove>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name="static_oid">TEMP.bme</field>
+    </index_remove>-->
+
+    <!--<do>OBJECT(TEMP.bme).operation='get'</do>
+    <do>OBJECT(TEMP.bme).start_date='2001-01-01 00:00:00.000'</do>
+    <do>OBJECT(TEMP.bme).end_date='2038-01-01 00:00:00.000'</do>
+    <do>OBJECT(TEMP.bme).toll_free_reservationless_bridgerate=''</do>
+    <do>OBJECT(TEMP.bme).my_basetransportminuom=''</do>
+    <do>OBJECT(TEMP.bme).my_basetransportrate=''</do>
+    <do>OBJECT(TEMP.bme).my_basetransportsetupcharge=''</do>
+    <do>OBJECT(TEMP.bme).my_basetransportmincharge=''</do>-->
+
+    <!--<info>'GET THE BME:'</info>
+    <call_proc_for_object>
+      <name>'bme_call_entity'</name>
+      <object_id>TEMP.bme</object_id>
+    </call_proc_for_object>-->
+
+    <!--<info>'GET SECOND BME RESULTS:'</info>
+  <call_proc_for_object>
+    <name>'print_dynamic_entities'</name>
+    <object_id>TEMP.bme</object_id>
+  </call_proc_for_object>-->
+
+    <!--<info>'CLEAR THE OLD BME_RESULTS'</info>
+    <index_remove>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name="static_oid">TEMP.bme</field>
+    </index_remove>-->
+
+    <!--<info>'UPDATE SOME FIELDS AND PUT THE BME:'</info>
+    <do>OBJECT(TEMP.bme).operation='put'</do>
+    <do>OBJECT(TEMP.bme).toll_free_reservationless_bridgerate='0.670000'</do>
+    <do>OBJECT(TEMP.bme).other_bridgerate='0.670000'</do>
+    <do>OBJECT(TEMP.bme).my_basetransportminuom='Minutes'</do>
+    <do>OBJECT(TEMP.bme).my_basetransportrate='2.220000'</do>
+    <do>OBJECT(TEMP.bme).my_basetransportsetupcharge='3.330000'</do>
+    <do>OBJECT(TEMP.bme).my_basetransportmincharge='4.440000'</do>
+    <do>OBJECT(TEMP.bme).start_date=''</do>
+    <do>OBJECT(TEMP.bme).end_date=''</do>-->
+
+    <!--<call_proc_for_object>
+      <name>'bme_call_entity'</name>
+      <object_id>TEMP.bme</object_id>
+    </call_proc_for_object>-->
+
+    <!--<info>'CLEAR THE OLD BME_RESULTS'</info>
+    <index_remove>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name="static_oid">TEMP.bme</field>
+    </index_remove>-->
+
+    <!--<info>'UPDATE SOME FIELDS AND PUT THE BME:'</info>
+    <do>OBJECT(TEMP.bme).toll_free_reservationless_bridgerate='0.890000'</do>
+    <do>OBJECT(TEMP.bme).toll_free_reservationless_setupcharge='1.890000'</do>
+    <do>OBJECT(TEMP.bme).toll_free_reservationless_mincharge='4.000000'</do>
+    <do>OBJECT(TEMP.bme).other_bridgerate='0.890000'</do>
+    <do>OBJECT(TEMP.bme).my_feature_rate='0.890000'</do>
+    <do>OBJECT(TEMP.bme).my_basetransportminuom='Minutes'</do>
+    <do>OBJECT(TEMP.bme).my_basetransportrate='2.222000'</do>
+    <do>OBJECT(TEMP.bme).my_basetransportsetupcharge='3.333000'</do>
+    <do>OBJECT(TEMP.bme).my_basetransportmincharge='4.444000'</do>
+    <do>OBJECT(TEMP.bme).start_date='20090901000000'</do>
+    <do>OBJECT(TEMP.bme).end_date='20091001000000'</do>
+    <do>OBJECT(TEMP.bme).start_date='2009-06-01 00:00:00.000'</do>
+    <do>OBJECT(TEMP.bme).end_date='2009-10-01 00:00:00.000'</do>-->
+
+    <!--<call_proc_for_object>
+      <name>'bme_call_entity'</name>
+      <object_id>TEMP.bme</object_id>
+    </call_proc_for_object>-->
+
+    <!--<info>'CLEAR THE OLD BME_RESULTS'</info>
+    <index_remove>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name="static_oid">TEMP.bme</field>
+    </index_remove>-->
+
+    <!--<call_proc_for_current_object>
+      <name>'clear_structures'</name>
+    </call_proc_for_current_object>-->
+
+    <!--<do>OBJECT(TEMP.bme).operation='get'</do>
+    <do>OBJECT(TEMP.bme).start_date='2001-01-01 00:00:00.000'</do>
+    <do>OBJECT(TEMP.bme).end_date='2038-01-01 00:00:00.000'</do>
+    <do>OBJECT(TEMP.bme).toll_free_reservationless_bridgerate=''</do>
+    <do>OBJECT(TEMP.bme).my_basetransportminuom=''</do>
+    <do>OBJECT(TEMP.bme).my_basetransportrate=''</do>
+    <do>OBJECT(TEMP.bme).my_basetransportsetupcharge=''</do>
+    <do>OBJECT(TEMP.bme).my_basetransportmincharge=''</do>-->
+
+    <!--<info>'GET THE BME:'</info>
+    <call_proc_for_object>
+      <name>'bme_call_entity'</name>
+      <object_id>TEMP.bme</object_id>
+    </call_proc_for_object>-->
+
+    <!--<info>'FINAL PUT BME RESULTS:'</info>
+  <call_proc_for_object>
+    <name>'print_dynamic_entities'</name>
+    <object_id>TEMP.bme</object_id>
+  </call_proc_for_object>-->
+
+    <!--<call_proc_for_object>
+      <name>'persist_rate_schedules_to_db'</name>
+      <object_id>TEMP.bme</object_id>
+    </call_proc_for_object>-->
+
+    <!--<call_proc_for_current_object>
+      <name>'clear_structures'</name>
+    </call_proc_for_current_object>-->
+
+    <!--<info>'CLEAR THE OLD BME_RESULTS'</info>
+    <index_remove>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name="static_oid">TEMP.bme</field>
+    </index_remove>-->
+
+    <!--<info>'UPDATE SOME FIELDS AND GET THE BME:'</info>
+    <do>OBJECT(TEMP.bme).operation='get'</do>
+    <do>OBJECT(TEMP.bme).toll_free_reservationless_bridgerate=''</do>
+    <do>OBJECT(TEMP.bme).other_bridgerate=''</do>
+    <do>OBJECT(TEMP.bme).my_feature_rate=''</do>
+    <do>OBJECT(TEMP.bme).start_date='20080101000000'</do>
+    <do>OBJECT(TEMP.bme).end_date='20380101000000'</do>
+    <do>OBJECT(TEMP.bme).start_date='2008-01-01 00:00:00.000'</do>
+    <do>OBJECT(TEMP.bme).end_date='2038-01-01 00:00:00.000'</do>-->
+
+    <!--<info>'GET THE BME:'</info>
+    <call_proc_for_object>
+      <name>'bme_call_entity'</name>
+      <object_id>TEMP.bme</object_id>
+    </call_proc_for_object>-->
+
+
+
+    <!--<info>'GET BME RESULTS:'</info>
+  <call_proc_for_object>
+    <name>'print_dynamic_entities'</name>
+    <object_id>TEMP.bme</object_id>
+  </call_proc_for_object>-->
+
+    <!--<info>'MERGED RESULTS'</info>
+    <call_proc_for_current_object>
+      <name>'date_aware_merge'</name>
+      <param name="static_oid">TEMP.bme</param>
+    </call_proc_for_current_object>-->
+    <!--<call_proc_for_object>
+    <name>'print_dynamic_entities'</name>
+    <object_id>TEMP.bme</object_id>
+  </call_proc_for_object>-->
+
+    <!--<call_proc_for_current_object>
+    <name>'test_sql_server'</name>
+  </call_proc_for_current_object>-->
+  </time>
+  <print>'Total time is '~TEMP.full_t~' ms'</print>
+
+
+</proc>
+
+</procs>

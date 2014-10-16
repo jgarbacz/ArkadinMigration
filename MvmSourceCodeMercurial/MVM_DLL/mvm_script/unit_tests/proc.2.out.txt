@@ -1,0 +1,58 @@
+(
+  proc
+    (
+      name
+        (
+          tester
+        )
+      arguments
+        (
+          i
+            (
+              type => int
+            )
+          s
+            (
+              type => System
+                .(
+                  Collections
+                    .(
+                      Dictionary
+                        <
+                          string
+                          string
+                        >
+                    )
+                )
+              mode => in
+            )
+          j
+            (
+              mode => inout
+            )
+          myout
+            (
+              type => decimal
+                [
+                  (
+                  )
+                ]
+              mode => out
+            )
+        )
+      returns
+        (
+          string
+            [
+              (
+              )
+            ]
+        )
+    )
+    {
+      print
+        (
+          'proc body'
+        )
+    }
+)

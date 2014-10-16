@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <StartArguments Condition="Exists('S:\MetraTech\Mvm\MVM_EXE\mvm_params.txt')">-params=S:\MetraTech\Mvm\MVM_EXE\mvm_params.txt</StartArguments>
+    <StartArguments Condition="!Exists('S:\MetraTech\Mvm\MVM_EXE\mvm_params.txt')">-params=..\..\Source\MetraTech\Mvm\MVM_EXE\mvm_params.txt</StartArguments>
+    <StartWorkingDirectory Condition="Exists('o:\Debug\bin\')">o:\Debug\bin\</StartWorkingDirectory>
+    <StartWorkingDirectory Condition="!Exists('o:\Debug\bin\')">
+    </StartWorkingDirectory>
+    <PublishUrlHistory />
+    <InstallUrlHistory />
+    <SupportUrlHistory />
+    <UpdateUrlHistory />
+    <BootstrapperUrlHistory />
+    <ErrorReportUrlHistory />
+    <FallbackCulture>en-US</FallbackCulture>
+    <VerifyUploadedFiles>false</VerifyUploadedFiles>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <StartArguments>-params=..\..\Source\MetraTech\Mvm\MVM_EXE\mvm_params.txt</StartArguments>
+  </PropertyGroup>
+</Project>

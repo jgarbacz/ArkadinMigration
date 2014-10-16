@@ -1,0 +1,4 @@
+﻿<proc name="main">
+  <print>'in embedded main'</print>
+  <call_proc>'move_feature_to_bridge'</call_proc>
+</proc>

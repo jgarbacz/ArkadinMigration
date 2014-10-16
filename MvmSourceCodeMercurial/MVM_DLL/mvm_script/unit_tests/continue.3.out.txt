@@ -1,0 +1,8 @@
+(
+Ast_Element => loop
+  {
+    continue
+      (
+        myLabel
+      )
+  })

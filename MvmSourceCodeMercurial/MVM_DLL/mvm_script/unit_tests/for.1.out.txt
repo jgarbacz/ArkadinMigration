@@ -1,0 +1,26 @@
+(
+  for
+    (
+      Ast_Element => =
+        (
+          i
+          1
+        )
+      Ast_Element => <
+        (
+          i
+          10
+        )
+      Ast_Element => i
+        .(
+          ++
+        )
+    )
+    {
+      =
+        (
+          x
+          i
+        )
+    }
+)

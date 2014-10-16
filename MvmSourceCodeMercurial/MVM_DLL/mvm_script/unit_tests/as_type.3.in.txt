@@ -1,0 +1,1 @@
+x=f(i as int, s as string, d as Dictionary<string,double>);

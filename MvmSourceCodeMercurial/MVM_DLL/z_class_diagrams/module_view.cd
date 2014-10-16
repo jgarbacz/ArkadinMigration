@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="MVM.ModuleContext">
+    <Position X="0.5" Y="4.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>bE2kwCiQhFIYDYWzDEEonuB0gnGpDXLPCAAsIQxQC1o=</HashCode>
+      <FileName>infrastructure\ModuleContext.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="globalContext" />
+      <Field Name="procInst" />
+      <Field Name="procDefinition" />
+      <Field Name="threadContext" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="MVM.GlobalContext" Collapsed="true">
+    <Position X="4" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAYEAAABACAADAAACMAAgAAAIAAACAIAEAAQCAQQAAA=</HashCode>
+      <FileName>infrastructure\GlobalContext.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MVM.ProcInst">
+    <Position X="4" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAFAAAACAAAAAWEBAAEAEAEABIQFAAAAAACAAASBI=</HashCode>
+      <FileName>infrastructure\ProcInst.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="procContext" />
+    </ShowAsAssociation>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MVM.ProcDefinition" Collapsed="true">
+    <Position X="4" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEABACAQAwIACDASAIAoAAEAAUBAABAQAAAICAAAgAI=</HashCode>
+      <FileName>infrastructure\ProcDefinition.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MVM.ThreadContext" Collapsed="true">
+    <Position X="4" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgKAAAgAACAAAAEAgAAAAAAAAAAAAAAIAAAA=</HashCode>
+      <FileName>infrastructure\ThreadContext.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="MVM.ProcContext">
+    <Position X="6.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAgAAAAAAAAAAAAAAAAgAAAAgAAQAAAA=</HashCode>
+      <FileName>infrastructure\ProcContext.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="tempContext" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="MVM.TempContext" Collapsed="true">
+    <Position X="9.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACEAAAAAACAAAACCAAAEAAAAAAAAEAAAAAABABAAgA=</HashCode>
+      <FileName>infrastructure\TempContext.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>

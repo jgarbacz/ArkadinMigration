@@ -1,0 +1,48 @@
+// define type using simple notation
+define_type(shopping_cart)(
+	items as item[],
+	grand_total as decimal
+);
+
+// define type using more powerful notation
+define_type(item)(
+	sku (string, MyStaticMetaInfo=>"something"),
+	description as string,
+	quantity as int,
+	unit_price as decimal,
+	total (decimal)
+);
+
+// here's the starting point for the test case
+proc test_case(){
+	cart=shopping_cart();
+	cart.buy_stuff();
+	my_grand_total=cart.checkout();
+	print('grand total is '~my_grand_total);
+}
+
+// add stuff to items
+proc buy_stuff(){
+	items.Add(
+		item(
+			sku=>'floss',
+			description=>'use daily',
+			quantity=>2,
+			unit_price=>1.99
+		)
+	);
+	items.Add(
+		item(
+			sku=>'tooth paste',
+			description=>'minty',
+			quantity=>1,
+			unit_price=>4.00
+		)
+	);
+}
+
+// make this return a value just for fun
+proc checkout() returns decimal{
+	items.ForEach(total=unit_price * quantity);		
+	grand_total=items.Sum(total);
+}

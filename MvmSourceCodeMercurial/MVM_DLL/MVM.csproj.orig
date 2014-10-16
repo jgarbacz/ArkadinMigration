@@ -1,0 +1,355 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D4EE4374-D312-48F1-B35F-5170E8CE537E}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MVM</RootNamespace>
+    <AssemblyName>mvm</AssemblyName>
+    <TargetFrameworkVersion>v3.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Antlr3.Runtime, Version=3.1.0.39271, Culture=neutral, PublicKeyToken=3a9cab8f8d22bfb7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\..\_ANTLR\DOT-NET-runtime-3.1.1\bin\net-2.0\Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="modules\ProcModuleSchema.xsd" />
+    <Compile Include="extensions\MyCollection.cs" />
+    <Compile Include="extensions\MyEnumerable.cs" />
+    <Compile Include="general\MultiStringBuilder.cs" />
+    <Compile Include="extensions\MyObject.cs" />
+    <Compile Include="extensions\MyReflection.cs" />
+    <Compile Include="general\RmpSearcher.cs" />
+    <Compile Include="infrastructure\CmdConsole.cs" />
+    <EmbeddedResource Include="modules\SchemaModuleAttribute.xsd" />
+    <None Include="modules\ProcModuleSchema.xsx">
+      <DependentUpon>ProcModuleSchema.xsd</DependentUpon>
+    </None>
+    <None Include="parser\antlr\MetraScript.g" />
+    <Compile Include="general\Arguments.cs" />
+    <Compile Include="general\FileUtils.cs" />
+    <Compile Include="general\FileUtils2.cs" />
+    <Compile Include="general\RecordReaderStandAlone.cs" />
+    <Compile Include="general\EnableExtensionMethodsFor3dot0.cs" />
+    <Compile Include="general\GlobalFileReader.cs" />
+    <Compile Include="general\GlobalFileStream.cs" />
+    <Compile Include="general\RecordReaderEscape.cs" />
+    <Compile Include="general\MergeSort.cs" />
+    <Compile Include="general\FileIndexCursor.cs" />
+    <Compile Include="general\FileIndex.cs" />
+    <Compile Include="general\MSQueue.cs" />
+    <Compile Include="extensions\MyArray.cs" />
+    <Compile Include="extensions\MyDictionary.cs" />
+    <Compile Include="extensions\MyList.cs" />
+    <Compile Include="extensions\MyString.cs" />
+    <Compile Include="general\RecordReader.cs" />
+    <Compile Include="general\SimpleLock.cs" />
+    <Compile Include="general\StringArray.cs" />
+    <Compile Include="general\StringArrayComparer.cs" />
+    <Compile Include="infrastructure\ClusterCache.cs" />
+    <Compile Include="infrastructure\ConsoleLogger.cs" />
+    <None Include="infrastructure\TempContext.cs.orig" />
+    <Compile Include="infrastructure\ModuleExtensions.cs" />
+    <Compile Include="infrastructure\Overrider.cs" />
+    <Compile Include="infrastructure\SqlDbCursor.cs" />
+    <Compile Include="infrastructure\DelimitedRecordCursorWithFormatHeader.cs" />
+    <Compile Include="infrastructure\ListOfStringListCursor.cs" />
+    <Compile Include="infrastructure\ModuleAttribute.cs" />
+    <Compile Include="infrastructure\StreamReaderCursor.cs" />
+    <Compile Include="infrastructure\DelimitedFileCursor.cs" />
+    <Compile Include="infrastructure\OraDbCursor.cs" />
+    <Compile Include="infrastructure\SchemaMaster.cs" />
+    <Compile Include="infrastructure\SterileCursor.cs" />
+    <Compile Include="infrastructure\ListOfStringArrayObjFieldsCursor.cs" />
+    <Compile Include="infrastructure\CounterCallbackProc.cs" />
+    <Compile Include="infrastructure\CursorUtils.cs" />
+    <Compile Include="infrastructure\DbUtils.cs" />
+    <Compile Include="infrastructure\DelimitedRecordCursor.cs" />
+    <Compile Include="infrastructure\IIndex.cs" />
+    <Compile Include="infrastructure\ILogger.cs" />
+    <Compile Include="infrastructure\ICursor.cs" />
+    <Compile Include="infrastructure\LogHelper.cs" />
+    <Compile Include="infrastructure\LogLevels.cs" />
+    <Compile Include="infrastructure\MemoryIndex.cs" />
+    <Compile Include="infrastructure\ListOfStringArrayFieldsCursor.cs" />
+    <Compile Include="infrastructure\NullCursor.cs" />
+    <Compile Include="infrastructure\OracleDumpCtrlFile.cs" />
+    <Compile Include="infrastructure\ProcDefinition.cs" />
+    <Compile Include="infrastructure\ModuleOrder.cs" />
+    <Compile Include="infrastructure\StringListCursor.cs" />
+    <Compile Include="infrastructure\SystemCommand.cs" />
+    <None Include="modules\MGenerateMetraNetConfig.cs.ORIG" />
+    <Compile Include="modules\MCallDotNetStaticMethod.cs" />
+    <Compile Include="type_conversions\WriteStringBase.cs" />
+    <Compile Include="type_conversions\ReadStringBase.cs" />
+    <Compile Include="type_conversions\IWritable.cs" />
+    <Compile Include="type_conversions\IReadable.cs" />
+    <Compile Include="type_conversions\IReadInt.cs" />
+    <Compile Include="type_conversions\CreateNewReadAsObject.cs" />
+    <Compile Include="type_conversions\IReadObject.cs" />
+    <Compile Include="type_conversions\IWriteObjectToObjectField.cs" />
+    <Compile Include="modules\MGetAssemblyPath.cs" />
+    <Compile Include="modules\MGetMachineName.cs" />
+    <Compile Include="type_conversions\ReadStringBase.cs" />
+    <Compile Include="type_conversions\IWritable.cs" />
+    <Compile Include="type_conversions\IReadable.cs" />
+    <Compile Include="type_conversions\IReadInt.cs" />
+    <Compile Include="type_conversions\CreateNewReadAsObject.cs" />
+    <Compile Include="type_conversions\IReadObject.cs" />
+    <Compile Include="type_conversions\IWriteObjectToObjectField.cs" />
+    <Compile Include="modules\MRenameObjectFields.cs" />
+    <Compile Include="modules\MRenameObjectField.cs" />
+    <Compile Include="modules\MRemoveObjectField.cs" />
+    <Compile Include="modules\MCopyObjectField.cs" />
+    <Compile Include="modules\MRegexReplace.cs" />
+    <Compile Include="modules\MSetObjectField.cs" />
+    <Compile Include="modules\MGetObjectField.cs" />
+    <Compile Include="modules\MDbExecute.cs" />
+    <Compile Include="modules\MDbInsert.cs" />
+    <Compile Include="modules\MAddParentSortFields.cs" />
+    <Compile Include="modules\MGenerateMetraNetConfig.cs" />
+    <Compile Include="modules\MObjectFieldExists.cs" />
+    <Compile Include="modules\MObjectFieldValueSelect.cs" />
+    <Compile Include="modules\MFileTouch.cs" />
+    <Compile Include="modules\MFileClose.cs" />
+    <Compile Include="modules\MFileDelete.cs" />
+    <Compile Include="modules\MProduceWork.cs" />
+    <Compile Include="modules\MSystemCommandSelect.cs" />
+    <Compile Include="modules\MCreateDirectory.cs" />
+    <Compile Include="modules\MDirectoryExists.cs" />
+    <Compile Include="modules\MFileExists.cs" />
+    <Compile Include="modules\MFileCopy.cs" />
+    <Compile Include="modules\MGetLength.cs" />
+    <Compile Include="modules\MFileMove.cs" />
+    <Compile Include="modules\MPathToAbsolute.cs" />
+    <Compile Include="modules\MPathParent.cs" />
+    <Compile Include="modules\MPathBasename.cs" />
+    <Compile Include="modules\MMatch.cs" />
+    <Compile Include="modules\MPrintFile.cs" />
+    <Compile Include="modules\MParse.cs" />
+    <Compile Include="modules\MLoadProcsFromGlob.cs" />
+    <Compile Include="modules\MGetCurrentDirectory.cs" />
+    <Compile Include="modules\MGlobSelect.cs" />
+    <Compile Include="modules\MAtomicDecrement.cs" />
+    <Compile Include="modules\MAtomicIncrement.cs" />
+    <Compile Include="modules\MTimeEnd.cs" />
+    <Compile Include="modules\MTimeStart.cs" />
+    <Compile Include="modules\MTime.cs" />
+    <Compile Include="modules\MBreak.cs" />
+    <Compile Include="modules\MSterilizeCursor.cs" />
+    <Compile Include="modules\MCopyCursorToTemp.cs" />
+    <Compile Include="modules\MCallbackCreateWithScopePop.cs" />
+    <Compile Include="modules\MBlock.cs" />
+    <Compile Include="modules\MCallbackCreate.cs" />
+    <Compile Include="modules\MParallelProcessCursor.cs" />
+    <Compile Include="modules\MLoggerDatabase.cs" />
+    <Compile Include="modules\MLoggerConsole.cs" />
+    <Compile Include="modules\MRound.cs" />
+    <Compile Include="modules\MFloatDivide.cs" />
+    <Compile Include="modules\MDateAdd.cs" />
+    <Compile Include="modules\MFloatAdd.cs" />
+    <Compile Include="modules\MCapitalize.cs" />
+    <Compile Include="modules\MInheritCursorDefault.cs" />
+    <Compile Include="modules\MTrim.cs" />
+    <Compile Include="modules\MToLower.cs" />
+    <Compile Include="modules\MReplace.cs" />
+    <Compile Include="modules\MPrintTableForCtrl.cs" />
+    <Compile Include="modules\MDbLog.cs" />
+    <Compile Include="modules\MLog.cs" />
+    <Compile Include="modules\MBatchSelect.cs" />
+    <Compile Include="modules\MCounterSelect.cs" />
+    <Compile Include="modules\MSerial.cs" />
+    <Compile Include="modules\MParallel.cs" />
+    <Compile Include="modules\MGetClusterObjectId.cs" />
+    <Compile Include="modules\MGetDate.cs" />
+    <Compile Include="modules\MSleep.cs" />
+    <Compile Include="modules\MInheritObject.cs" />
+    <Compile Include="modules\MDbCallProc.cs" />
+    <Compile Include="modules\MRemoveNamedClass.cs" />
+    <Compile Include="modules\MAddParentSortField.cs" />
+    <Compile Include="modules\MToUpper.cs" />
+    <Compile Include="modules\MDateConvert.cs" />
+    <Compile Include="modules\MSubstring.cs" />
+    <Compile Include="modules\MFileConvert.cs" />
+    <Compile Include="modules\MFileGrep.cs" />
+    <Compile Include="modules\MGetFile.cs" />
+    <Compile Include="modules\MFileSort.cs" />
+    <Compile Include="modules\MMd5Hash.cs" />
+    <Compile Include="modules\MIndexSelectKeys.cs" />
+    <Compile Include="modules\MIndexRemove.cs" />
+    <Compile Include="modules\MWarn.cs" />
+    <Compile Include="modules\MDebug.cs" />
+    <Compile Include="modules\MGetGuid.cs" />
+    <Compile Include="modules\MInheritCursor.cs" />
+    <Compile Include="modules\MIndexClear.cs" />
+    <Compile Include="modules\MRunOnce.cs" />
+    <Compile Include="modules\MDefineMemoryIndex.cs" />
+    <Compile Include="modules\MIndexInsert.cs" />
+    <Compile Include="modules\MFatal.cs" />
+    <Compile Include="modules\MLoadProcsFromFiles.cs" />
+    <Compile Include="modules\MPrintTable.cs" />
+    <Compile Include="modules\MDbSelect.cs" />
+    <Compile Include="modules\MRun.cs" />
+    <Compile Include="modules\MDbQueryToFile.cs" />
+    <Compile Include="modules\MCreateMemoryIndexFromCursor.cs" />
+    <Compile Include="modules\MCursorClear.cs" />
+    <Compile Include="modules\MIndexSelect.cs" />
+    <Compile Include="modules\MCreateFileIndex.cs" />
+    <Compile Include="modules\MGetWorkerNo.cs" />
+    <Compile Include="modules\MPrintRecord.cs" />
+    <Compile Include="modules\MNothing.cs" />
+    <Compile Include="modules\MRemoveClusterFromCache.cs" />
+    <Compile Include="modules\MProduce.cs" />
+    <Compile Include="modules\MCreateCluster.cs" />
+    <Compile Include="parser\AccessGlobal.cs" />
+    <Compile Include="parser\AccessThread.cs" />
+    <Compile Include="type_conversions\IWriteString.cs" />
+    <Compile Include="modules\MCursorNext.cs" />
+    <Compile Include="modules\MFileSelect.cs" />
+    <Compile Include="modules\MPopScope.cs" />
+    <Compile Include="modules\MRemoveObjectFromCache.cs" />
+    <Compile Include="modules\MWhile.cs" />
+    <Compile Include="modules\MDo.cs" />
+    <Compile Include="type_conversions\IReadString.cs" />
+    <Compile Include="modules\MCopyArgs.cs" />
+    <Compile Include="modules\MInput.cs" />
+    <Compile Include="modules\MOutput.cs" />
+    <Compile Include="modules\MPushAfter.cs" />
+    <Compile Include="modules\MCallback.cs" />
+    <Compile Include="modules\MIf.cs" />
+    <Compile Include="modules\MPushBefore.cs" />
+    <Compile Include="modules\MReturn.cs" />
+    <Compile Include="modules\MSpawn.cs" />
+    <Compile Include="modules\MCallProc.cs" />
+    <Compile Include="modules\IModuleSetup.cs" />
+    <Compile Include="modules\MSyncEnd.cs" />
+    <Compile Include="modules\MSyncStart.cs" />
+    <Compile Include="modules\MXmlModule.cs" />
+    <Compile Include="modules\ProcLoader.cs" />
+    <Compile Include="extensions\MyXml.cs" />
+    <Compile Include="infrastructure\Scheduler.cs" />
+    <Compile Include="infrastructure\Work.cs" />
+    <Compile Include="infrastructure\Worker.cs" />
+    <Compile Include="infrastructure\GlobalContext.cs" />
+    <Compile Include="modules\IModuleRun.cs" />
+    <Compile Include="modules\MSynchronized.cs" />
+    <Compile Include="infrastructure\ModuleContext.cs" />
+    <Compile Include="infrastructure\MVM.cs" />
+    <Compile Include="modules\MPrint.cs" />
+    <Compile Include="infrastructure\Cluster.cs" />
+    <Compile Include="infrastructure\ObjectData.cs" />
+    <Compile Include="infrastructure\ObjectCache.cs" />
+    <Compile Include="infrastructure\ProcContext.cs" />
+    <Compile Include="parser\antlr\MetraScriptLexer.cs" />
+    <Compile Include="parser\antlr\MetraScriptParser.cs" />
+    <Compile Include="parser\antlr\MetraScriptTester.cs" />
+    <Compile Include="parser\antlr\ParserExtensions.cs" />
+    <Compile Include="parser\antlr\StringExtensions.cs" />
+    <Compile Include="parser\AccessInt.cs" />
+    <Compile Include="parser\AccessString.cs" />
+    <Compile Include="parser\BaseBinaryOpSetup.cs" />
+    <Compile Include="parser\BaseLiteral.cs" />
+    <Compile Include="parser\BaseUnaryOpSetup.cs" />
+    <Compile Include="parser\AccessBool.cs" />
+    <Compile Include="parser\AccessNull.cs" />
+    <Compile Include="parser\BaseTernaryOpSetup.cs" />
+    <Compile Include="parser\AccessTemp.cs" />
+    <Compile Include="type_conversions\ISetupWritable.cs" />
+    <Compile Include="parser\OpThisEquals.cs" />
+    <Compile Include="parser\OpTBD.cs" />
+    <Compile Include="parser\OpIff.cs" />
+    <Compile Include="parser\OpOr.cs" />
+    <Compile Include="parser\OpAnd.cs" />
+    <Compile Include="parser\OpStrLte.cs" />
+    <Compile Include="parser\OpStrGte.cs" />
+    <Compile Include="parser\OpStrLt.cs" />
+    <Compile Include="parser\OpStrGt.cs" />
+    <Compile Include="parser\OpLte.cs" />
+    <Compile Include="parser\OpGte.cs" />
+    <Compile Include="parser\OpLt.cs" />
+    <Compile Include="parser\OpGt.cs" />
+    <Compile Include="parser\OpDivide.cs" />
+    <Compile Include="parser\OpMultiply.cs" />
+    <Compile Include="parser\OpSubtract.cs" />
+    <Compile Include="parser\OpNe.cs" />
+    <Compile Include="parser\OpEq.cs" />
+    <Compile Include="parser\OpStrNe.cs" />
+    <Compile Include="parser\OpNot.cs" />
+    <Compile Include="parser\OpStrEq.cs" />
+    <Compile Include="parser\OpAdd.cs" />
+    <Compile Include="parser\OpAssign.cs" />
+    <Compile Include="parser\ISetupSyntax.cs" />
+    <Compile Include="parser\AccessObject.cs" />
+    <Compile Include="parser\LiteralString.cs" />
+    <Compile Include="parser\OpConcat.cs" />
+    <Compile Include="parser\SyntaxMaster.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="infrastructure\SchedulerMaster.cs" />
+    <Compile Include="general\StringDecimal.cs" />
+    <Compile Include="general\SyncDictionary.cs" />
+    <Compile Include="infrastructure\TempContext.cs" />
+    <Compile Include="infrastructure\ThreadContext.cs" />
+    <Compile Include="infrastructure\WorkMgr.cs" />
+    <Compile Include="infrastructure\WorkList.cs" />
+    <Compile Include="type_conversions\ReadAsIntObject.cs" />
+    <Compile Include="type_conversions\TypeConverter.cs" />
+    <Compile Include="type_conversions\WriteIntObjectToObjectField.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="parser\antlr\test_syntax.txt" />
+    <EmbeddedResource Include="version.txt" />
+    <Content Include="_NOTES\notes.txt" />
+    <Content Include="_TESTS\file_processor\config\mapping_boa.xml" />
+    <Content Include="_TESTS\file_processor\config\file_processor.xml" />
+    <Content Include="_TESTS\main.xml" />
+    <Content Include="_TESTS\meter_object\config\meter_files.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="_TESTS\test_generate_metranet\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PreBuildEvent>hg -R $(SolutionDir) identify&gt; $(SolutionDir)version.txt
+hg -R $(SolutionDir) diff&gt;&gt; $(SolutionDir)version.txt</PreBuildEvent>
+  </PropertyGroup>
+</Project>

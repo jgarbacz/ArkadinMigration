@@ -1,0 +1,2 @@
+foreach(myitem in mylist)
+	x=myitem;

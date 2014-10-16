@@ -1,0 +1,52 @@
+(
+  try
+    (
+      brace
+        {
+          print
+            (
+              "in try"
+            )
+        }
+      catch
+        (
+          as
+            (
+              e1
+              MyE1
+            )
+          brace
+            {
+              print
+                (
+                  "in e1"
+                )
+            }
+        )
+      catch
+        (
+          as
+            (
+              e2
+              MyE2
+            )
+          brace
+            {
+              print
+                (
+                  "in e2"
+                )
+            }
+        )
+      finally
+        (
+          brace
+            {
+              print
+                (
+                  "in finally"
+                )
+            }
+        )
+    )
+)

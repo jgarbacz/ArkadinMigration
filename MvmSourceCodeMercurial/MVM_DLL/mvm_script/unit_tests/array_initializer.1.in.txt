@@ -1,0 +1,18 @@
+x=[
+  Person => [
+    'firstName' => 'John',
+    'lastName' => 'Smith',
+    'age' => 25,
+    'Address' => [
+      'streetAddress' => '21 2nd Street',
+      'city' => 'New York',
+      'state' => 'NY',
+      'postalCode' => '10021'
+    ],
+    'Phone Numbers' => [
+      'home' => '212 555-1234',
+      'fax' => '646 555-4567'
+    ],
+    luckyNumbers => [7,11]
+  ]
+];

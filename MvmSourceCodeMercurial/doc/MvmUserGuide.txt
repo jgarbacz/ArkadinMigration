@@ -1,0 +1,211 @@
+MVM User Guide
+==============
+:toc:
+:icons:
+:numbered:
+
+.Introduction
+
+MVM (short for MVM Virtual Machine) is a platform for creating MetraNet
+applications.  It can be used to write programs ranging from complex adapters
+to simple batch scripts.  These programs can be scheduled through MetraControl,
+tied to the pipeline, or run standalone from the command-line.  Here are a few
+examples of applications built atop MVM:
+
+* AMP
+* RME
+* MetraConvert
+
+...motivation for using MVM...
+
+== MVM Basics
+
+MVM itself is an executable program (+MVM.exe+) that is typically installed
+under the +RMP/bin+ directory.  The executable itself does not do much; you
+tell it what to do through configuration files.  MVM configuration files
+look like standard XML files.  By default, MVM will scan every extension
+directory under +RMP/extensions+.  If any of these extension directories
+contain a directory named "MvmConfig", MVM will load all the XML
+configuration files located under that directory, or any of its
+subdirectories.
+
+By convention, MVM 
+
+=== Procs
+
+The basic unit of work in MVM is a proc.  Procs are analagous to functions or
+subroutines in other languages.  MVM comes with many built-in procs that you
+can use.  You can also define and execute your own procs.  A full list of the
+built-in procs that ship with MVM is included in the appendix of this document.
+
+=== Modules and Functions
+
+Procs are composed of modules and functions.  These are lower-level constructs
+that are compiled into MVM itself.  One nice thing about using MVM is that it
+provides a rich set of modules and functions that support a range of high-level
+abstractions for you to take advantage of.  For example, there are modules to
+run database queries, interact with the filesystem, and execute multiple pieces
+of work in parallel across multiple machines.
+
+=== A Simple Example
+
+Suppose you have an XML file under an extension's +MvmConfig+ directory
+containing the following text:
+[source,xml]
+<proc name="hello_world">
+  <print>"Hello, world!"</print>
+</proc>
+
+When MVM reads this XML file, it will create a proc named "hello_world".  When
+you later execute the proc, it will print the string "Hello, world!" to the
+screen.
+
+We can define multiple procs in the same file:
+[source,xml]
+<procs>
+  <proc name="hello_world">
+    <print>"Hello, world!"</print>
+  </proc>
+  <proc name="print_error">
+    <fatal>"Fatal error!"</fatal>
+  </proc>
+</procs>
+
+Don't worry about the details of MVM syntax; we will cover the syntax in much
+greater detail shortly.  What's important is that this creates two procs; the
+second one, named "print_error", will immediately abort after printing an error
+message.
+
+The XML elements +<procs>+ and +<proc>+ are special.  Every MVM
+configuration file must contain either +<procs>+ or +<proc>+ as its root
+element.  If you use the +<procs>+ element as the root of all your MVM
+configuration files, you will be able to add new procs to them as needed
+without any other changes.
+
+Every other XML element (other than +<procs>+ and +<proc>+) in the file
+corresponds to an MVM module (or part of a module).  Any given XML
+element name will in general map one-to-one to a module (exceptions to
+this rule happen when multiple XML elements map to a single module, but
+these are infrequent).  In the examples above, +<print>+ and +<fatal>+
+correspond to MVM modules that handle printing to the screen and
+printing fatal errors, respectively.
+
+=== Proc Namespaces
+
+Any MetraNet system is likely to have lots of different users; these users
+might eventually want to create procs with the same name.  MVM allows
+this by supporting the concept of a namespace: the combination of proc
+name and namespace is required to be unique across the entire system.  The
+namespace is derived from the location of the proc under the RMP directory.
+It is determined by the name of the directory directly underneath the
+MvmConfig directory.  So a proc defined in the file
++RMP/extensions/MvmConvert/MvmConfig/Convert/migration/migrate.xml+ will have
+namespace "Convert", and a proc defined in
++RMP/Extensions/MvmCore/MvmConfig/global/GeneralProcs/print_object.xml+ will
+have namespace "global".
+
+=== Running MVM
+
+At this point, we have defined an MVM proc, which is uniquely named within our
+namespace.  How do we execute the proc?  Let's look at using MVM from the
+command prompt.  Open a command prompt window and type this command (either
+make sure +RMP/bin+ is in your +%PATH%+, or go to the +RMP/bin+ directory
+first):
+
+[source,bat]
+mvm -h
+
+This will show you the different options that MVM supports.  Let's look at
+each option.
+
+-f::
+-m::
+-p::
+These options are purely informational; they provide lists of the
+functions, modules, and procs available in the system.  Include a
+function/module/proc name as an argument to see the details of
+that particular object.
+
+-s::
+Remember how MVM by default loads all MVM configuration files under
++RMP/extensions+?  This option will override this behavior, in case you want
+MVM to only know about a subset of the available configuration files.
+
+-params=[file name]::
+This option is simply a way to gather one or more options in a file,
+and then pass the file to MVM as a single unit.  It is helpful when
+writing batch scripts to encapsulate complicated MVM commands.
+
+-xml=[XML string]::
+-file=[file name]::
+These options control what configuration files MVM will process.  In addition
+to any configuration under +RMP/extensions+ (which may have already
+been skipped if -s was used), MVM will also read the file(s) referenced by a
+semicolon-separated list of glob patterns given by the -file option.  It will
+also read XML text directly from the -xml option's argument, passed on the
+command line.
+
+-proc=[proc name]::
+This option tells MVM where to begin; once the program is fully
+initialized and has read all configuration files, MVM will execute the
+proc specified by this option.
+
+-cluster=[cluster name]::
+This option controls which cluster MVM should start; we will talk much
+more about clusters in a later section.
+
+Any other option not specifically mentioned above will be written to the
+GLOBAL variable context, where it will be available to any proc that wants
+to use it.  For example, the argument "-mvm=awesome" will set the variable
+GLOBAL.mvm to the value "awesome".  We will talk about the GLOBAL context
+in more detail in the next section.
+
+Often, the only necessary option is -proc, since you will almost always want
+to tell MVM which proc it should execute.  The other options are useful but
+not as essential.
+
+==== Utility Commands
+
+MVM also supports some additional syntactic sugar for executing utility
+commands.  This is the term given to small, self-contained MVM programs
+that usually do not need access to any other MVM or MetraNet configuration.
+
+To create a utility command named "my_utility", you would do the following:
+
+* Create a file called +<extension>/MvmConfig/utilities/my_utility.xml+
+* In this file, create a proc called "my_utility"
+
+You would run this utility as follows:
+[source,bat]
+mvm -my_utility
+
+MVM would interpret this exactly the same as this longer command:
+[source,bat]
+mvm -s -file=<extension>/MvmConfig/utilities/my_utility.xml -proc=my_utility
+
+Out of the box, MVM contains a handful of pre-made utilities under the
+MvmCore extension.  For example, grep and grepx will search through
+regular text files and MVM configuration files, respectively.
+
+== The MVM Language
+
+Let's look at a slightly more involved example of a proc:
+[source,xml]
+<proc name="example">
+  <do>TEMP.counter = 1</do>
+  <while>
+    <condition>TEMP.counter LT 10</condition>
+    <loop>
+      <print>'Counter is now ' ~ TEMP.counter</print>
+      <do>TEMP.counter += 1</do>
+    </loop>
+  </while>
+</proc>
+
+You may not understand every detail in this proc, but you can probably
+get the gist of it.  We've created a proc that initializes a variable
+to 1, then prints out its value as it is incremented to 10.
+MVM syntax supports most of the elements of other programming languages
+that you are probably familiar with: variables, expressions, conditional
+statements, loops, and so on.  In this chapter we will explore the details
+of MVM syntax.

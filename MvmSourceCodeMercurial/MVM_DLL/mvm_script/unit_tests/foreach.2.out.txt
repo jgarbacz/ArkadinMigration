@@ -1,0 +1,14 @@
+(
+  foreach
+    (
+      Ast_Element => myitem
+      Ast_Element => mylist
+    )
+    {
+      =
+        (
+          x
+          myitem
+        )
+    }
+)

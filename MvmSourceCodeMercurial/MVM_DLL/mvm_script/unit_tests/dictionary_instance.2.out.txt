@@ -1,0 +1,20 @@
+(
+  =
+    (
+      dic
+      new
+        (
+          Dictionary
+            <
+              string
+              Dictionary
+                <
+                  int
+                  DateTime
+                >
+            >
+            (
+            )
+        )
+    )
+)

@@ -1,0 +1,28 @@
+(
+  =
+    (
+      x
+      f
+        (
+          as
+            (
+              i
+              int
+            )
+          as
+            (
+              s
+              string
+            )
+          as
+            (
+              d
+              Dictionary
+                <
+                  string
+                  double
+                >
+            )
+        )
+    )
+)

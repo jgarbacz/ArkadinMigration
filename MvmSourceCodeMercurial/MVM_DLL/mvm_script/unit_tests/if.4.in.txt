@@ -1,0 +1,5 @@
+//   base compound statements
+if(true){
+	print("true");
+	print("true");
+}

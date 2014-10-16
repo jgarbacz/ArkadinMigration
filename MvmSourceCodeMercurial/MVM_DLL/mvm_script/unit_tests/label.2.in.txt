@@ -1,0 +1,4 @@
+mylabel: 
+	loop(){
+		print('hi');
+	}

@@ -1,0 +1,10 @@
+(
+mylabel => loop
+  (
+  )
+  {
+    print
+      (
+        'hi'
+      )
+  })

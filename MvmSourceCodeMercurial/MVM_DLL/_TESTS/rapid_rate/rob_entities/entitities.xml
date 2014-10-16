@@ -1,0 +1,116 @@
+﻿<entity_config>
+
+  <entity_group>
+    <name>default</name>
+    <!--<group_profile>date_aware</group_profile>-->
+    <!--<get_children_proc>date_aware_child_to_parent_mapping</get_children_proc>-->
+    
+    <map datatype="System.DateTime">ENTITY.start_date=PARENT.start_date</map>
+    <map datatype="System.DateTime">ENTITY.end_date=PARENT.end_date</map>
+    <map datatype="string">ENTITY.operation=PARENT.operation</map>
+    <map datatype="int">ENTITY.id_acc=PARENT.id_acc</map>
+    <dynamic_operation_before name="put">check_for_date_expansion</dynamic_operation_before>
+    <dynamic_operation_after>save_original_start_end_date</dynamic_operation_after>
+    <dynamic_operation_before name="put">unset_nondirty_icb_rates</dynamic_operation_before>
+    <dynamic_operation_after>create_rate_metadata_fields</dynamic_operation_after>
+    
+  </entity_group>
+  
+  <entity is_public="true">
+    <name>BME</name>
+    <child>MY_PREMIERE_BRIDGERATE</child>
+  </entity>
+
+  <entity is_public="true">
+    <name>MY_TOLLFREE_RESERVATIONLESS_BRIDGERATE</name>
+    <map>ENTITY.toll_free_reservationless_bridgerate=PARENT.toll_free_reservationless_bridgerate</map>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='BridgeRate'</map_down_before>
+      <map_down_before>CHILD.call_type='I'</map_down_before>
+      <map_down_before>CHILD.transport='Toll-Free'</map_down_before>
+      <map_down_before>CHILD.product='d'</map_down_before>
+      <map_after>ENTITY.toll_free_reservationless_bridgerate=CHILD.bridge_rate</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>MY_OTHER_BRIDGERATE</name>
+    <map>ENTITY.bridge_rate=PARENT.other_bridgerate</map>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.id_paramtable=12</map_down_before>
+      <map_down_before>CHILD.call_type=349</map_down_before>
+      <map_down_before>CHILD.transport=7617</map_down_before>
+      <map_down_before>CHILD.product='d'</map_down_before>
+      <map_after>ENTITY.bridge_rate=CHILD.bridge_rate</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>MY_FEATURE_RATE</name>
+    <map>ENTITY.feature_rate=PARENT.my_feature_rate</map>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='FeatureRate'</map_down_before>
+      <map_down_before>CHILD.feature_code=5289</map_down_before>
+      <map_after>ENTITY.feature_rate=CHILD.feature_rate</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>MY_BTM</name>
+    <map>ENTITY.basetransportminuom=PARENT.my_basetransportminuom</map>
+    <map>ENTITY.basetransportrate=PARENT.my_basetransportrate</map>
+    <map>ENTITY.basetransportsetupcharge=PARENT.my_basetransportsetupcharge</map>
+    <map>ENTITY.basetransportmincharge=PARENT.my_basetransportmincharge</map>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='basetransportrate'</map_down_before>
+      <map_down_before>CHILD.servicelevel=121310</map_down_before>
+      <map_down_before>CHILD.transport='Domestic'</map_down_before>
+      <map_down_before>CHILD.countrybridge='NULL'</map_down_before>
+      <map_down_before>CHILD.calendarcode='NULL'</map_down_before>
+      <map_down_before>CHILD.userrole='NULL'</map_down_before>
+      <map_after>ENTITY.basetransportminuom=CHILD.basetransportminuom</map_after>
+      <map_after>ENTITY.basetransportrate=CHILD.basetransportrate</map_after>
+      <map_after>ENTITY.basetransportsetupcharge=CHILD.basetransportsetupcharge</map_after>
+      <map_after>ENTITY.basetransportmincharge=CHILD.basetransportmincharge</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>MY_PREMIERE_BRIDGERATE</name>
+    <map>ENTITY.bridgerate=PARENT.toll_free_reservationless_bridgerate</map>
+    <map>ENTITY.bridgesetupcharge=PARENT.toll_free_reservationless_setupcharge</map>
+    <map>ENTITY.bridgemincharge=PARENT.toll_free_reservationless_mincharge</map>
+    <child>
+      <name>PARAM_TABLE</name>
+      <map_down_before>CHILD.paramtable_name='BridgeRate'</map_down_before>
+      <map_down_before>CHILD.servicelevel='2618'</map_down_before>
+      <map_down_before>CHILD.transport='NULL'</map_down_before>
+      <map_down_before>CHILD.countrybridge='NULL'</map_down_before>
+      <map_down_before>CHILD.countryorigin='NULL'</map_down_before>
+      <map_down_before>CHILD.countrydestination='NULL'</map_down_before>
+      <map_down_before>CHILD.userrole='NULL'</map_down_before>
+      <map_down_before>CHILD.calendarcode='NULL'</map_down_before>
+      <map_down_before>CHILD.bridgeminuom='Minutes'</map_down_before>
+      <map_down_before>CHILD.totalqualifiedminutes=''</map_down_before>
+      <map_down_before>CHILD.nonnull_priority_field1='servicelevel'</map_down_before>
+      <map_down_before>CHILD.nonnull_priority_field2='transport'</map_down_before>
+      <map_down_before>CHILD.nonnull_priority_field2='countrybridge'</map_down_before>
+      <map_after>ENTITY.bridgerate=CHILD.bridgerate</map_after>
+      <map_after>ENTITY.bridgesetupcharge=CHILD.bridgesetupcharge</map_after>
+      <map_after>ENTITY.bridgemincharge=CHILD.bridgemincharge</map_after>
+    </child>
+  </entity>
+
+  <entity>
+    <name>PARAM_TABLE</name>
+    <dynamic_operation name="put">param_table_put</dynamic_operation>
+    <dynamic_operation name="get">get_rscheds</dynamic_operation>
+    <dynamic_operation name="metadata">param_table_structure</dynamic_operation>
+  </entity>
+
+
+</entity_config>

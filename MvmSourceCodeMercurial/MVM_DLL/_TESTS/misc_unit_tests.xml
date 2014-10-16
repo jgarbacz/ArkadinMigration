@@ -1,0 +1,1927 @@
+﻿<procs>
+  
+  <proc name="test_args">
+    <param name="x"></param>
+    <print>'x='~TEMP.x</print>
+  </proc>
+  
+  <proc name="main">
+    <get_current_directory>GLOBAL.pwd</get_current_directory>
+    <path_to_absolute>
+      <input>GLOBAL.pwd ~ '\..\..\_TESTS'</input>
+      <output>GLOBAL.test_dir</output>
+    </path_to_absolute>
+    <print>'test_dir='~GLOBAL.test_dir</print>
+
+    <!-- 
+    <do>GLOBAL.db='ORCL'</do>
+    <do>GLOBAL.user='jonah'</do>
+    <do>GLOBAL.pw='jonah123'</do>
+    <do>GLOBAL.field_delim=','</do>
+    <do>GLOBAL.record_delim='not_used'</do>
+    <do>GLOBAL.output_dir='C:\\_ROB\\mvm\\test_print_table'</do>
+    -->
+
+    <!-- Use a basic logging setup -->
+    <spawn>
+      <object_type>'LOGGER'</object_type>
+      <object_id>GLOBAL.logger</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.logger).log_type='console'</do>
+    <do>OBJECT(GLOBAL.logger).log_level='info'</do>
+    <log level='info'>'Using log_type='~OBJECT(GLOBAL.logger).log_type~', level='~OBJECT(GLOBAL.logger).log_level</log>
+
+    <!--<call_proc_for_current_object>
+      <name>'test_args'</name>-->
+      <!--<name>'test_sql_dm'</name>-->
+      <!--<name>'test_sqlserver'</name>-->
+      <!--<name>'mytest'</name>-->
+      <!--<name>'test_jonah'</name>-->
+
+      <!--<name>'test_metering'</name>-->
+
+      <!--<name>'test_time'</name>-->
+      <!--<name>'test_metraconvert'</name>-->
+      <!--<name>'test_generate_metranet_oracle'</name>-->
+
+      <!--<name>'test_rename_object_fields'</name>-->
+      <!--<name>'test_ora_db_execute'</name>-->
+      <!--<name>'test_ora_db_insert'</name>-->
+      <!--<name>'test_db_query_to_file_sql'</name>-->
+      <!--<name>'test_generate_metranet_procs'</name>-->
+      <!--<name>'test_object_field_exists'</name>-->
+      <!--<name>'test_file_select_with_header'</name>-->
+      <!--<name>'test_object_field_value_select'</name>-->
+      <!--<name>'test_file_delete'</name>-->
+      <!--<name>'test_system_command_select'</name>-->
+      <!--<name>'test_match'</name>-->
+      <!--<name>'test_parse'</name>-->
+      <!--<name>'test_file_processor'</name>-->
+      <!--<name>'test_path'</name>-->
+      <!--<name>'test_parallel_speed'</name>-->
+      <!--<name>'test_glob_select'</name>-->
+      <!--<name>'test_time'</name>-->
+      <!--<name>'test_float'</name>-->
+      <!--<name>'test_temp'</name>-->
+      <!--<name>'test_my_temp'</name>-->
+      <!--<name>'test_add_parent_sort_field'</name>-->
+      <!--<name>'test_database_logger'</name>-->
+      <!--<name>'test_console_logger'</name>-->
+      <!--<name>'test_batch_select'</name>-->
+      <!--<name>'test_counter_select'</name>-->
+      <!--<name>'test_parallel'</name>-->
+      <!--<name>'test_queue_cb'</name>-->
+      <!--<name>'test_select_parallel'</name>-->
+      <!--<name>'test_jonah'</name>-->
+      <!--<name>'test_inherit_object'</name>-->
+      <!--<name>'test_producer1'</name>-->
+      <!--<name>'test_db_call_proc'</name>-->
+      <!--<name>'test_add_parent_sort_field'</name>-->
+      <!--<name>'test_file_convert'</name>-->
+      <!--<name>'test_file_grep'</name>-->
+      <!--<name>'test_get_file'</name>-->
+      <!--<name>'test_file_sort'</name>-->
+      <!--<name>'test_define_memory_index'</name>-->
+      <!--<name>'test_hello_world'</name>-->
+      <!--<name>'test_ops'</name>-->
+      <!--<name>'test_sync'</name>-->
+      <!--<name>'test_spawn'</name>-->
+      <!--<name>'test_print_table'</name>-->
+      <!--<name>'test_sql_db_select'</name>-->
+      <!--<name>'test_ora_db_select'</name>-->
+      <!--<name>'test_file_select'</name>-->
+      <!--<name>'test_global_fields'</name>-->
+      <!--<name>'test_db_query_to_file'</name>-->
+      <!--<name>'test_create_index_on_sorted_file'</name>-->
+      <!--<name>'test_create_memory_index_from_cursor'</name>-->
+      <!--<name>'test_print_record'</name>-->
+      <!--<name>'test_conversion'</name>-->
+      <!--<name>'test_producer_manual'</name>-->
+      <!--<name>'test_create_cluster'</name>-->
+      <!--<name>'test_while'</name>-->
+      <!--<name>'test_if'</name>-->
+      <!--<name>'test_push'</name>-->
+      <!--<name>'test_hello_world'</name>-->
+    <!--</call_proc_for_current_object>-->
+  </proc>
+
+
+  <proc name="make_hang">
+    <counter_select>
+      <from>"0"</from>
+      <to>3</to>
+      <cursor_value>"batch_number"</cursor_value>
+      <parallel>
+        <print>"BAAAAAAAAAAAAAAAAAAAAAATCH="~TEMP.batch_number</print>
+        <call_proc>'nada'</call_proc>
+      </parallel>
+    </counter_select>
+  </proc>
+
+  <proc name="test_sql_dm">
+
+    <do>GLOBAL.database_type='sql'</do>
+    <do>GLOBAL.database_server='vmllckmig'</do>
+    <do>GLOBAL.database_name='netmeter'</do>
+    <do>GLOBAL.database_user='nmdbo'</do>
+    <do>GLOBAL.database_password='MetraTech1'</do>
+    <!--
+    
+     CREATE procedure SP_RJP_PROC(
+        @my_in_vc nvarchar(255),
+        @my_out_vc nvarchar(255) output,
+        @my_in_i int,
+        @my_out_i int output,
+        @my_in_d datetime,
+        @my_out_d datetime output
+        )as
+        set @my_out_vc=@my_in_vc
+        SET @my_out_i=@my_in_i
+        SET @my_out_d=@my_in_d  
+GO
+sp_MS_marksystemobject 'sp_prem_dm_PopulateDM_part_new'
+go
+grant execute on sp_prem_dm_PopulateDM_part_new to public
+go
+
+      CREATE TABLE [dbo].[MVM_LOG](
+      [mvm_run_id] [int] NOT NULL,
+      [msg_dt] [datetime] NOT NULL,
+      [level] [int] NOT NULL,
+      [msg] [nvarchar] NOT NULL
+      )
+      
+    CREATE TABLE [dbo].[t_prem_IDM_work_partitions]
+    (
+    [IntervalID] [int] NOT NULL,
+    [DatabaseName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+    [strDBName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+    [strDataLogFilePath] [varchar] (255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+    [dbSize] [int] NOT NULL,
+    [partition_number] [int] NOT NULL
+    )    
+    
+    insert into t_prem_IDM_work_partitions 
+(intervalid,databasename,strdbname,strdatalogfilepath,dbsize,partition_number)
+values 
+(90220,DM_INTERVAL_90220_P1,DM_INTERVAL_90220_P1,C:\Temp,5,1)
+    -->
+    <spawn>
+      <object_type>'LOGGER'</object_type>
+      <object_id>GLOBAL.logger</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.logger).log_level='fine'</do>
+    <do>OBJECT(GLOBAL.logger).log_type='database'</do>
+    <do>OBJECT(GLOBAL.logger).log_table_name='MVM_LOG'</do>
+    <do>OBJECT(GLOBAL.logger).log_message_field='msg'</do>
+    <do>OBJECT(GLOBAL.logger).log_message_date_column='msg_dt'</do>
+    <do>OBJECT(GLOBAL.logger).log_message_level_column='level'</do>
+    <do>OBJECT(GLOBAL.logger).database_type=GLOBAL.database_type</do>
+    <do>OBJECT(GLOBAL.logger).database_name=GLOBAL.database_name</do>
+    <do>OBJECT(GLOBAL.logger).database_user=GLOBAL.database_user</do>
+    <do>OBJECT(GLOBAL.logger).database_server=GLOBAL.database_server</do>
+    <do>OBJECT(GLOBAL.logger).database_password=GLOBAL.database_password</do>
+    <info>'test out logging'</info>
+    <db_select>
+      <query>"select intervalid,databasename,strdbname,strdatalogfilepath,dbsize,partition_number from t_prem_IDM_work_partitions"</query>
+      <parallel>
+        <do>TEMP.database_name=TEMP.databasename</do>
+        <!-- this controls where sql is run-->
+        <print>'pointing to:'~TEMP.database_name</print>
+        <synchronized>
+          <do>TEMP.database_name=GLOBAL.database_name</do>
+          <print>'pointing to:'~TEMP.database_name</print>
+          <db_call_proc>'CreateReportingDBPartition'</db_call_proc>
+          <print>'return_code=['~TEMP.return_code~']'</print>
+          <do>TEMP.database_name=TEMP.databasename</do>
+        </synchronized>
+        <print>'pointing to:'~TEMP.database_name</print>
+        <print>'return_code=['~TEMP.return_code~']'</print>
+        <do>TEMP.my_in_vc="abc"</do>
+        <do>TEMP.my_in_d="2010-04-21 10:31:18.187"</do>
+        <do>TEMP.my_in_i="99"</do>
+        <db_call_proc>'sp_rjp_proc'</db_call_proc>
+        <print>'my_out_vc=['~TEMP.my_out_vc~']'</print>
+        <print>'my_out_d=['~TEMP.my_out_d~']'</print>
+        <print>'my_out_i=['~TEMP.my_out_i~']'</print>
+        <synchronized>
+          <db_call_proc>'CreateReportingDBPartitionOnce'</db_call_proc>
+        </synchronized>
+        <synchronized>
+          <db_call_proc>'sp_prem_CombineReportingDBPartition'</db_call_proc>
+          <do>TEMP.database_name=GLOBAL.database_name</do>
+          <!--<db_call_proc>'DeleteReportingDBPartition'</db_call_proc>-->
+        </synchronized>
+      </parallel>
+    </db_select>
+  </proc>
+  <proc name="log_db_exception">
+    <print>'got'~TEMP.database_exception_severity</print>
+    <print>'got'~TEMP.database_exception_state</print>
+    <print>'got'~TEMP.database_exception</print>
+    <!--<db_insert>
+      <login_object>GLOBAL.logger</login_object>
+      <name>"MVM_EXCEPTION_TABLE"</name>
+      <field name="msg_dt" sql="true">"SYSDATE"</field>
+      <field name="msg">OBJECT.database_exception</field>
+      <field name="partition_number">TEMP.partition_number</field>
+      <field name="interval_id">TEMP.interval_id</field>
+    </db_insert>
+    <if>
+      <condition>GLOBAL.fatal_db_exceptions eq 1</condition>
+      <then>
+        <fatal>"Erroring after first db exception:"~OBJECT.database_exception</fatal>
+      </then>
+    </if>-->
+  </proc>
+  <proc name="test_sqlserver">
+    <spawn>
+      <object_type>'LOGIN'</object_type>
+      <object_id>GLOBAL.source_login</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.source_login).database_type='sql'</do>
+    <do>OBJECT(GLOBAL.source_login).database_server='vmllckmig'</do>
+    <do>OBJECT(GLOBAL.source_login).database_name='netmeter'</do>
+    <do>OBJECT(GLOBAL.source_login).database_user='nmdbo'</do>
+    <do>OBJECT(GLOBAL.source_login).database_password='MetraTech1'</do>
+    <do>OBJECT(GLOBAL.source_login).database_exception_proc='log_db_exception'</do>
+
+
+    <db_insert>
+      <login_object>GLOBAL.source_login</login_object>
+      <name>'MVM_LOG'</name>
+      <field name="mvm_run_id">99</field>
+      <field name="msg_dt" sql="true">'getdate()'</field>
+      <field name="msg">'hello rob'</field>
+    </db_insert>
+
+    <db_execute>
+      <login_object>GLOBAL.source_login</login_object>
+      <statement>
+        "
+        begin
+        drop procedure RJP_PROC
+        end
+        "
+      </statement>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute>
+    <do>'got num_rows='~TEMP.num_rows</do>
+
+    <db_execute>
+      <login_object>GLOBAL.source_login</login_object>
+      <statement>
+        "
+        CREATE procedure RJP_PROC(
+        @my_in_vc nvarchar(255),
+        @my_out_vc nvarchar(255) output,
+        @my_in_i int,
+        @my_out_i int output,
+        @my_in_d datetime,
+        @my_out_d datetime output
+        )as
+        RAISERROR('This error is raised by me', 16, 1)
+        set @my_out_vc=@my_in_vc
+        SET @my_out_i=@my_in_i
+        SET @my_out_d=@my_in_d
+        "
+      </statement>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute>
+    <do>'got num_rows='~TEMP.num_rows</do>
+
+    <do>TEMP.my_in_vc="abc"</do>
+    <do>TEMP.my_out_vc=""</do>
+    <do>TEMP.my_in_d="2010-04-21 10:31:18.187"</do>
+    <do>TEMP.my_out_d=""</do>
+    <do>TEMP.my_in_i="99"</do>
+    <do>TEMP.my_out_i=""</do>
+    <db_call_proc>
+      <login_object>GLOBAL.source_login</login_object>
+      <name>'rjp_proc'</name>
+    </db_call_proc>
+    <print>'my_out_vc=['~TEMP.my_out_vc~']'</print>
+    <print>'my_out_d=['~TEMP.my_out_d~']'</print>
+    <print>'my_out_i=['~TEMP.my_out_i~']'</print>
+
+    <db_select>
+      <login_object>GLOBAL.source_login</login_object>
+      <query>'select '~"'abc'"~' first, 999 second, getdate() today'</query>
+      <!-- 2010-04-21 10:31:18.187 -->
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <print>'first='~OBJECT(TEMP.csr).first</print>
+        <print>'second='~OBJECT(TEMP.csr).second</print>
+        <print>'today='~OBJECT(TEMP.csr).today</print>
+      </loop>
+      <else>
+        <print>'query returned no rows!'</print>
+      </else>
+    </db_select>
+
+  </proc>
+
+  <proc name="test_rob">
+
+    <counter_select>
+      <from>0</from>
+      <to>1</to>
+      <cursor>TEMP.csr_1</cursor>
+      <cursor_value>'ctr_1'</cursor_value>
+      <parallel>
+        <parallel>
+          <print>'hi-'~TEMP.ctr_1</print>
+        </parallel>
+      </parallel>
+    </counter_select>
+
+  </proc>
+
+  <proc name="xxx">
+    <do>TEMP.xxx=>yy</do>
+  </proc>
+
+  <proc name='test_call_static_method'>
+    <print>'calling static method'</print>
+    <do>TEMP.input='abc'</do>
+    <do>TEMP.myref='yomyref'</do>
+    <print>"input="~TEMP.input</print>
+    <call_dotnet_static_method>
+      <assembly>'F:\_SOURCE\TestClassLibrary\TestClassLibrary\bin\Debug\TestClassLibrary.dll'</assembly>
+      <type>'TestClassLibrary.MyLib'</type>
+      <method>'MyToUpper'</method>
+      <field name='input'>TEMP.input</field>
+      <field name='count'>TEMP.count</field>
+      <field name='myref'>TEMP.myref</field>
+      <result>TEMP.output</result>
+    </call_dotnet_static_method>
+    <print>"output="~TEMP.output</print>
+    <print>"count="~TEMP.count</print>
+    <print>"myref="~TEMP.myref</print>
+  </proc>
+
+  <proc name='mytest'>
+    <spawn>
+      <object_type>'LOGIN'</object_type>
+      <object_id>GLOBAL.target_login</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.target_login).database_type='oracle'</do>
+    <do>OBJECT(GLOBAL.target_login).database_name='DEV-RAC1 '</do>
+    <do>OBJECT(GLOBAL.target_login).database_user='perf4_na'</do>
+    <do>OBJECT(GLOBAL.target_login).database_password='perf4_na'</do>
+    <do>TEMP.dat_file=  'f:\x.dat.txt'</do>
+    <do>TEMP.ctl_file=  'f:\x.ctl.txt'</do>
+    <db_query_to_file>
+      <login_object>GLOBAL.target_login</login_object>
+      <query>"select 'hi' hello from dual union select 'ho' hello from dual"</query>
+      <file>TEMP.dat_file</file>
+      <ctrl>TEMP.ctl_file</ctrl>
+      <field_delim>'`|'</field_delim>
+      <record_delim>'|&#xd;&#xa;'</record_delim>
+    </db_query_to_file>
+    <file_select>
+      <input_file>TEMP.dat_file</input_file>
+      <ctrl>TEMP.ctl_file</ctrl>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <print>OBJECT(TEMP.csr).hello</print>
+      </loop>
+    </file_select>
+  </proc>
+
+  <proc name='test_db_query_to_file_sql'>
+
+    <spawn>
+      <object_type>'LOGIN'</object_type>
+      <object_id>GLOBAL.target_login</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.target_login).database_type='sql'</do>
+    <do>OBJECT(GLOBAL.target_login).database_name='Netmeter'</do>
+    <do>OBJECT(GLOBAL.target_login).database_server='vmllckmig'</do>
+    <do>OBJECT(GLOBAL.target_login).database_user='nmdbo'</do>
+    <do>OBJECT(GLOBAL.target_login).database_password='MetraTech1'</do>
+
+    <db_query_to_file>
+      <login_object>GLOBAL.target_login</login_object>
+      <query>"select * from rjp"</query>
+      <file>'c:\x.dat.txt'</file>
+      <ctrl>'c:\x.ctl.txt'</ctrl>
+      <field_delim>'`|'</field_delim>
+      <record_delim>'|&#xd;&#xa;'</record_delim>
+    </db_query_to_file>
+
+  </proc>
+
+
+  <proc name='test_metraconvert'>
+    <do>GLOBAL.main_dir='F:\_MIGRATION\MetraConvert'</do>
+    <do>GLOBAL.migrate_accounts_glob=GLOBAL.main_dir~'\migrate.xml'</do>
+    <print>'Loading: '~GLOBAL.file_processor_glob</print>
+    <load_procs_from_glob>
+      <glob>GLOBAL.migrate_accounts_glob</glob>
+    </load_procs_from_glob>
+    <do>GLOBAL.type='product_catalog'</do>
+    <!--<do>GLOBAL.type='accounts'</do>-->
+    <call_proc_for_current_object>
+      <name>'migrate'</name>
+    </call_proc_for_current_object>
+  </proc>
+
+  <proc name='test_object_field_exists'>
+    <do>OBJECT.xx='XX'</do>
+    <do>TEMP.field_name='xx'</do>
+    <object_field_exists>
+      <object_id>OBJECT.object_id</object_id>
+      <field_name>TEMP.field_name</field_name>
+      <output>TEMP.xx_exists</output>
+    </object_field_exists>
+    <object_field_exists>
+      <object_id>OBJECT.object_id</object_id>
+      <field_name>'yy'</field_name>
+      <output>TEMP.yy_exists</output>
+    </object_field_exists>
+    <print>'TEMP.xx_exists='~TEMP.xx_exists~', TEMP.yy_exists='~TEMP.yy_exists</print>
+  </proc>
+
+
+  <proc name='test_file_select_with_header'>
+    <do>TEMP.file=GLOBAL.test_dir~'\test_file_select_with_header\input.txt'</do>
+    <file_select>
+      <input_file>TEMP.file</input_file>
+      <format field_delim=',' format_in_header='true'/>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <print>'A=['~OBJECT(TEMP.csr).a~']'</print>
+        <object_field_value_select>
+          <object_id>TEMP.csr</object_id>
+          <cursor>TEMP.csr2</cursor>
+          <cursor_field>'field'</cursor_field>
+          <cursor_value>'value'</cursor_value>
+          <loop>
+            <print>'fieldname='~OBJECT(TEMP.csr2).field~', value='~OBJECT(TEMP.csr2).value</print>
+          </loop>
+        </object_field_value_select>
+      </loop>
+    </file_select>
+  </proc>
+
+
+  <proc name='test_rename_object_fields'>
+
+    <do>OBJECT.c_a='a_value'</do>
+    <do>OBJECT.c_b='b_value'</do>
+    <do>OBJECT.notprefixed='notprefixed_value'</do>
+
+    <print>'FIELDS BEFORE RENAME:'</print>
+    <object_field_value_select>
+      <object_id>OBJECT.object_id</object_id>
+      <cursor>TEMP.csr</cursor>
+      <cursor_field>'field'</cursor_field>
+      <cursor_value>'value'</cursor_value>
+      <loop>
+        <print>'fieldname='~OBJECT(TEMP.csr).field~', value='~OBJECT(TEMP.csr).value</print>
+      </loop>
+    </object_field_value_select>
+
+    <rename_object_fields>
+      <pattern>'^(c_)(.*)$'</pattern>
+      <replacement>'tada_$2'</replacement>
+    </rename_object_fields>
+
+    <print>'FIELDS AFTER RENAME:'</print>
+    <object_field_value_select>
+      <object_id>OBJECT.object_id</object_id>
+      <cursor>TEMP.csr</cursor>
+      <cursor_field>'field'</cursor_field>
+      <cursor_value>'value'</cursor_value>
+      <loop>
+        <print>'fieldname='~OBJECT(TEMP.csr).field~', value='~OBJECT(TEMP.csr).value</print>
+      </loop>
+    </object_field_value_select>
+  </proc>
+
+  <proc name='test_object_field_value_select'>
+    <spawn>
+      <object_type>'VIEW'</object_type>
+      <object_id>TEMP.view</object_id>
+    </spawn>
+    <do>OBJECT(TEMP.view).a=1</do>
+    <do>OBJECT(TEMP.view).c=1</do>
+
+    <do>OBJECT.a='a_value'</do>
+    <do>OBJECT.b='b_value'</do>
+    <do>OBJECT.c='c_value'</do>
+    <object_field_value_select>
+      <object_id>OBJECT.object_id</object_id>
+      <view_object_id>TEMP.view</view_object_id>
+      <cursor>TEMP.csr</cursor>
+      <cursor_field>'field'</cursor_field>
+      <cursor_value>'value'</cursor_value>
+      <loop>
+        <print>'fieldname='~OBJECT(TEMP.csr).field~', value='~OBJECT(TEMP.csr).value</print>
+      </loop>
+    </object_field_value_select>
+  </proc>
+
+
+  <proc name='test_file_delete'>
+    <do>TEMP.file='F:\_ROB\junk\fixedlength.txt'</do>
+    <print>'WRITING TO:'~TEMP.file</print>
+    <do>OBJECT.data='hahaha'</do>
+    <print_file>
+      <file>TEMP.file</file>
+      <format fixed_length='true' trim='true' default='NULL'>
+        <field name='data' length='40'/>
+      </format>
+    </print_file>
+
+    <do>TEMP.mv_file=TEMP.file~'.mv'</do>
+
+    <print>'touch '~TEMP.mv_file</print>
+    <file_touch>TEMP.mv_file</file_touch>
+
+    <print>'MV:'~TEMP.file~' '~TEMP.mv_file</print>
+    <file_move>
+      <source>TEMP.file</source>
+      <target>TEMP.mv_file</target>
+    </file_move>
+
+    <print>'DELETING:'~TEMP.mv_file</print>
+    <file_delete>TEMP.mv_file</file_delete>
+  </proc>
+
+
+  <proc name='test_system_command_select'>
+    <do>TEMP.last_command_no='-1'</do>
+    <system_command_select>
+      <command>'c:'</command>
+      <command>'cd \'</command>
+      <command>'dir'</command>
+      <cursor>TEMP.csr</cursor>
+      <cursor_value>'value'</cursor_value>
+      <cursor_command>'command'</cursor_command>
+      <cursor_command_no>'command_no'</cursor_command_no>
+      <loop>
+        <if>
+          <condition>TEMP.last_command_no ne OBJECT(TEMP.csr).command_no</condition>
+          <then>
+            <do>TEMP.last_command_no=OBJECT(TEMP.csr).command_no</do>
+            <print>'COMMAND '~TEMP.last_command_no~": "~OBJECT(TEMP.csr).command</print>
+          </then>
+        </if>
+        <print>"OUTPUT:" ~OBJECT(TEMP.csr).value</print>
+      </loop>
+    </system_command_select>
+  </proc>
+
+
+  <proc name='test_match'>
+    <do>TEMP.input='617-762-1267'</do>
+    <do>TEMP.regex='^(\d*)-(.*)-(.*)$'</do>
+    <match>
+      <input>TEMP.input</input>
+      <regex>"INTR(\d*)O_LBX_OUTBNR_(..)FSLBX.(\d*).txt"</regex>
+      <!--<regex>TEMP.regex</regex>-->
+      <success>TEMP.success</success>
+      <capture>TEMP.first</capture>
+      <capture>TEMP.second</capture>
+      <capture>TEMP.third</capture>
+    </match>
+    <print>'success='~TEMP.success</print>
+    <print>'first='~TEMP.first</print>
+    <print>'second='~TEMP.second</print>
+    <print>'third='~TEMP.third</print>
+  </proc>
+
+
+  <proc name='test_parse'>
+
+    <do>OBJECT.record='122  3    55555'</do>
+    <parse>
+      <input>OBJECT.record</input>
+      <format fixed_length='true' trim='true' default='NULL'>
+        <field name='field1' length='1'/>
+        <field name='field2' length='2'/>
+        <field name='field3' length='3'/>
+        <field name='field4' length='4'/>
+        <field name='field5' length='5'/>
+      </format>
+    </parse>
+
+    <print>'field1=['~OBJECT.field1~']'</print>
+    <print>'field2=['~OBJECT.field2~']'</print>
+    <print>'field3=['~OBJECT.field3~']'</print>
+    <print>'field4=['~OBJECT.field4~']'</print>
+    <print>'field5=['~OBJECT.field5~']'</print>
+
+    <do>OBJECT.field2='2'</do>
+    <do>OBJECT.field5='55555abc'</do>
+
+    <print_file>
+      <file>'F:\_ROB\mvm\fixedlength.txt'</file>
+      <format fixed_length='true' trim='true' default='NULL'>
+        <field name='field1' length='1'/>
+        <field name='field2' length='2'/>
+        <field name='field3' length='3'/>
+        <field name='field4' length='4'/>
+        <field name='field5' length='5'/>
+      </format>
+    </print_file>
+
+  </proc>
+
+
+  <proc name='test_metering'>
+    <do>GLOBAL.test_metering_glob=GLOBAL.test_dir~'\meter_object\config\meter_files.xml'</do>
+    <print>'Loading: '~GLOBAL.test_metering_glob</print>
+    <load_procs_from_glob>
+      <glob>GLOBAL.test_metering_glob</glob>
+    </load_procs_from_glob>
+    <call_proc_for_current_object>
+      <name>'meter_files'</name>
+    </call_proc_for_current_object>
+  </proc>
+
+  <proc name='test_file_processor'>
+    <do>GLOBAL.file_processor_glob=GLOBAL.test_dir~'\file_processor\config\file_processor.xml'</do>
+    <print>'Loading: '~GLOBAL.file_processor_glob</print>
+    <load_procs_from_glob>
+      <glob>GLOBAL.file_processor_glob</glob>
+    </load_procs_from_glob>
+    <call_proc_for_current_object>
+      <name>'file_processor'</name>
+    </call_proc_for_current_object>
+  </proc>
+
+  <!--
+  load searches for when='startup', order = X, and pushes work there.
+  load then calls startup proc, then empties it.
+  
+  if i say when='MyMapping', that means push into MyMapping. when means push, yet we're using when 
+  to push. this seems stupid.
+  
+  <startup>  
+    <push>MyMapping</push>
+  </startup>
+  
+  -->
+
+
+
+
+  <proc name='test_load_and_global'>
+    <do>GLOBAL.config_home='F:\_ROB'</do>
+    <print>'loading procs from:' ~ GLOBAL.config_home</print>
+    <load_procs_from_files>
+      <input_dir>GLOBAL.config_home</input_dir>
+      <input_match>'*.xml'</input_match>
+    </load_procs_from_files>
+  </proc>
+
+
+
+
+
+
+
+
+
+
+
+  <proc name='test_glob_select'>
+
+
+
+    <do>TEMP.glob='F:\_ROB\*\*.txt'</do>
+
+
+
+    <print>'Running glob_select for: '~TEMP.glob</print>
+    <glob_select>
+      <glob>TEMP.glob</glob>
+      <cursor>TEMP.csr</cursor>
+      <cursor_value>'glob'</cursor_value>
+      <loop>
+        <print>'GLOB='~OBJECT(TEMP.csr).glob</print>
+      </loop>
+      <else>
+        <print>'No matches'</print>
+      </else>
+    </glob_select>
+  </proc>
+
+  <proc name='test_time'>
+    <print>'Try to time 12345 ms...'</print>
+    <time ms='TEMP.t'>
+      <sleep>12345</sleep>
+    </time>
+    <print>'TEMP.t='~TEMP.t~' ms'</print>
+  </proc>
+
+
+
+
+
+  <proc name='test_parallel_speed'>
+    <do>OBJECT(GLOBAL.logger).log_level='info'</do>
+
+    <do>TEMP.outer_start=1</do>
+    <do>TEMP.outer_end=2</do>
+
+    <do>TEMP.inner_start=3</do>
+    <do>TEMP.inner_end=4</do>
+
+    <do>TEMP.outer_batch=100</do>
+    <do>TEMP.inner_batch=100</do>
+
+    <do>TEMP.outer_count=TEMP.outer_end-TEMP.outer_start+1</do>
+    <do>TEMP.inner_count=TEMP.inner_end-TEMP.inner_start+1</do>
+    <do>TEMP.total_count=TEMP.outer_count*TEMP.inner_count</do>
+
+    <print>'outer_start='~TEMP.outer_start</print>
+    <print>'outer_end='~TEMP.outer_end</print>
+    <print>'inner_start='~TEMP.inner_start</print>
+    <print>'inner_end='~TEMP.inner_end</print>
+    <print>'outer_batch='~TEMP.outer_batch</print>
+    <print>'inner_batch='~TEMP.inner_batch</print>
+    <print>'outer_count='~TEMP.outer_count</print>
+    <print>'inner_count='~TEMP.inner_count</print>
+    <print>'total_count='~TEMP.total_count</print>
+
+    <time ms='TEMP.time'>
+      <counter_select>
+        <from>TEMP.outer_start</from>
+        <to>TEMP.outer_end</to>
+        <cursor>TEMP.csr_1</cursor>
+        <cursor_value>'ctr_1'</cursor_value>
+        <parallel batch_size='TEMP.outer_batch'>
+          <counter_select>
+            <from>TEMP.inner_start</from>
+            <to>TEMP.inner_end</to>
+            <cursor>TEMP.csr_2</cursor>
+            <cursor_value>'ctr_2'</cursor_value>
+            <parallel  batch_size='TEMP.inner_batch'>
+              <print>'INNER: ctr_1=['~TEMP.ctr_1~'],ctr_2=['~TEMP.ctr_2~']'</print>
+            </parallel>
+          </counter_select>
+        </parallel>
+      </counter_select>
+    </time>
+
+    <print>'============= DONE ==============='</print>
+
+    <print>'parallel time='~TEMP.time~' ms'</print>
+    <float_divide>
+      <input>TEMP.total_count</input>
+      <input>TEMP.time</input>
+      <output>TEMP.work_per_ms</output>
+    </float_divide>
+    <print>'parallel rate='~TEMP.work_per_ms~' work/ms'</print>
+
+    <time ms='TEMP.time'>
+      <counter_select>
+        <from>TEMP.outer_start</from>
+        <to>TEMP.outer_end</to>
+        <cursor>TEMP.csr_1</cursor>
+        <cursor_value>'ctr_1'</cursor_value>
+        <loop>
+          <counter_select>
+            <from>TEMP.inner_start</from>
+            <to>TEMP.inner_end</to>
+            <cursor>TEMP.csr_2</cursor>
+            <cursor_value>'ctr_2'</cursor_value>
+            <loop>
+              <!--<print>'INNER: ctr_1=['~OBJECT(TEMP.csr_1).ctr_1~'],ctr_2=['~OBJECT(TEMP.csr_2).ctr_2~']'</print>-->
+            </loop>
+          </counter_select>
+        </loop>
+      </counter_select>
+    </time>
+
+    <print>'serial time='~TEMP.time~' ms'</print>
+    <float_divide>
+      <input>TEMP.total_count</input>
+      <input>TEMP.time</input>
+      <output>TEMP.work_per_ms</output>
+    </float_divide>
+    <print>'serial rate='~TEMP.work_per_ms~' work/ms'</print>
+
+  </proc>
+
+
+  <proc name="test_float">
+    <do>TEMP.f1='1.2'</do>
+    <do>TEMP.f2='2.255'</do>
+    <print>'f1='~TEMP.f1</print>
+    <print>'f2='~TEMP.f2</print>
+    <float_add>
+      <input>TEMP.f1</input>
+      <input>TEMP.f2</input>
+      <output>TEMP.f3</output>
+    </float_add>
+    <print>'f3='~TEMP.f3</print>
+    <round>
+      <input>TEMP.f3</input>
+      <precision>2</precision>
+      <output>TEMP.f4</output>
+    </round>
+    <print>'f4='~TEMP.f4</print>
+  </proc>
+
+  <proc name="test_copy_cursor3">
+    <print>'before parallel OBJECT.object_id=['~OBJECT.object_id~']'</print>
+    <do>TEMP.blah='blah'</do>
+    <counter_select>
+      <from>15</from>
+      <to>20</to>
+      <increment>1</increment>
+      <cursor>TEMP.csr</cursor>
+      <cursor_value>'ctr'</cursor_value>
+      <parallel>
+        <nothing/>
+        <print>'OBJECT.object_id=['~OBJECT.object_id~'], TEMP.ctr=['~TEMP.ctr~'], TEMP.csr=['~TEMP.csr~'], OBJECT(TEMP.csr).ctr=['~OBJECT(TEMP.csr).ctr~']'</print>
+      </parallel>
+    </counter_select>
+    <print>'after parallel OBJECT.object_id=['~OBJECT.object_id~']'</print>
+  </proc>
+
+
+  <proc name="test_copy_cursor2">
+    <do>TEMP.blah='blah'</do>
+    <counter_select>
+      <from>10</from>
+      <to>20</to>
+      <increment>1</increment>
+      <cursor>TEMP.csr2</cursor>
+      <cursor_value>'ctr'</cursor_value>
+      <run>
+        <multi_thread_cursor>
+          <cursor>TEMP.csr2</cursor>
+          <cursor_temp_object>TEMP.clone_csr2</cursor_temp_object>
+          <batch_size>1</batch_size>
+          <run>
+            <print>'TEMP.blah=['~TEMP.blah~'], TEMP.clone_csr2=['~TEMP.clone_csr2~'], OBJECT(TEMP.clone_csr2).ctr=['~OBJECT(TEMP.clone_csr2).ctr~']'</print>
+          </run>
+        </multi_thread_cursor>
+      </run>
+    </counter_select>
+  </proc>
+
+  <proc name="test_copy_cursor">
+    <print>'STARTING: test_copy_cursor object_id='~OBJECT.object_id</print>
+    <counter_select>
+      <from>1</from>
+      <to>2</to>
+      <increment>1</increment>
+      <cursor>TEMP.csr1</cursor>
+      <cursor_value>'ctr'</cursor_value>
+      <run>
+        <multi_thread_cursor>
+          <cursor>TEMP.csr1</cursor>
+          <cursor_temp_object>TEMP.clone_csr1</cursor_temp_object>
+          <batch_size>1</batch_size>
+          <run>
+            <counter_select>
+              <from>10</from>
+              <to>20</to>
+              <increment>1</increment>
+              <cursor>TEMP.csr2</cursor>
+              <cursor_value>'ctr'</cursor_value>
+              <run>
+                <multi_thread_cursor>
+                  <cursor>TEMP.csr2</cursor>
+                  <cursor_temp_object>TEMP.clone_csr2</cursor_temp_object>
+                  <batch_size>1</batch_size>
+                  <run>
+                    <print>'TEMP.clone_csr1=['~TEMP.clone_csr1~'], OBJECT(TEMP.clone_csr1).ctr=['~OBJECT(TEMP.clone_csr1).ctr~'] ,TEMP.clone_csr2=['~TEMP.clone_csr2~'], OBJECT(TEMP.clone_csr2).ctr=['~OBJECT(TEMP.clone_csr2).ctr~']'</print>
+                    <!--<print>'OBJECT(TEMP.clone_csr1).ctr=['~OBJECT(TEMP.clone_csr1).ctr~'] ,OBJECT(TEMP.clone_csr2).ctr=['~OBJECT(TEMP.clone_csr2).ctr~']'</print>-->
+                  </run>
+                </multi_thread_cursor>
+              </run>
+            </counter_select>
+          </run>
+        </multi_thread_cursor>
+      </run>
+    </counter_select>
+    <print>'FINISHED: test_copy_cursor object_id='~OBJECT.object_id</print>
+  </proc>
+
+
+  <proc name="test_console_logger">
+    <spawn>
+      <object_type>'LOGGER'</object_type>
+      <object_id>GLOBAL.logger</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.logger).log_level='fine'</do>
+    <do>OBJECT(GLOBAL.logger).log_type='console'</do>
+    <do>OBJECT(GLOBAL.logger).log_message_field='the_log_message'</do>
+    <do>OBJECT(GLOBAL.logger).log_message_date_field='the_log_message_date'</do>
+    <do>OBJECT(GLOBAL.logger).log_column_names='the_log_message_date,acct_ext_id,serv_ext_id,my_log_message'</do>
+    <do>OBJECT(GLOBAL.logger).override_my_log_message='"THELOGMSG="~OBJECT.the_log_message'</do>
+    <do>OBJECT(GLOBAL.logger).override_acct_ext_id='"AEI="~OBJECT.acct_ext_id'</do>
+    <do>OBJECT(GLOBAL.logger).override_serv_ext_id='"SEI="~OBJECT.serv_ext_id'</do>
+    <log level='info'>'ThisIsTheLogMessage'</log>
+  </proc>
+
+  <proc name="test_database_logger">
+    <do>OBJECT.database_type='oracle'</do>
+    <do>OBJECT.database_name='XE'</do>
+    <do>OBJECT.database_user='netmeter'</do>
+    <do>OBJECT.database_password='netmeter'</do>
+    <spawn>
+      <object_type>'LOGGER'</object_type>
+      <object_id>GLOBAL.logger</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.logger).log_level='fine'</do>
+    <do>OBJECT(GLOBAL.logger).log_type='database'</do>
+    <!-- the_log_message_date,acct_ext_id,serv_ext_id,my_log_message -->
+    <do>OBJECT(GLOBAL.logger).log_table_name='RJP_LOG_TABLE'</do>
+    <do>OBJECT(GLOBAL.logger).database_type=OBJECT.database_type</do>
+    <do>OBJECT(GLOBAL.logger).database_name=OBJECT.database_name</do>
+    <do>OBJECT(GLOBAL.logger).database_user=OBJECT.database_user</do>
+    <do>OBJECT(GLOBAL.logger).database_password=OBJECT.database_password</do>
+    <do>OBJECT(GLOBAL.logger).log_message_field='the_log_message'</do>
+    <do>OBJECT(GLOBAL.logger).log_message_date_column='the_log_message_date'</do>
+    <do>OBJECT(GLOBAL.logger).override_my_log_message='"THELOGMSG="~OBJECT.the_log_message'</do>
+    <do>OBJECT(GLOBAL.logger).override_acct_ext_id='"AEI="~OBJECT.acct_ext_id'</do>
+    <do>OBJECT(GLOBAL.logger).override_serv_ext_id='"SEI="~OBJECT.serv_ext_id'</do>
+    <log level='info'>'ThisIsTheLogMessage,info'</log>
+    <info>'ThisIsTheLogMessage,info2'</info>
+    <fatal>'ThisIsTheLogMessage,fatal'</fatal>
+    <finest>'ThisIsTheLogMessage,finest'</finest>
+  </proc>
+
+  <proc name="test_counter_select">
+    <do>GLOBAL.debug=0</do>
+    <counter_select>
+      <from>0</from>
+      <to>10</to>
+      <increment>2</increment>
+      <cursor>TEMP.csr</cursor>
+      <cursor_value>'ctr'</cursor_value>
+      <parallel>
+        <print>'OBJECT.ctr='~OBJECT.ctr</print>
+      </parallel>
+    </counter_select>
+  </proc>
+
+  <proc name="test_batch_select">
+    <do>GLOBAL.debug=0</do>
+    <batch_select>
+      <batch_start>'batch_start'</batch_start>
+      <batch_end>'batch_end'</batch_end>
+      <first_number>1</first_number>
+      <last_number>18</last_number>
+      <num_batches>5</num_batches>
+      <parallel>
+        <sleep>OBJECT.batch_start*1000</sleep>
+        <print>'batch_start='~OBJECT.batch_start~', batch_end='~OBJECT.batch_end</print>
+      </parallel>
+    </batch_select>
+  </proc>
+
+  <proc name="test_parallel">
+    <print>'TRY PARALLEL WORK'</print>
+    <parallel>
+      <serial>
+        <sleep>4000</sleep>
+        <print>'hi 4'</print>
+      </serial>
+      <serial>
+        <sleep>2000</sleep>
+        <print>'hi 2'</print>
+      </serial>
+      <serial>
+        <sleep>5000</sleep>
+        <print>'hi 5'</print>
+      </serial>
+      <serial>
+        <sleep>3000</sleep>
+        <print>'hi 3'</print>
+      </serial>
+      <print>'hi 1'</print>
+    </parallel>
+    <print>'PARALLEL WORK COMPLETE'</print>
+  </proc>
+
+
+  <proc name="test_queue_cb">
+    <get_cluster_object_id>TEMP.cluster_oid</get_cluster_object_id>
+    <print>"GOT CLUSTER_OID="~TEMP.cluster_oid</print>
+    <print>"about to queue it"</print>
+    <queue_proc_for_object_in_cluster>
+      <name>"test_hello_world"</name>
+      <object_id>OBJECT.object_id</object_id>
+      <cluster_object_id>TEMP.cluster_oid</cluster_object_id>
+      <callback_proc_name>"test_hello_world"</callback_proc_name>
+      <callback_object_id>OBJECT.object_id</callback_object_id>
+    </queue_proc_for_object_in_cluster>
+    <print>"DONE queue it"</print>
+  </proc>
+
+  <proc name="test_select_parallel">
+    <get_date>TEMP.date</get_date>
+    <print>'date='~TEMP.date</print>
+    <do>GLOBAL.debug=0</do>
+    <do>TEMP.test_dir='F:\\_ROB\\mvm\\test_parallel'</do>
+    <do>TEMP.input_file=TEMP.test_dir~'\\input.txt'</do>
+    <do>TEMP.input_ctrl=TEMP.test_dir~'\\ctrl.txt'</do>
+    <do>TEMP.output_file=TEMP.test_dir~'\\output.txt'</do>
+    <file_select>
+      <input_file>TEMP.input_file</input_file>
+      <ctrl>TEMP.input_ctrl</ctrl>
+      <cursor>TEMP.csr</cursor>
+      <parallel>
+        <get_worker_no>TEMP.worker_no</get_worker_no>
+        <do>TEMP.file=TEMP.test_dir~"\\output."~TEMP.worker_no~".txt"</do>
+        <print_record>
+          <file>TEMP.file</file>
+          <field_delim>","</field_delim>
+          <record_delim>"\r\n"</record_delim>
+          <data>
+            <field>TEMP.field_1</field>
+          </data>
+        </print_record>
+      </parallel>
+    </file_select>
+    <print>"ALL COMPLETE............."</print>
+  </proc>
+
+
+  <!--
+  
+    drop table rjp_proc_work;
+ 
+    create table rjp_proc_work (
+    database_user varchar2(100),
+    partition_no number(10),
+    my_num_in number(10),
+    my_date_in date,
+    my_vc_in varchar2(100),
+    my_vc_inout varchar2(100)
+    );
+
+    insert into rjp_work values('netmeter',1,1,sysdate+1,'a','aa');
+    insert into rjp_work values('netmeter',2,2,sysdate+2,'b','bb');
+    insert into rjp_work values('netmeter',3,3,sysdate+3,'c','cc');
+    insert into rjp_work values('netmeter',4,4,sysdate+4,'d','dd');
+    insert into rjp_work values('netmeter',5,5,sysdate+5,'e','ee');
+ 
+     create or replace
+      procedure rjp_proc(
+      my_vc_in IN varchar2,
+      my_vc_out out varchar2,
+      my_num_in in number,
+      my_num_out out number,
+      my_date_in in DATE,
+      my_date_out out DATE,
+      my_vc_inout in out varchar2
+      )
+      authid current_user
+      as
+      my_sql varchar2(4000);
+      begin
+      my_vc_out:= my_vc_in;
+      my_num_out:= my_num_in;
+      my_date_out:= my_date_in;
+      select 'updated'|| my_vc_inout into my_vc_inout from dual;
+  end;
+  
+-->
+
+
+  <proc name='test_jonah'>
+    <!-- set db info -->
+    <do>OBJECT.database_type='oracle'</do>
+    <do>OBJECT.database_name='PERF4_NA'</do>
+    <do>OBJECT.database_user='perf4_na'</do>
+    <do>OBJECT.database_password='perf4_na'</do>
+    <do>OBJECT.database_exception_proc='log_database_exception'</do>
+    <do>TEMP.database_num_rows=''</do>
+    <do>TEMP.database_exception=''</do>
+
+    <!-- test insert -->
+    <db_insert>
+      <name>"NOT_MVM_ERROR"</name>
+      <field name="mvm_run_id" sql="true">"SEQ_MVM_RUN.nextval"</field>
+      <field name="error_date" sql="true">"SYSDATE"</field>
+      <field name="error">"some error message"</field>
+    </db_insert>
+
+    <!-- set some values we want in mvm_log -->
+    <get_date>OBJECT.run_id</get_date>
+    <do>TEMP.partition_no=0</do>
+
+    <!-- setup db logger -->
+    <spawn>
+      <object_type>'LOGGER'</object_type>
+      <object_id>GLOBAL.logger</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.logger).log_level='fine'</do>
+    <do>OBJECT(GLOBAL.logger).log_type='database'</do>
+    <!--<do>OBJECT(GLOBAL.logger).log_table_name='MVM_LOG'</do>-->
+    <do>OBJECT(GLOBAL.logger).database_type=OBJECT.database_type</do>
+    <do>OBJECT(GLOBAL.logger).database_name=OBJECT.database_name</do>
+    <do>OBJECT(GLOBAL.logger).database_user=OBJECT.database_user</do>
+    <do>OBJECT(GLOBAL.logger).database_password=OBJECT.database_password</do>
+    <!--<do>OBJECT(GLOBAL.logger).log_message_field='message'</do>-->
+    <!--<do>OBJECT(GLOBAL.logger).log_message_date_column='message_date'</do>-->
+    <!--<do>OBJECT(GLOBAL.logger).override_log_message='"my prefix to msg: "~OBJECT.the_log_message'</do>-->
+    <do>OBJECT(GLOBAL.logger).override_work_id='TEMP.partition_no'</do>
+
+
+    <counter_select>
+      <from>"0"</from>
+      <to>3</to>
+      <cursor_value>"batch_number"</cursor_value>
+      <parallel>
+        <print>"BAAAAAAAAAAAAAAAAAAAAAATCH="~TEMP.batch_number</print>
+      </parallel>
+    </counter_select>
+
+    <!--<info>'test the log'</info>-->
+
+    <!--<db_call_proc>
+      <name>"rjp_test_proc"</name>
+    </db_call_proc>-->
+
+    <!-- parallel process the worklist -->
+    <info>'begin parallel my_processing rjp_work'</info>
+    <db_select>
+      <query>'select 999 batch_number from dual union all select 1000 from dual'</query>
+      <parallel>
+        <print>'batch_number='~TEMP.batch_number</print>
+        <db_call_proc>
+          <name>'rjp_test_proc'</name>
+        </db_call_proc>
+      </parallel>
+    </db_select>
+    <info>'end parallel my_processing rjp_work'</info>
+
+  </proc>
+
+
+
+
+  <proc name="log_database_exception">
+    <fatal>"Exiting due to database exception: ["~TEMP.database_exception~"]"</fatal>
+  </proc>
+
+  <proc name="test_inherit_object">
+    <do>OBJECT.on_parent=1</do>
+    <spawn>
+      <object_type>'BLAH'</object_type>
+      <object_id>TEMP.child</object_id>
+    </spawn>
+    <print>'implicit OBJECT(TEMP.child).object_id='~OBJECT(TEMP.child).object_id</print>
+    <print>'implicit OBJECT(TEMP.child).object_type='~OBJECT(TEMP.child).object_type</print>
+    <do>OBJECT(TEMP.child).on_child=1</do>
+    <do>OBJECT(TEMP.child).on_parent=0</do>
+    <print>'OBJECT(TEMP.child).on_child='~OBJECT(TEMP.child).on_child</print>
+    <print>'OBJECT(TEMP.child).on_parent='~OBJECT(TEMP.child).on_parent</print>
+    <inherit_object>
+      <source>OBJECT.object_id</source>
+      <target>TEMP.child</target>
+    </inherit_object>
+    <print>'OBJECT(TEMP.child).on_child='~OBJECT(TEMP.child).on_child</print>
+    <print>'OBJECT(TEMP.child).on_parent='~OBJECT(TEMP.child).on_parent</print>
+    <spawn>
+      <object_type>'BLAH2'</object_type>
+      <object_id>TEMP.child</object_id>
+      <inherit_parent>1</inherit_parent>
+    </spawn>
+    <print>'implicit OBJECT(TEMP.child).object_id='~OBJECT(TEMP.child).object_id</print>
+    <print>'implicit OBJECT(TEMP.child).object_type='~OBJECT(TEMP.child).object_type</print>
+    <print>'implicit OBJECT(TEMP.child).on_child='~OBJECT(TEMP.child).on_child</print>
+    <print>'implicit OBJECT(TEMP.child).on_parent='~OBJECT(TEMP.child).on_parent</print>
+  </proc>
+
+  <proc name="log_sql_exception">
+    <print>'first_database_exception======'~OBJECT.first_database_exception</print>
+  </proc>
+  <proc name="test_db_call_proc">
+    <do>OBJECT.database_type='oracle'</do>
+    <do>OBJECT.database_name='XE'</do>
+    <do>OBJECT.database_user='netmeter'</do>
+    <do>OBJECT.database_password='netmeter'</do>
+
+    <do>TEMP.exception_proc='log_sql_exception'</do>
+
+    <!-- default input args are nvl(TEMP.param,OBJECT.param)-->
+    <do>TEMP.my_vc_in='abc'</do>
+    <do>OBJECT.my_num_in=10</do>
+    <do>TEMP.my_date_in=20090101000000</do>
+    <do>TEMP.my_vc_inout='GoingIn'</do>
+
+
+
+
+    <db_call_proc>
+      <name>'rjp_proc'</name>
+      <alias>'rjpalias'</alias>
+      <!--<param name="my_vc_in"></param>-->
+      <!--<param name="my_vc_out"></param>-->
+      <!--<param name="my_num_in"></param>-->
+      <!--<param name="my_num_out"></param>-->
+      <!--<param name="my_date_in"></param>-->
+      <!--<param name="my_date_out"></param>-->
+      <!--<param name="my_vc_inout"></param>-->
+      <!--<num_rows>TEMP.num_rows</num_rows> NOTUSED -->
+      <!--<exception>OBJECT.sql_exception</exception> NOTUSED -->
+      <!--<exception_proc>TEMP.exception_proc</exception_proc> NOTUSED -->
+    </db_call_proc>
+
+    <!-- default output args go to TEMP.procname_paramname and TEMP.paramname-->
+    <print>'TEMP.my_vc_out='~TEMP.my_vc_out</print>
+    <print>'TEMP.rjpalias_my_vc_out='~TEMP.rjpalias_my_vc_out</print>
+
+    <print>'TEMP.my_num_out='~TEMP.my_num_out</print>
+    <print>'TEMP.rjpalias_my_num_out='~TEMP.rjpalias_my_num_out</print>
+
+    <print>'TEMP.my_date_out='~TEMP.my_date_out</print>
+    <print>'TEMP.rjpalias_my_date_out='~TEMP.rjpalias_my_date_out</print>
+
+    <print>'TEMP.my_vc_inout='~TEMP.my_vc_inout</print>
+    <print>'TEMP.rjpalias_my_vc_inout='~TEMP.rjpalias_my_vc_inout</print>
+
+    <!-- exceptions get written to these places -->
+    <print>'OBJECT.database_exception='~OBJECT.database_exception</print>
+    <print>'OBJECT.rjpalias_exception='~OBJECT.rjpalias_exception</print>
+    <print>'OBJECT.first_database_exception='~OBJECT.first_database_exception</print>
+    <print>'OBJECT.first_rjpalias_exception='~OBJECT.first_rjpalias_exception</print>
+
+    <!-- num_rows gets written to these places -->
+    <print>'OBJECT.database_num_rows='~OBJECT.database_num_rows</print>
+    <print>'OBJECT.rjpalias_num_rows='~OBJECT.rjpalias_num_rows</print>
+
+    <!-- now what about the exception proc?? -->
+  </proc>
+
+  <proc name="test_add_parent_sort_field">
+
+
+    <do>TEMP.a_input_file="C:\\_ROB\\mvm\\test_add_parent_sort_field\\a_input.dat.txt"</do>
+    <do>TEMP.a_input_ctrl="C:\\_ROB\\mvm\\test_add_parent_sort_field\\a_input.ctl.txt"</do>
+    <do>TEMP.a_output_file="C:\\_ROB\\mvm\\test_add_parent_sort_field\\a_output.dat.txt"</do>
+    <do>TEMP.a_output_ctrl="C:\\_ROB\\mvm\\test_add_parent_sort_field\\a_output.ctl.txt"</do>
+    <do>TEMP.a_orphan_file="C:\\_ROB\\mvm\\test_add_parent_sort_field\\a_orphan.dat.txt"</do>
+    <do>TEMP.a_orphan_ctrl="C:\\_ROB\\mvm\\test_add_parent_sort_field\\a_orphan.ctl.txt"</do>
+    <print>'add sort field to:'~TEMP.a_input_file</print>
+    <add_parent_sort_field>
+      <input_file>TEMP.a_input_file</input_file>
+      <input_ctrl>TEMP.a_input_ctrl</input_ctrl>
+      <output_file>TEMP.a_output_file</output_file>
+      <output_ctrl>TEMP.a_output_ctrl</output_ctrl>
+      <orphan_file>TEMP.a_orphan_file</orphan_file>
+      <orphan_ctrl>TEMP.a_orphan_ctrl</orphan_ctrl>
+      <sort_field>'sortkey'</sort_field>
+      <child_index>'SORT_A'</child_index>
+      <child_key_field>'first'</child_key_field>
+      <num_good>TEMP.numnotorphan</num_good>
+      <num_orphans>TEMP.numorphan</num_orphans>
+    </add_parent_sort_field>
+  </proc>
+
+
+  <proc name="test_file_convert">
+    <do>TEMP.input_file="C:\\_ROB\\mvm\\test_file_convert\\input.dat.txt"</do>
+    <do>TEMP.output_file="C:\\_ROB\\mvm\\test_file_convert\\output.dat.txt"</do>
+    <do>TEMP.bad_file="C:\\_ROB\\mvm\\test_file_convert\\bad.dat.txt"</do>
+    <do>TEMP.input_ctrl="C:\\_ROB\\mvm\\test_file_convert\\input.ctl.txt"</do>
+    <do>TEMP.output_ctrl="C:\\_ROB\\mvm\\test_file_convert\\output.ctl.txt"</do>
+    <print>'converting file :'~TEMP.input_file</print>
+    <file_convert>
+      <input_file>TEMP.input_file</input_file>
+      <input_ctrl>TEMP.input_ctrl</input_ctrl>
+      <output_file>TEMP.output_file</output_file>
+      <output_ctrl>TEMP.output_ctrl</output_ctrl>
+      <new_field_delim>']\t['</new_field_delim>
+      <new_record_delim>']END\r\n'</new_record_delim>
+      <bad_file>TEMP.bad_file</bad_file>
+      <num_good>TEMP.num_good</num_good>
+      <num_bad>TEMP.num_bad</num_bad>
+    </file_convert>
+    <print>'num_good:'~TEMP.num_good</print>
+    <print>'num_bad:'~TEMP.num_bad</print>
+  </proc>
+
+  <proc name="test_file_grep">
+    <file_grep>
+      <input_file>"C:\\_ROB\\mvm\\test_file_sort\\oa.dat.txt"</input_file>
+      <output_file>"C:\\_ROB\\mvm\\test_file_sort\\oa.filtered.dat.txt"</output_file>
+      <ctrl_file>"C:\\_ROB\\mvm\\test_file_sort\\oa.ctl.txt"</ctrl_file>
+      <field name="accessory_id">'^83$'</field>
+    </file_grep>
+  </proc>
+
+  <proc name="test_get_file">
+    <get_file>
+      <dir>"C:\\_ROB\\mvm\\test_get_file"</dir>
+      <match>'input1.*'</match>
+      <file>TEMP.file</file>
+    </get_file>
+    <print>"GOT FILE ["~TEMP.file~"]"</print>
+  </proc>
+
+  <proc name="test_file_sort">
+    <file_sort>
+      <input_file>"C:\\_ROB\\mvm\\test_file_sort\\oa.dat.txt"</input_file>
+      <sorted_file>"C:\\_ROB\\mvm\\test_file_sort\\oa.sort.dat.txt"</sorted_file>
+      <ctrl>"C:\\_ROB\\mvm\\test_file_sort\\oa.ctl.txt"</ctrl>
+      <field>"owner_number"</field>
+    </file_sort>
+  </proc>
+
+  <proc name="test_define_memory_index">
+    <define_memory_index>
+      <index>'TEST_IDX'</index>
+      <key_field>'k1'</key_field>
+      <key_field>'k2'</key_field>
+      <field>'v1'</field>
+      <field>'v2'</field>
+    </define_memory_index>
+    <index_insert>
+      <index>'TEST_IDX'</index>
+      <field name="k1">"K1"</field>
+      <field name="k2">"K2"</field>
+      <field name="v1">"V1-a"</field>
+      <field name="v2">"V2-a"</field>
+    </index_insert>
+    <index_insert>
+      <index>'TEST_IDX'</index>
+      <field name="k1">"K1"</field>
+      <field name="k2">"K2"</field>
+      <field name="v1">"V1-b"</field>
+      <field name="v2">"V2-b"</field>
+    </index_insert>
+    <index_select>
+      <index>'TEST_IDX'</index>
+      <field name="k1">"K1"</field>
+      <field name="k2">"K2"</field>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <print>'k1='~OBJECT(TEMP.csr).k1~',k2='~OBJECT(TEMP.csr).k2~',v1='~OBJECT(TEMP.csr).v1~',v2='OBJECT(TEMP.csr).v2</print>
+      </loop>
+      <else>
+        <print>'index select returned no rows'</print>
+      </else>
+    </index_select>
+    <print>'clearing index'</print>
+    <index_clear>
+      <index>'TEST_IDX'</index>
+    </index_clear>
+    <index_select>
+      <index>'TEST_IDX'</index>
+      <field name="k1">"K1"</field>
+      <field name="k2">"K2"</field>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <print>'k1='~OBJECT(TEMP.csr).k1~',k2='~OBJECT(TEMP.csr).k2~',v1='~OBJECT(TEMP.csr).v1~',v2='OBJECT(TEMP.csr).v2</print>
+      </loop>
+      <else>
+        <print>'index select returned no rows'</print>
+      </else>
+    </index_select>
+  </proc>
+
+  <proc name="test_my_temp">
+    <print>'a='~(TEMP.a=1)</print>
+    <if>
+      <condition>1</condition>
+      <then>
+        <print>'a='~(TEMP.a=2)</print>
+        <print>'b='~(TEMP.b=1)</print>
+      </then>
+    </if>
+    <print>'a='~TEMP.a</print>
+    <print>'b='~TEMP.b</print>
+  </proc>
+
+  <proc name="test_sync">
+    <do>TEMP.x="x-ey"</do>
+    <synchronized>
+      <print>'x='~TEMP.x</print>
+    </synchronized>
+  </proc>
+
+  <proc name="test_print_table">
+    <do>OBJECT.a='aa'</do>
+    <do>OBJECT.c='cya'</do>
+    <print_table>
+      <name>'JONAH_JUNK'</name>
+      <field name="c">'overriding_big_c'</field>
+    </print_table>
+  </proc>
+
+  <proc name="test_global_fields">
+    <print>GLOBAL.something='yes it works'</print>
+  </proc>
+
+  <proc name="test_db_query_to_file">
+    <spawn>
+      <object_type>'LOGIN'</object_type>
+      <object_id>GLOBAL.oracle_login</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.source_login).database_type='oracle'</do>
+    <do>OBJECT(GLOBAL.source_login).database_name='XE'</do>
+    <do>OBJECT(GLOBAL.source_login).database_user='staging'</do>
+    <do>OBJECT(GLOBAL.source_login).database_password='staging'</do>
+    <db_query_to_file>
+      <login_object>GLOBAL.source_login</login_object>
+      <query>'select '~"'abc'"~' first, 999 second  from dual'</query>
+      <file>'C:\\_ROB\\mvm\\test_db_query_to_file\\output.txt'</file>
+      <ctrl>'C:\\_ROB\\mvm\\test_db_query_to_file\\output_ctrl.txt'</ctrl>
+    </db_query_to_file>
+  </proc>
+
+  <proc name="test_ora_db_execute">
+    <spawn>
+      <object_type>'LOGIN'</object_type>
+      <object_id>GLOBAL.oracle_login</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.oracle_login).database_type='oracle'</do>
+    <do>OBJECT(GLOBAL.oracle_login).database_name='VPCORAEE01_new1'</do>
+    <do>OBJECT(GLOBAL.oracle_login).database_user='NETMETER'</do>
+    <do>OBJECT(GLOBAL.oracle_login).database_password='NETMETER'</do>
+
+    <db_execute>
+      <login_object>GLOBAL.oracle_login</login_object>
+      <statement>'truncate table rjp'</statement>
+      <alias>'rjpalias'</alias>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute>
+    <do>'got num_rows='~TEMP.num_rows</do>
+
+    <db_execute>
+      <login_object>GLOBAL.oracle_login</login_object>
+      <statement>"insert into rjp values (1,'2','3',4.4,sysdate)"</statement>
+      <alias>'rjpalias'</alias>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute>
+    <do>'got num_rows='~TEMP.num_rows</do>
+
+    <db_execute>
+      <login_object>GLOBAL.oracle_login</login_object>
+      <statement>"insert into rjp values (2,'2','3',4.4,sysdate)"</statement>
+      <alias>'rjpalias'</alias>
+      <num_rows>TEMP.num_rows</num_rows>
+    </db_execute>
+
+    <do>'got num_rows='~TEMP.num_rows</do>
+
+
+  </proc>
+
+
+  <proc name="test_ora_db_insert">
+    <spawn>
+      <object_type>'LOGIN'</object_type>
+      <object_id>GLOBAL.oracle_login</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.oracle_login).database_type='oracle'</do>
+    <do>OBJECT(GLOBAL.oracle_login).database_name='VPCORAEE01_new1'</do>
+    <do>OBJECT(GLOBAL.oracle_login).database_user='NETMETER'</do>
+    <do>OBJECT(GLOBAL.oracle_login).database_password='NETMETER'</do>
+    <do>OBJECT.integer=99</do>
+    <do>OBJECT.my_date='20050101000000'</do>
+    <do>TEMP.integer=88</do>
+    <do>TEMP.varchar='tempvchar'</do>
+    <do>OBJECT.varchar2='objvachr2'</do>
+    <db_insert>
+      <login_object>GLOBAL.oracle_login</login_object>
+      <name>'rjp'</name>
+      <field name="my_date">'20090101000000'</field>
+      <regex pattern="^(my_)(.*)$">(TEMP.$2 ne '' ? TEMP.$2 : OBJECT.$2)</regex>
+    </db_insert>
+  </proc>
+
+  <proc name="test_ora_db_select">
+
+    <spawn>
+      <object_type>'LOGIN'</object_type>
+      <object_id>GLOBAL.oracle_login</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.oracle_login).database_type='oracle'</do>
+    <do>OBJECT(GLOBAL.oracle_login).database_name='XE'</do>
+    <do>OBJECT(GLOBAL.oracle_login).database_user='staging'</do>
+    <do>OBJECT(GLOBAL.oracle_login).database_password='staging'</do>
+    <db_select>
+      <login_object>GLOBAL.oracle_login</login_object>
+      <query>'select '~"'abc'"~' first, 999 second, sysdate third  from dual'</query>
+      <cursor>TEMP.csr</cursor>
+      <run>
+        <print>'RUN: eof='~OBJECT(TEMP.csr).eof</print>
+      </run>
+      <loop>
+        <print>'first='~OBJECT(TEMP.csr).first</print>
+        <print>'second='~OBJECT(TEMP.csr).second</print>
+        <print>'third='~OBJECT(TEMP.csr).third</print>
+      </loop>
+      <else>
+        <print>'query returned no rows!'</print>
+      </else>
+    </db_select>
+
+  </proc>
+
+  <proc name="test_sql_db_select">
+    <spawn>
+      <object_type>'LOGIN'</object_type>
+      <object_id>GLOBAL.source_login</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.source_login).type='sql'</do>
+    <do>OBJECT(GLOBAL.source_login).server='192.168.4.121'</do>
+    <do>OBJECT(GLOBAL.source_login).db='ACEMTMetering'</do>
+    <do>OBJECT(GLOBAL.source_login).user='su'</do>
+    <do>OBJECT(GLOBAL.source_login).pw='su123'</do>
+    <db_select>
+      <login_object>GLOBAL.source_login</login_object>
+      <query>'select '~"'abc'"~' first, 999 second, getdate() today'</query>
+      <cursor>TEMP.csr</cursor>
+      <loop>
+        <print>'first='~OBJECT(TEMP.csr).first</print>
+        <print>'second='~OBJECT(TEMP.csr).second</print>
+        <print>'today='~OBJECT(TEMP.csr).today</print>
+      </loop>
+      <else>
+        <print>'query returned no rows!'</print>
+      </else>
+    </db_select>
+  </proc>
+
+  <proc name="test_create_memory_index_from_cursor">
+
+    <file_select>
+
+      <input_dir>'C:\\_ROB\\mvm\\test_create_memory_index_from_cursor'</input_dir>
+      <input_match>'test_create_memory_index_from_cursor.txt'</input_match>
+      <ctrl>'C:\\_ROB\\mvm\\test_create_memory_index_from_cursor\\ctrl.txt'</ctrl>
+      <cursor>OBJECT.csr</cursor>
+      <run>
+        <create_memory_index_from_cursor>
+          <index>'MY_INDEX'</index>
+          <cursor>OBJECT.csr</cursor>
+          <key_field>'field_1'</key_field>
+        </create_memory_index_from_cursor>
+      </run>
+    </file_select>
+
+    <index_select>
+      <index>'MY_INDEX'</index>
+      <field name='field_1'>'1'</field>
+      <cursor>TEMP.new_csr</cursor>
+      <loop>
+        <print>'LOOPING!'</print>
+        <print>'eof='~OBJECT(TEMP.MY_CURSOR).eof</print>
+        <print>'field_1='~OBJECT(TEMP.new_csr).field_1</print>
+        <print>'field_2='~OBJECT(TEMP.new_csr).field_2</print>
+      </loop>
+      <else>
+        <print>'NO MATCH!'</print>
+      </else>
+    </index_select>
+
+  </proc>
+
+  <proc name="test_out_dynamically_named_counters">
+    <!--<startup>-->
+    <define_memory_index>
+      <index>'COUNTERS'</index>
+      <key_field>'name'</key_field>
+      <field>'obj'</field>
+    </define_memory_index>
+    <!--</startup>-->
+    <index_select>
+      <index>'COUNTERS'</index>
+      <field name='name'>OBJECT.domain_id</field>
+      <cursor>TEMP.csr</cursor>
+      <then>
+        <print>'use existing ctr for domain_id:'~OBJECT.domain_id</print>
+        <do>TEMP.ctr_obj=OBJECT(TEMP.csr).obj</do>
+        <do>OBJECT(TEMP.ctr_obj).ctr=OBJECT(TEMP.ctr_obj).ctr+1</do>
+        <print>'incremented ctr to '~OBJECT(TEMP.ctr_obj).ctr~' for domain_id:'~OBJECT.domain_id</print>
+      </then>
+      <else>
+        <print>'create new ctr for domain_id:'~OBJECT.domain_id</print>
+        <spawn>
+          <object_type>'CTR_OBJ'</object_type>
+          <object_id>TEMP.ctr_obj</object_id>
+        </spawn>
+        <do>OBJECT(TEMP.ctr_obj).ctr=1</do>
+        <index_insert>
+          <index>'COUNTERS'</index>
+          <field name="name">OBJECT.domain_id</field>
+          <field name="obj">TEMP.ctr_obj</field>
+        </index_insert>
+      </else>
+    </index_select>
+
+  </proc>
+
+
+  <proc name="test_create_index_on_sorted_file">
+
+    <create_index_on_sorted_file>
+      <index>'MY_INDEX'</index>
+      <file>'C:\\_ROB\\mvm\\test_create_index_on_sorted_file\\input.txt'</file>
+      <ctrl>'C:\\_ROB\\mvm\\test_create_index_on_sorted_file\\input-ctrl.txt'</ctrl>
+      <key_field>'field_2'</key_field>
+    </create_index_on_sorted_file>
+
+    <index_select>
+      <index>'MY_INDEX'</index>
+      <field name='field_2'>'1'</field>
+      <cursor>TEMP.MY_CURSOR</cursor>
+      <then>
+        <print>'IN THEN!'</print>
+      </then>
+      <loop>
+        <print>'*LOOPING!'</print>
+        <print>'eof='~OBJECT(TEMP.MY_CURSOR).eof</print>
+        <print>'field_1='~OBJECT(TEMP.MY_CURSOR).field_1</print>
+        <print>'field_2='~OBJECT(TEMP.MY_CURSOR).field_2</print>
+      </loop>
+      <else>
+        <print>'IN ELSE!'</print>
+      </else>
+    </index_select>
+
+  </proc>
+
+  <proc name="test_record">
+    <get_worker_no>TEMP.worker_no</get_worker_no>
+    <do>TEMP.file="C:\\_ROB\\mvm\\output."~TEMP.worker_no~".txt"</do>
+    <print_record>
+      <file>TEMP.file</file>
+      <field_delim>","</field_delim>
+      <record_delim>"notused"</record_delim>
+      <data>
+        <field>"hi "~999</field>
+        <field>2+2</field>
+      </data>
+    </print_record>
+    <print_record>
+      <file>TEMP.file</file>
+      <field_delim>","</field_delim>
+      <record_delim>"notused"</record_delim>
+      <data>
+        <field>"ho "~999</field>
+        <field>"blah"</field>
+      </data>
+    </print_record>
+  </proc>
+
+  <proc name="test_create_cluster">
+    <create_cluster>TEMP.cluster_oid</create_cluster>
+    <print>'TEMP.cluster_oid='~TEMP.cluster_oid</print>
+    <do>TEMP.ot='ACCOUNT'</do>
+    <do>TEMP.oid=TEMP.ot~'|'~99</do>
+    <spawn>
+      <object_type>TEMP.ot</object_type>
+      <object_id>TEMP.oid</object_id>
+      <cluster_object_id>TEMP.cluster_oid</cluster_object_id>
+    </spawn>
+    <create_cluster>TEMP.cluster_oid2</create_cluster>
+    <print>'TEMP.cluster_oid2='~TEMP.cluster_oid2</print>
+  </proc>
+
+  <proc name="test_push">
+    <push_before name="test_hello_world" order="5">
+      <print>'push_before 5-1-a'</print>
+      <print>'push_before 5-1-b'</print>
+    </push_before>
+    <push_before name="test_hello_world" order="5">
+      <print>'push_before 5-2-a'</print>
+    </push_before>
+    <push_before name="test_hello_world" order="21">
+      <print>'push_before 21-1-a'</print>
+    </push_before>
+    <push_after name="test_hello_world" order="5">
+      <print>'push_after 5-1-a'</print>
+      <print>'push_after 5-1-b'</print>
+    </push_after>
+    <push_after name="test_hello_world" order="5">
+      <print>'push_after 5-2-a'</print>
+    </push_after>
+    <push_after name="test_hello_world" order="6">
+      <print>'push_after 6-1-a'</print>
+    </push_after>
+    <push_after name="test_hello_world" order="5.5">
+      <print>'push_after 5.5-1-a'</print>
+    </push_after>
+    <push_after name="test_hello_world" order="21">
+      <print>'push_after 21-1-a'</print>
+    </push_after>
+    <push_after name="test_push" order="7">
+      <print>'push_after test_push'</print>
+    </push_after>
+    <call_proc_for_current_object>
+      <name>test_hello_world</name>
+    </call_proc_for_current_object>
+  </proc>
+
+  <proc name="test_spawn">
+    <spawn>
+      <object_type>'ACCOUNT'</object_type>
+      <object_id>TEMP.ACCOUNT1</object_id>
+    </spawn>
+    <spawn>
+      <object_type>'ACCOUNT'</object_type>
+      <object_id>TEMP.ACCOUNT2</object_id>
+    </spawn>
+    <call_proc_for_current_cluster>
+      <name>'test_hello_world'</name>
+    </call_proc_for_current_cluster>
+  </proc>
+
+  <proc name="test_hello_world">
+    <print>"object_type="~OBJECT.object_type~", object_id="~OBJECT.object_id~" say's hello world!"</print>
+  </proc>
+
+  <proc name="cp_proc">
+    <input name="x">xxx</input>
+    <print>OBJECT.object_id</print>
+    <output name="y">yyy</output>
+  </proc>
+
+  <proc name='test_temp'>
+    <print>TEMP.yy=22</print>
+    <print>TEMP.zz=10</print>
+    <print>TEMP.aa=TEMP.yy-TEMP.zz</print>
+    <if>
+      <condition>true</condition>
+      <then>
+        <do>TEMP.nested="i am nested"</do>
+        <print>"TEMP.nested="~TEMP.nested</print>
+        <do>TEMP.yy=10</do>
+      </then>
+    </if>
+    <print>"After pop: TEMP.nested="~TEMP.nested</print>
+  </proc>
+
+  <proc name='test_ops'>
+    <print>OBJECT.nn = ''</print>
+    <print>OBJECT.nn=OBJECT.nn ne '' ? OBJECT.nn : 'hellyeah'</print>
+    <print>'OBJECT.nn=['~OBJECT.nn~']'</print>
+    <print>(6+4)/2*3-1</print>
+    <print>6+4/2*3-1</print>
+    <print>"a" lt "b"</print>
+    <print>"b" lt "a"</print>
+    <print>"a" lte "a"</print>
+    <print>("a" eq "a") eq true</print>
+    <print>("a" eq "a") eq false</print>
+    <print>"" eq null</print>
+    <print>"0" eq null</print>
+    <print>OBJECT.test = 1 LTE "2" ? "yes" : "no"</print>
+    <print>'OBJECT.test=['~OBJECT.test~']'</print>
+    <print>OBJECT.xx=2</print>
+    <print>OBJECT.xx+=10</print>
+    <print>OBJECT.xx-=1</print>
+    <print>OBJECT.xx~='abc'</print>
+  </proc>
+
+  <proc name='test_if'>
+
+    <if>
+      <condition>false</condition>
+      <else>
+        <print>"Yay, you can use else without then"</print>
+      </else>
+    </if>
+
+    <if>
+      <condition>false</condition>
+      <then>
+        <print>"Error, you should not see this"</print>
+      </then>
+      <condition>true</condition>
+      <then>
+        <print>"Yay, repeating condition/then works"</print>
+      </then>
+      <else>
+        <print>"Error, you should not see this from else"</print>
+      </else>
+    </if>
+
+    <print>OBJECT.ctr=1</print>
+    <if>
+      <condition>OBJECT.ctr==1</condition>
+      <then>
+        <print>"Yay, if/then worked"</print>
+        <if>
+          <condition>OBJECT.ctr==0</condition>
+          <then>
+            <print>"Error, ctr should not be zero"</print>
+          </then>
+          <else>
+            <print>"Yay, if/else worked"</print>
+          </else>
+        </if>
+      </then>
+      <else>
+        <print>"Error, ctr should is 1"</print>
+      </else>
+    </if>
+  </proc>
+
+  <proc name='test_while'>
+    <print>OBJECT.ctr=3</print>
+    <while>
+      <condition>OBJECT.ctr GT 0</condition>
+      <loop>
+        <print>OBJECT.ctr-=1</print>
+      </loop>
+    </while>
+    <print>"Blast-off!"</print>
+  </proc>
+
+  <proc name='test_file_select'>
+    <print>'about to create file cursor'</print>
+    <file_select>
+      <input_file>'C:\\_ROB\\mvm\\test_file_select\\input.dat.txt'</input_file>
+      <ctrl>'C:\\_ROB\\mvm\\test_file_select\\input.ctl.txt'</ctrl>
+      <cursor>OBJECT.csr</cursor>
+      <run>
+        <print>'RUN: eof='~ OBJECT(OBJECT.csr).eof</print>
+      </run>
+      <loop>
+        <print>'LOOP: first='~OBJECT(OBJECT.csr).first~', second='~OBJECT(OBJECT.csr).second</print>
+      </loop>
+      <else>
+        <print>'ELSE: cursor return no rows...'</print>
+      </else>
+    </file_select>
+  </proc>
+
+
+
+  <proc name="test_generate_metranet_procs">
+
+    <print>"hi1"</print>
+    <spawn>
+      <object_type>'LOGIN'</object_type>
+      <object_id>GLOBAL.target_login</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.target_login).database_type='sql'</do>
+    <do>OBJECT(GLOBAL.target_login).database_name='Netmeter'</do>
+    <do>OBJECT(GLOBAL.target_login).database_server='Vmllckdev05'</do>
+    <do>OBJECT(GLOBAL.target_login).database_user='nmdbo'</do>
+    <do>OBJECT(GLOBAL.target_login).database_password='MetraTech1'</do>
+    <print>"hi2"</print>
+    <do>GLOBAL.rmp_dir='\\Vmllckdev05\RMP'</do>
+    <do>GLOBAL.generate_dir=GLOBAL.test_dir~'\test_generate_metranet'</do>
+
+    <generate_metranet_procs>
+      <rmp_dir>GLOBAL.rmp_dir</rmp_dir>
+      <generate_dir>GLOBAL.generate_dir</generate_dir>
+      <login_object>GLOBAL.target_login</login_object>
+      <account_views>
+        <av_override view_name='contact' enum_name='contacttype'>
+          <case enum_value='Bill-to' prefix=''/>
+          <case enum_value='Ship-to' prefix='ship_to_'/>
+        </av_override>
+        <av_printing>
+          <proc_name>'av_printing'</proc_name>
+        </av_printing>
+        <av_enum_mapping>
+          <proc_name>'av_enum_mapping'</proc_name>
+        </av_enum_mapping>
+        <av_defaults>
+          <proc_name>'av_defaults'</proc_name>
+        </av_defaults>
+      </account_views>
+    </generate_metranet_procs>
+
+
+
+  </proc>
+
+  <proc name="test_generate_metranet_oracle">
+
+    <spawn>
+      <object_type>'LOGIN'</object_type>
+      <object_id>GLOBAL.target_login</object_id>
+    </spawn>
+    <do>OBJECT(GLOBAL.target_login).database_type='oracle'</do>
+    <do>OBJECT(GLOBAL.target_login).database_name='DEV-RAC1 '</do>
+    <do>OBJECT(GLOBAL.target_login).database_user='perf4_na'</do>
+    <do>OBJECT(GLOBAL.target_login).database_password='perf4_na'</do>
+    <do>GLOBAL.rmp_dir='\\perf4\Share\RMP'</do>
+    <do>GLOBAL.generate_dir=GLOBAL.test_dir~'\test_generate_metranet'</do>
+
+    <generate_metranet_procs>
+      <rmp_dir>GLOBAL.rmp_dir</rmp_dir>
+      <generate_dir>GLOBAL.generate_dir</generate_dir>
+      <login_object>GLOBAL.target_login</login_object>
+    </generate_metranet_procs>
+
+    <print>'Loading xml configuration...'</print>
+    <load_procs_from_files>
+      <input_dir>GLOBAL.generate_dir</input_dir>
+      <input_match>'*.xml'</input_match>
+    </load_procs_from_files>
+
+    <print>'DONE Loading xml configuration...'</print>
+  </proc>
+
+</procs>

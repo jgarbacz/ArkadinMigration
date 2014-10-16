@@ -1,0 +1,6 @@
+try{
+	print("in try3");
+}
+catch(ee){
+	print("in ee");
+}

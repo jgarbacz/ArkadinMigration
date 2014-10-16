@@ -1,0 +1,33 @@
+(
+  if
+    (
+      condition
+        (
+          a
+        )
+      then
+        {
+          if
+            (
+              condition
+                (
+                  b
+                )
+              then
+                {
+                  print
+                    (
+                      "b"
+                    )
+                }
+              else
+                {
+                  print
+                    (
+                      "b else"
+                    )
+                }
+            )
+        }
+    )
+)

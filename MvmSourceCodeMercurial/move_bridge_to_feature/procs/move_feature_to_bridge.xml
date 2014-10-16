@@ -1,0 +1,78 @@
+﻿<proc name="move_feature_to_bridge">
+  <!-- 
+  so run like:
+  C:\Users\rparks\Documents\_SOURCE\MVM\_TESTS\rapid_rate>..\..\bin\Debug\mvm.exe -file=*.xml -proc=jonah
+  or 
+  for IDE setup GLOBAL.test_name='rapid_rate' and GLOBAL.test_proc='move_feature_to_bridge' in main.xml
+  -->
+
+  <!-- point to the entities dir you want and initialize -->
+  <do>GLOBAL.main_dir=GLOBAL.main_dir ne ''?GLOBAL.main_dir:'.'</do>
+  <do>GLOBAL.entities_dir=GLOBAL.main_dir~'/IC_entities'</do>
+  <call_proc>'initialize'</call_proc>
+
+
+  <info>'SPAWN BME TO GET:'</info>
+  <spawn>
+    <object_type>'IC_FEATURERATES'</object_type>
+    <object_id>TEMP.bme</object_id>
+  </spawn>
+
+
+
+  <db_select>
+    <login_object>GLOBAL.target_login</login_object>
+    <query type="oracle">"select distinct id_acc from my_account_list"</query>
+    <query type="sql">"select distinct id_acc from my_account_list"</query>
+    <cursor>TEMP.account_cursor</cursor>
+    <loop>
+      <do>OBJECT(TEMP.bme).id_acc=OBJECT(TEMP.account_cursor).id_acc</do>
+      <do>OBJECT(TEMP.bme).start_date=''</do>
+      <do>OBJECT(TEMP.bme).end_date=''</do>
+      <do>OBJECT(TEMP.bme).operation='get'</do>
+      <info>'Moving rates for account:['~OBJECT(TEMP.account_cursor).id_acc~']'</info>
+      <call_proc_for_object>
+        <name>'ic_featurerates_call_entity'</name>
+        <object_id>TEMP.bme</object_id>
+      </call_proc_for_object>
+      <call_proc_for_current_object>
+        <name>'date_aware_merge'</name>
+        <param name="static_oid">TEMP.bme</param>
+      </call_proc_for_current_object>
+      <index_select>
+        <index>'DYNAMIC_ENTITIES'</index>
+        <field name="static_oid">TEMP.bme</field>
+        <cursor>TEMP.dynamic_csr</cursor>
+        <loop>
+          
+          <do>TEMP.curr_oid=OBJECT(TEMP.dynamic_csr).dynamic_oid</do>
+          <do>OBJECT(TEMP.curr_oid).operation='put'</do>
+          <info>'Copying rates for obj['~TEMP.curr_oid~'] account:['~OBJECT(TEMP.account_cursor).id_acc~'] for ['~OBJECT(TEMP.curr_oid).start_date~']['~OBJECT(TEMP.curr_oid).end_date~']'</info>
+          <call_proc_for_object>
+            <name>'ic_bridgerates_call_entity'</name>
+            <object_id>TEMP.curr_oid</object_id>
+          </call_proc_for_object>
+          <call_proc_for_object>
+            <name>'persist_rate_schedules_to_db'</name>
+            <object_id>TEMP.curr_oid</object_id>
+          </call_proc_for_object>
+          <print>'Did I write to the db? If this is empty I did ['~OBJECT(TEMP.curr_oid).entity_error~']'</print>
+          <index_remove>
+            <index>'DYNAMIC_ENTITIES'</index>
+            <field name="static_oid">TEMP.curr_oid</field>
+          </index_remove>
+        </loop>
+      </index_select>
+      <index_remove>
+        <index>'DYNAMIC_ENTITIES'</index>
+        <field name="static_oid">TEMP.bme</field>
+      </index_remove>
+      <call_proc_for_current_object>
+        <name>'clear_structures'</name>
+      </call_proc_for_current_object>
+    </loop>
+  </db_select>
+</proc>
+
+
+

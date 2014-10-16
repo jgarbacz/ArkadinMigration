@@ -1,0 +1,22 @@
+(
+  try
+    (
+      brace
+        {
+          print
+            (
+              "in try2"
+            )
+        }
+      finally
+        (
+          brace
+            {
+              print
+                (
+                  "in finally2"
+                )
+            }
+        )
+    )
+)

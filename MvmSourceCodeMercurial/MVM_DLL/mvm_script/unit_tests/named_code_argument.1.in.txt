@@ -1,0 +1,9 @@
+myfunc(
+	mycode=>{
+		x=y;
+		a=b;
+	},
+	yourcode=>{
+		print('yours');
+	}
+);

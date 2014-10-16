@@ -1,0 +1,5 @@
+foreach(myitem in mylist){
+	print(a);
+	print(b) //error
+	print(c);
+}

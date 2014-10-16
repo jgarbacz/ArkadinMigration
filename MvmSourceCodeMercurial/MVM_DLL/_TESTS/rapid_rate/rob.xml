@@ -1,0 +1,193 @@
+﻿<procs>
+
+
+  <proc name="rob">
+    <!-- 
+  so run like:
+  mvm.exe -file=*.xml -proc=rob 
+  or 
+  just setup GLOBAL.test_name='rapid_rate' and GLOBAL.test_proc='rob' to run in ide
+  -->
+
+    <!-- point to the entities dir you want and initialize -->
+    <do>GLOBAL.main_dir=GLOBAL.main_dir ne ''?GLOBAL.main_dir:'.'</do>
+    <do>GLOBAL.entities_dir=GLOBAL.main_dir~'/rob_entities'</do>
+
+    <do>OBJECT(GLOBAL.logger).log_level='debug'</do>
+
+    <call_proc>'initialize'</call_proc>
+    
+    <call_proc_for_current_object>
+      <name>'gen_entity_domain_model'</name>
+      <param name="generate_dir">GLOBAL.generated_dm_dir</param>
+    </call_proc_for_current_object>
+    <!--<call_proc>'log_entity_domain_model'</call_proc>-->
+
+
+   
+    
+    <!--<index_select_keys>
+      <index>'OBJECT_FIELD_METADATA'</index>
+      <cursor>TEMP.c1</cursor>
+      <loop>
+        <do>TEMP.static_oid=OBJECT(TEMP.c1).static_oid</do>
+        <do>TEMP.field_name=OBJECT(TEMP.c1).field_name</do>
+        <print>'static_oid='~TEMP.static_oid</print>
+        <print>'field_name='~TEMP.field_name</print>
+        <index_select>
+          <index>'OBJECT_FIELD_METADATA'</index>
+          <field name="static_oid">TEMP.static_oid</field>
+          <field name="field_name">TEMP.field_name</field>
+          <cursor>TEMP.c2</cursor>
+          <loop>
+            <do>TEMP.datatype=OBJECT(TEMP.c2).datatype</do>
+            <print>'datatype='~TEMP.datatype</print>
+          </loop>
+        </index_select>
+      </loop>
+    </index_select_keys>-->
+  
+    
+    
+    
+    
+    <!--<c>test passing multiples</c>
+    
+    <spawn>
+      <object_type>'BME'</object_type>
+      <object_id>TEMP.bme1</object_id>
+    </spawn>
+    <do>OBJECT(TEMP.bme1).id_acc='878037'</do>
+    <do>OBJECT(TEMP.bme1).start_date='2008-01-01 00:00:00.000'</do>
+    <do>OBJECT(TEMP.bme1).end_date='2009-01-01 00:00:00.000'</do>
+    <do>OBJECT(TEMP.bme1).operation='get'</do>
+    <index_insert>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name='static_oid'>OBJECT.object_id</field>
+      <field name='dynamic_oid'>TEMP.bme1</field>
+    </index_insert>-->
+
+    <!--<spawn>
+      <object_type>'BME'</object_type>
+      <object_id>TEMP.bme2</object_id>
+    </spawn>
+    <do>OBJECT(TEMP.bme2).id_acc=OBJECT(TEMP.bme1).id_acc</do>
+    <do>OBJECT(TEMP.bme2).start_date=OBJECT(TEMP.bme1).end_date</do>
+    <do>OBJECT(TEMP.bme2).end_date='2010-01-01 00:00:00.000'</do>
+    <do>OBJECT(TEMP.bme2).operation='get'</do>
+    <index_insert>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name='static_oid'>OBJECT.object_id</field>
+      <field name='dynamic_oid'>TEMP.bme2</field>
+    </index_insert>-->
+    
+    <!--<call_proc_for_object>
+      <name>'call_entity'</name>
+      <object_id>OBJECT.object_id</object_id>
+      <param name='entity_name'>'BME'</param>
+    </call_proc_for_object>-->
+
+
+
+    <!--
+    <c> TEST PASSING SINGLE </c>
+    <spawn>
+      <object_type>'BME'</object_type>
+      <object_id>TEMP.bme</object_id>
+    </spawn>
+    <do>OBJECT(TEMP.bme).id_acc='878037'</do>
+    <do>OBJECT(TEMP.bme).start_date='20080101000000'</do>
+    <do>OBJECT(TEMP.bme).end_date='20100101000000'</do>
+    <do>OBJECT(TEMP.bme).operation='get'</do>
+
+    <info>'GET THE BME:'</info>
+    <call_proc_for_object>
+      <name>'call_entity'</name>
+      <object_id>TEMP.bme</object_id>
+    </call_proc_for_object>-->
+
+
+    <!-- do your test-->
+
+
+    <!--<info>'SPAWN BME TO GET:'</info>
+  <spawn>
+    <object_type>'BME'</object_type>
+    <object_id>TEMP.bme</object_id>
+  </spawn>
+  <do>OBJECT(TEMP.bme).id_acc='4460382'</do>
+  <do>OBJECT(TEMP.bme).start_date='20080101000000'</do>
+  <do>OBJECT(TEMP.bme).end_date='20100101000000'</do>
+  <do>OBJECT(TEMP.bme).operation='get'</do>
+
+  <info>'GET THE BME:'</info>
+    <call_proc_for_object>
+      <name>'bme_call_entity'</name>
+      <object_id>TEMP.bme</object_id>
+    </call_proc_for_object>
+
+    <info>'GET BME RESULTS:'</info>
+    <call_proc_for_object>
+      <name>'print_dynamic_entities'</name>
+      <object_id>TEMP.bme</object_id>
+    </call_proc_for_object>
+
+    <info>'CLEAR THE OLD BME_RESULTS'</info>
+    <index_remove>
+      <index>'DYNAMIC_ENTITIES'</index>
+      <field name="static_oid">TEMP.bme</field>
+    </index_remove>
+
+  <info>'UPDATE SOME FIELDS AND PUT THE BME:'</info>
+  <do>OBJECT(TEMP.bme).operation='put'</do>
+  <do>OBJECT(TEMP.bme).toll_free_reservationless_bridgerate='0.99'</do>
+  <do>OBJECT(TEMP.bme).start_date='20090401000000'</do>
+  <do>OBJECT(TEMP.bme).end_date='20090801000000'</do>
+
+  <call_proc_for_object>
+    <name>'bme_call_entity'</name>
+    <object_id>TEMP.bme</object_id>
+  </call_proc_for_object>
+
+  <info>'PUT BME RESULTS:'</info>
+  <call_proc_for_object>
+    <name>'print_dynamic_entities'</name>
+    <object_id>TEMP.bme</object_id>
+  </call_proc_for_object>
+
+  <info>'CLEAR THE OLD BME_RESULTS'</info>
+  <index_remove>
+    <index>'DYNAMIC_ENTITIES'</index>
+    <field name="static_oid">TEMP.bme</field>
+  </index_remove>
+
+  <info>'UPDATE SOME FIELDS AND GET THE BME:'</info>
+  <do>OBJECT(TEMP.bme).operation='get'</do>
+  <do>OBJECT(TEMP.bme).toll_free_reservationless_bridgerate=''</do>
+  <do>OBJECT(TEMP.bme).start_date='20080101000000'</do>
+  <do>OBJECT(TEMP.bme).end_date='20100101000000'</do>
+
+  <info>'GET THE BME:'</info>
+  <call_proc_for_object>
+    <name>'bme_call_entity'</name>
+    <object_id>TEMP.bme</object_id>
+  </call_proc_for_object>
+
+  <info>'GET BME RESULTS:'</info>
+  <call_proc_for_object>
+    <name>'print_dynamic_entities'</name>
+    <object_id>TEMP.bme</object_id>
+  </call_proc_for_object>
+
+  <info>'MERGED RESULTS'</info>
+  <call_proc_for_current_object>
+    <name>'date_aware_merge'</name>
+    <param name="static_oid">TEMP.bme</param>
+  </call_proc_for_current_object>
+  <call_proc_for_object>
+    <name>'print_dynamic_entities'</name>
+    <object_id>TEMP.bme</object_id>
+  </call_proc_for_object>-->
+
+  </proc>
+</procs>

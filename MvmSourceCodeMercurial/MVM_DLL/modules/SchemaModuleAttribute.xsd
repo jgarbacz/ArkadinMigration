@@ -1,0 +1,41 @@
+﻿<xs:schema id="SchemaModuleAttribute" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  
+  <xs:element name="module_config">
+    <xs:complexType>
+      <xs:sequence>
+        <!-- define one or more element names that can trigger this module -->
+        <xs:element name="name" minOccurs="1" maxOccurs="unbounded"/>
+        <!-- configure one or more xsds, we use these to plug the modules in -->
+        <xs:element name="xsd" minOccurs="1" maxOccurs="unbounded" type="wildcard"/>
+        <!-- define any unit tests to run, which can also serve as examples in the documentation -->
+        <xs:element name="test" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:complexContent>
+              <xs:extension base='wildcard'>
+                <xs:attribute name='example_only' type='xs:boolean' use='optional'/>
+              </xs:extension>
+            </xs:complexContent>
+          </xs:complexType>
+        </xs:element>
+        <!-- optionally define documentation -->
+        <xs:element name="doc" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="category" type="xs:string" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="desc" type="xs:string" minOccurs="0"/>
+              <xs:element name="description" type="xs:string" minOccurs="1"/>
+              <xs:element name="visibility" type="xs:string" minOccurs="0"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="wildcard" mixed="true">
+    <xs:sequence>
+      <xs:any minOccurs="0" maxOccurs="unbounded" processContents="skip" namespace="##any"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+</xs:schema>

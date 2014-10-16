@@ -1,0 +1,9 @@
+proc tester(
+	i as int, 
+	in s as System.Collections.Dictionary<string,string>, 
+	inout j,
+	out myout as decimal[]
+) returns string[]
+{
+	print('proc body');
+}

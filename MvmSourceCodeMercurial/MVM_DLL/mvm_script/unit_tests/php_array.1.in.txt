@@ -1,0 +1,17 @@
+x=array(
+  'Person' => array(
+    'firstName' => 'John',
+    'lastName' => 'Smith',
+    'age' => 25,
+    'Address' => array(
+      'streetAddress' => '21 2nd Street',
+      'city' => 'New York',
+      'state' => 'NY',
+      'postalCode' => '10021'
+    ),
+    'PhoneNumbers' => array(
+      'home' => '212 555-1234',
+      'fax' => '646 555-4567'
+    )
+  )
+);

@@ -1,0 +1,603 @@
+<xs:schema id="ModuleVM" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- copied here and below -->
+  <xs:element name="inherit_object" type="inherit_object_type"></xs:element>
+  <xs:element name="db_call_proc" type="db_call_proc_type"></xs:element>
+  <xs:element name="remove_named_class" type="xs:string"></xs:element>
+  <xs:element name="add_parent_sort_field" type="add_parent_sort_field_type"></xs:element>
+  <xs:element name="to_upper" type="to_upper_type"></xs:element>
+  <xs:element name="date_convert" type="date_convert_type"></xs:element>
+  <xs:element name="substring" type="substring_type"></xs:element>
+  <xs:element name="file_convert" type="file_convert_type"></xs:element>
+  <xs:element name="file_grep" type="file_grep_type"></xs:element>
+  <xs:element name="get_file" type="get_file_type"></xs:element>
+  <xs:element name="file_sort" type="file_sort_type"></xs:element>
+  <xs:element name="get_guid" type="xs:string"></xs:element>
+  <xs:element name="inherit_cursor" type="inherit_cursor_type"></xs:element>
+  <xs:element name="index_clear" type="index_clear_type"></xs:element>
+  <xs:element name="index_remove" type="index_remove_type"></xs:element>
+  <xs:element name="index_insert" type="index_insert_type"></xs:element>
+  <xs:element name="define_memory_index" type="define_memory_index_type"></xs:element>
+  <xs:element name="print_table" type="print_table_type"/>
+  <xs:element name="run" type="proc_type"/>
+  <xs:element name="run_once" type="proc_type"/>
+  <xs:element name="db_query_to_file" type="db_query_to_file_type"></xs:element>
+  <xs:element name="db_select" type="db_select_type"></xs:element>
+  <xs:element name="create_memory_index_from_cursor" type="create_memory_index_from_cursor_type"></xs:element>
+  <xs:element name="index_select" type="index_select_type"></xs:element>
+  <xs:element name="index_select_keys" type="index_select_keys_type"></xs:element>
+  <xs:element name="create_index_on_sorted_file" type="create_index_on_sorted_file_type"></xs:element>
+  <xs:element name="get_worker_no" type="xs:string"></xs:element>
+  <xs:element name="print_record" type="print_record_type"></xs:element>
+  <xs:element name="nothing" type="xs:string"></xs:element>
+  <xs:element name="produce" type="produce_type"></xs:element>
+  <xs:element name="print" type="xs:string"></xs:element>
+  <xs:element name="debug" type="xs:string"></xs:element>
+  <xs:element name="warn" type="xs:string"></xs:element>
+  <xs:element name="fatal" type="xs:string"></xs:element>
+  <xs:element name="do" type="xs:string"></xs:element>
+  <xs:element name="call_proc_for_object" type="call_proc_type"></xs:element>
+  <xs:element name="call_proc_for_current_object" type="call_proc_type"></xs:element>
+  <xs:element name="call_proc_for_current_object_nested" type="call_proc_type"></xs:element>
+  <xs:element name="call_proc_for_cluster" type="call_proc_type"></xs:element>
+  <xs:element name="call_proc_for_current_cluster" type="call_proc_type"></xs:element>
+  <xs:element name="queue_proc_for_object" type="call_proc_type"></xs:element>
+  <xs:element name="queue_proc_for_object_in_cluster" type="call_proc_type"></xs:element>
+  <xs:element name="queue_proc_for_current_object" type="call_proc_type"></xs:element>
+  <xs:element name="queue_proc_for_current_object_nested" type="call_proc_type"></xs:element>
+  <xs:element name="queue_proc_for_cluster" type="call_proc_type"></xs:element>
+  <xs:element name="queue_proc_for_current_cluster" type="call_proc_type"></xs:element>
+  <xs:element name="spawn" type="spawn_type"></xs:element>
+  <xs:element name="synchronized" type="synchronized_type"></xs:element>
+  <xs:element name="sync_start" type="sync_type"></xs:element>
+  <xs:element name="sync_end" type="sync_type"></xs:element>
+  <xs:element name="while" type="while_type"></xs:element>
+  <xs:element name="if" type="if_type"></xs:element>
+  <xs:element name="callback" type="xs:string"></xs:element>
+  <xs:element name="push_before" type="push_before_type"></xs:element>
+  <xs:element name="push_after" type="push_before_type"></xs:element>
+  <xs:element name="input" type="input_type"></xs:element>
+  <xs:element name="output" type="output_type"></xs:element>
+  <xs:element name="return" type="xs:string"></xs:element>
+  <xs:element name="remove_object_from_cache" type="xs:string"></xs:element>
+  <xs:element name="remove_cluster_from_cache" type="xs:string"></xs:element>
+  <xs:element name="pop_scope" type="xs:string"></xs:element>
+  <xs:element name="file_select" type="file_select_type"></xs:element>
+  <xs:element name="cursor_next" type="xs:string"></xs:element>
+  <xs:element name="cursor_clear" type="xs:string"></xs:element>
+  <xs:element name="create_cluster" type="xs:string"></xs:element>
+  <xs:element name="load_procs_from_files" type="load_procs_from_files_type"></xs:element>
+  <xs:element name="md5" type="md5_type"></xs:element>
+
+  <xs:complexType name="proc_type">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="inherit_object" type="inherit_object_type"></xs:element>
+      <xs:element name="db_call_proc" type="db_call_proc_type"></xs:element>
+      <xs:element name="remove_named_class" type="xs:string"></xs:element>
+      <xs:element name="add_parent_sort_field" type="add_parent_sort_field_type"></xs:element>
+      <xs:element name="to_upper" type="to_upper_type"></xs:element>
+      <xs:element name="date_convert" type="date_convert_type"></xs:element>
+      <xs:element name="substring" type="substring_type"></xs:element>
+      <xs:element name="file_convert" type="file_convert_type"></xs:element>
+      <xs:element name="file_grep" type="file_grep_type"></xs:element>
+      <xs:element name="get_file" type="get_file_type"></xs:element>
+      <xs:element name="file_sort" type="file_sort_type"></xs:element>
+      <xs:element name="get_guid" type="xs:string"></xs:element>
+      <xs:element name="inherit_cursor" type="inherit_cursor_type"></xs:element>
+      <xs:element name="index_clear" type="index_clear_type"></xs:element>
+      <xs:element name="index_remove" type="index_remove_type"></xs:element>
+      <xs:element name="index_insert" type="index_insert_type"></xs:element>
+      <xs:element name="define_memory_index" type="define_memory_index_type"></xs:element>
+      <xs:element name="print_table" type="print_table_type"/>
+      <xs:element name="run" type="proc_type"/>
+      <xs:element name="run_once" type="proc_type"/>
+      <xs:element name="db_query_to_file" type="db_query_to_file_type"></xs:element>
+      <xs:element name="db_select" type="db_select_type"></xs:element>
+      <xs:element name="create_memory_index_from_cursor" type="create_memory_index_from_cursor_type"></xs:element>
+      <xs:element name="index_select" type="index_select_type"></xs:element>
+      <xs:element name="index_select_keys" type="index_select_keys_type"></xs:element>
+      <xs:element name="create_index_on_sorted_file" type="create_index_on_sorted_file_type"></xs:element>
+      <xs:element name="get_worker_no" type="xs:string"></xs:element>
+      <xs:element name="print_record" type="print_record_type"></xs:element>
+      <xs:element name="nothing" type="xs:string"></xs:element>
+      <xs:element name="produce" type="produce_type"></xs:element>
+      <xs:element name="print" type="xs:string"></xs:element>
+      <xs:element name="debug" type="xs:string"></xs:element>
+      <xs:element name="warn" type="xs:string"></xs:element>
+      <xs:element name="fatal" type="xs:string"></xs:element>
+      <xs:element name="do" type="xs:string"></xs:element>
+      <xs:element name="call_proc_for_object" type="call_proc_type"></xs:element>
+      <xs:element name="call_proc_for_current_object" type="call_proc_type"></xs:element>
+      <xs:element name="call_proc_for_current_object_nested" type="call_proc_type"></xs:element>
+      <xs:element name="call_proc_for_cluster" type="call_proc_type"></xs:element>
+      <xs:element name="call_proc_for_current_cluster" type="call_proc_type"></xs:element>
+      <xs:element name="queue_proc_for_object" type="call_proc_type"></xs:element>
+      <xs:element name="queue_proc_for_object_in_cluster" type="call_proc_type"></xs:element>
+      <xs:element name="queue_proc_for_current_object" type="call_proc_type"></xs:element>
+      <xs:element name="queue_proc_for_current_object_nested" type="call_proc_type"></xs:element>
+      <xs:element name="queue_proc_for_cluster" type="call_proc_type"></xs:element>
+      <xs:element name="queue_proc_for_current_cluster" type="call_proc_type"></xs:element>
+      <xs:element name="spawn" type="spawn_type"></xs:element>
+      <xs:element name="synchronized" type="synchronized_type"></xs:element>
+      <xs:element name="sync_start" type="sync_type"></xs:element>
+      <xs:element name="sync_end" type="sync_type"></xs:element>
+      <xs:element name="while" type="while_type"></xs:element>
+      <xs:element name="if" type="if_type"></xs:element>
+      <xs:element name="callback" type="xs:string"></xs:element>
+      <xs:element name="push_before" type="push_before_type"></xs:element>
+      <xs:element name="push_after" type="push_before_type"></xs:element>
+      <xs:element name="input" type="input_type"></xs:element>
+      <xs:element name="output" type="output_type"></xs:element>
+      <xs:element name="return" type="xs:string"></xs:element>
+      <xs:element name="remove_object_from_cache" type="xs:string"></xs:element>
+      <xs:element name="remove_cluster_from_cache" type="xs:string"></xs:element>
+      <xs:element name="pop_scope" type="xs:string"></xs:element>
+      <xs:element name="file_select" type="file_select_type"></xs:element>
+      <xs:element name="cursor_next" type="xs:string"></xs:element>
+      <xs:element name="cursor_clear" type="xs:string"></xs:element>
+      <xs:element name="create_cluster" type="xs:string"></xs:element>
+      <xs:element name="load_procs_from_files" type="load_procs_from_files_type"></xs:element>
+      <xs:element name="md5" type="md5_type"></xs:element>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="db_call_proc_type">
+    <xs:sequence>
+      <xs:group ref="db_info_group"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="param" type="named_field_type" minOccurs="0" maxOccurs="unbounded"></xs:element>
+      <xs:element name="num_rows" type="xs:string" minOccurs="0"/>
+      <xs:element name="exception" type="xs:string" minOccurs="0"/>
+      <xs:element name="exception_proc" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="inherit_object_type">
+    <xs:sequence>
+      <xs:element name="source" type="xs:string"/>
+      <xs:element name="target" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="inherit_cursor_type">
+    <xs:sequence>
+      <xs:element name="cursor" type="xs:string"/>
+      <xs:element name="object_id" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="print_table_type">
+    <xs:sequence>
+      <xs:group ref="db_info_group"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="field_delim" type="xs:string" minOccurs="0"/>
+      <xs:element name="record_delim" type="xs:string" minOccurs="0"/>
+      <xs:element name="output_dir" type="xs:string" minOccurs="0"/>
+      <xs:element name="field" type="named_field_type" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:group name="cursor_util_group">
+    <xs:sequence>
+    <xs:element name="cursor" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+    <xs:choice>
+      <xs:sequence minOccurs="0 " maxOccurs="1">
+        <xs:element name="run" type="proc_type" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="then" type="proc_type" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="loop" type="proc_type" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="else" type="proc_type" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:element name="parallel">
+        <xs:complexType>
+        <xs:complexContent>
+          <xs:extension base="proc_type">
+            <xs:attribute name="cursor" type="xs:string" use="optional"/>
+            <xs:attribute name="producer_cursor_field" type="xs:string" use="optional"/>
+            <xs:attribute name="object_type" type="xs:string" use="optional"/>
+            <xs:attribute name="inherit_parent" type="xs:string" use="optional"/>
+            <xs:attribute name="batch_size" type="xs:string" use="optional"/>
+          </xs:extension>
+        </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+    </xs:sequence>
+  </xs:group>
+  
+  <xs:group name="db_info_group">
+    <xs:choice>
+      <xs:sequence minOccurs="0 " maxOccurs="1">
+        <xs:element name="db" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="user" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="pw" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:element name="login_object" type="xs:string" maxOccurs="1"/>
+    </xs:choice>
+  </xs:group>
+
+  <xs:complexType name="db_query_to_file_type">
+    <xs:sequence>
+      <xs:group ref="db_info_group"/>
+      <xs:element name="query" type="xs:string"/>
+      <xs:element name="order_by" type="xs:string" minOccurs="0"/>
+      <xs:element name="file" type="xs:string"/>
+      <xs:element name="ctrl" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  
+
+  <xs:complexType name="create_memory_index_from_cursor_type">
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name="index" type="xs:string"/>
+        <xs:element name="cursor" type="xs:string"/>
+        <xs:element name="key_field" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="db_select_type">
+    <xs:sequence>
+      <xs:group ref="db_info_group"/>
+      <xs:element name="query" type="xs:string" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="order_by" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:group ref="cursor_util_group"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="named_field_type">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="index_select_keys_type">
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name="index" type="xs:string"/>
+        <xs:element name="cursor" type="xs:string"/>
+        <xs:element name="run" type="proc_type" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="then" type="proc_type" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="loop" type="proc_type" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="else" type="proc_type" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="index_select_type">
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name="index" type="xs:string"/>
+        <xs:element name="field" type="named_field_type" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:group ref="cursor_util_group"/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+
+  <xs:complexType name="index_clear_type">
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name="index" type="xs:string"/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="index_remove_type">
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name="index" type="xs:string"/>
+        <xs:element name="num_rows" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="field" type="named_field_type" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="index_insert_type">
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name="index" type="xs:string"/>
+        <xs:element name="field" type="named_field_type" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="define_memory_index_type">
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name="index" type="xs:string"/>
+        <xs:element name="key_field" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="field" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="load_procs_from_files_type">
+    <xs:sequence>
+      <xs:element name="input_dir" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+      <xs:choice>
+        <xs:element name="input_match" type="xs:string" minOccurs="1" maxOccurs="1"></xs:element>
+        <xs:element name="input_file" type="xs:string" minOccurs="1" maxOccurs="1"></xs:element>
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="date_convert_type">
+    <xs:sequence>
+      <xs:element name="from" >
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:string">
+              <xs:attribute name="name" type="xs:string" use="required"/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="to" >
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:string">
+              <xs:attribute name="name" type="xs:string" use="optional"/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="to_upper_type">
+    <xs:sequence>
+      <xs:element name="input" type="xs:string"></xs:element>
+      <xs:element name="output" type="xs:string"></xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="add_parent_sort_field_type">
+    <xs:sequence>
+      <xs:element name="input_file" type="xs:string"></xs:element>
+      <xs:element name="input_ctrl" type="xs:string"></xs:element>
+      <xs:element name="output_file" type="xs:string"></xs:element>
+      <xs:element name="output_ctrl" type="xs:string"></xs:element>
+      <xs:element name="orphan_file" type="xs:string"></xs:element>
+      <xs:element name="orphan_ctrl" type="xs:string"></xs:element>
+      <xs:element name="sort_field" type="xs:string"></xs:element>
+      <xs:element name="parent_index" type="xs:string" minOccurs="0"></xs:element>
+      <xs:element name="parent_key_field" type="xs:string" minOccurs="0"></xs:element>
+      <xs:element name="child_index" type="xs:string" minOccurs="0"></xs:element>
+      <xs:element name="child_key_field" type="xs:string" minOccurs="0"></xs:element>
+      <xs:element name="num_good" type="xs:string"></xs:element>
+      <xs:element name="num_orphans" type="xs:string"></xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="substring_type">
+    <xs:sequence>
+      <xs:element name="input" type="xs:string"></xs:element>
+      <xs:element name="offset" type="xs:string"></xs:element>
+      <xs:element name="length" type="xs:string" minOccurs="0"></xs:element>
+      <xs:element name="output" type="xs:string"></xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="get_file_type">
+    <xs:sequence>
+      <xs:element name="dir" type="xs:string"></xs:element>
+      <xs:element name="match" type="xs:string"></xs:element>
+      <xs:element name="file" type="xs:string"></xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="file_convert_type">
+    <xs:sequence>
+      <xs:element name="input_file" type="xs:string"></xs:element>
+      <xs:element name="input_ctrl" type="xs:string"></xs:element>
+      <xs:element name="output_file" type="xs:string"></xs:element>
+      <xs:element name="output_ctrl" type="xs:string"></xs:element>
+      <xs:element name="new_field_delim" type="xs:string"></xs:element>
+      <xs:element name="new_record_delim" type="xs:string"></xs:element>
+      <xs:element name="bad_file" type="xs:string"></xs:element>
+      <xs:element name="num_good" type="xs:string"></xs:element>
+      <xs:element name="num_bad" type="xs:string"></xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="file_grep_type">
+    <xs:sequence>
+      <xs:element name="input_file" type="xs:string" minOccurs="1" maxOccurs="1"></xs:element>
+      <xs:element name="output_file" type="xs:string" minOccurs="1" maxOccurs="1"></xs:element>
+      <xs:element name="ctrl_file" type="xs:string" minOccurs="1" maxOccurs="1"></xs:element>
+      <xs:element name="field" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:string">
+              <xs:attribute name="name" type="xs:string" use="optional"/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="file_sort_type">
+    <xs:sequence>
+      <xs:element name="input_file" type="xs:string" minOccurs="1" maxOccurs="1"></xs:element>
+      <xs:element name="sorted_file" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+      <xs:element name="ctrl" type="xs:string" minOccurs="1" maxOccurs="1"></xs:element>
+      <xs:element name="field" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="file_select_type">
+    <xs:sequence>
+      <xs:element name="input_dir" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+      <xs:choice>
+        <xs:element name="input_match" type="xs:string" minOccurs="1" maxOccurs="1"></xs:element>
+        <xs:element name="input_file" type="xs:string" minOccurs="1" maxOccurs="1"></xs:element>
+      </xs:choice>
+      <xs:element name="ctrl" type="xs:string" minOccurs="1" maxOccurs="1"></xs:element>
+      <xs:group ref="cursor_util_group"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="create_index_on_sorted_file_type">
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name="index" type="xs:string"/>
+        <xs:element name="file" type="xs:string"/>
+        <xs:element name="ctrl" type="xs:string"/>
+        <xs:element name="key_field" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="push_before_type">
+    <xs:complexContent>
+      <xs:extension base="proc_type">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="order" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="print_record_type">
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name="file" type="xs:string"/>
+        <xs:element name="field_delim" type="xs:string"/>
+        <xs:element name="record_delim" type="xs:string"/>
+        <xs:element name="data" minOccurs="1" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="field" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="name" type="xs:string" use="optional"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="md5_type">
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name="input" type="xs:string"/>
+        <xs:element name="output" type="xs:string"/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="produce_type">
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name="cursor" type="xs:string"/>
+        <xs:element name="producer_cursor_field" type="xs:string" minOccurs="0"/>
+        <xs:element name="object_type" type="xs:string"/>
+        <xs:element name="inherit_parent" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+        <xs:element name="batch_size" type="xs:string" minOccurs="0"/>
+        <xs:element name="consumer_proc_name" type="xs:string"/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="while_type">
+    <xs:sequence>
+      <xs:sequence>
+        <xs:element name="condition" type="xs:string"/>
+        <xs:element name="loop" type="proc_type"/>
+      </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="if_type">
+    <xs:sequence>
+      <xs:sequence minOccurs="1" maxOccurs="unbounded">
+        <xs:element name="condition" type="xs:string" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="then" type="proc_type" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+      <xs:element name="else" type="proc_type" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="procs">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="proc" type="named_proc_type"></xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="proc" type="named_proc_type">
+  </xs:element>
+
+  <xs:complexType name="named_proc_type">
+    <xs:complexContent>
+      <xs:extension base="proc_type">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="call_proc_type">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1"></xs:element>
+      <xs:element name="object_type" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+      <xs:element name="object_id" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+      <xs:element name="cluster_object_id" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="spawn_type">
+    <xs:sequence>
+      <xs:element name="object_type" type="xs:string" minOccurs="1" maxOccurs="1"></xs:element>
+      <xs:element name="object_id" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+      <xs:element name="inherit_parent" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+      <xs:element name="no_cluster" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+      <xs:element name="cluster_object_id" type="xs:string" minOccurs="0" maxOccurs="1"></xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="sync_type">
+    <xs:complexContent>
+      <xs:extension base="proc_type">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="synchronized_type">
+    <xs:complexContent>
+      <xs:extension base="proc_type">
+        <xs:attribute name="name" type="xs:string" use="optional"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <xs:complexType name="input_type">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="output_type">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="name" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+
+ 
+  
+</xs:schema>

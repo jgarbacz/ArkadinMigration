@@ -1,0 +1,3 @@
+Expecting ']' in expression but found ';' at line=2, position=12 in D:\MetraTech\SourceCode\MvmSourceCode\MVM_DLL\mvm_script\unit_tests\error_missing_end_bracket.1.in.txt
+   at MvmScript.AstNode.ParseAstFile(String file) in D:\MetraTech\SourceCode\MvmSourceCode\MVM_DLL\mvm_script\AstNode.cs:line 70
+   at MvmScript.MvmScriptTester.TestMain(String[] args) in D:\MetraTech\SourceCode\MvmSourceCode\MVM_DLL\mvm_script\MvmScriptTester.cs:line 48

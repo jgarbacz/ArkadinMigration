@@ -1,0 +1,11 @@
+// make sure second else binds with inner if
+if(aa){
+	if(bb){ 
+		print("bb");
+		print("bb");
+	}
+	else{
+		print("bb else");
+		print("bb else");
+	}
+}

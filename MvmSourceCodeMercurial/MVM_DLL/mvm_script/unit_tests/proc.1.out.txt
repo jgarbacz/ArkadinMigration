@@ -1,0 +1,18 @@
+(
+  proc
+    (
+      name
+        (
+          main
+        )
+      arguments
+        (
+        )
+    )
+    {
+      print
+        (
+          'hi'
+        )
+    }
+)

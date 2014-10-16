@@ -1,0 +1,1240 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!-- turn off xml comment warnings -->
+    <NoWarn>1591,1592,1573,1571,1570,1572,1711,1712,1734,1587</NoWarn>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <OutputPath Condition="Exists('$(MTOUTDIR)\$(Configuration)\bin\')">$(MTOUTDIR)\$(Configuration)\bin\</OutputPath>
+    <OutputPath Condition="!Exists('$(MTOUTDIR)\$(Configuration)\bin\')">C:\MetraTech\RMP\Bin\</OutputPath>
+    <BaseIntermediateOutputPath Condition="Exists('$(MTOUTDIR)\$(Configuration)\MetraTech\Mvm\MVM_DLL\')">$(MTOUTDIR)\$(Configuration)\MetraTech\Mvm\MVM_DLL\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath Condition="!Exists('$(MTOUTDIR)\$(Configuration)\MetraTech\Mvm\MVM_DLL\')">C:\MetraTech\RMP\Bin\MetraTech\Mvm\MVM_DLL\</BaseIntermediateOutputPath>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D4EE4374-D312-48F1-B35F-5170E8CE537E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>MVM</RootNamespace>
+    <AssemblyName>mvm_lib</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <StartupObject>
+    </StartupObject>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>..\..\..\..\..\Debug\bin\mvm_lib.XML</DocumentationFile>
+    <OutputPath>C:\MetraTech\RMP\Bin\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Antlr3.Runtime, Version=3.1.0.39271, Culture=neutral, PublicKeyToken=3a9cab8f8d22bfb7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath Condition="Exists('$(MTOUTDIR)\$(Configuration)\Antlr3.Runtime.dll')">$(MTOUTDIR)\$(Configuration)\Antlr3.Runtime.dll</HintPath>
+      <HintPath Condition="!Exists('$(MTOUTDIR)\$(Configuration)\Antlr3.Runtime.dll')">C:\MetraTech\RMP\Bin\Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="NGenerics, Version=1.4.1.0, Culture=neutral, PublicKeyToken=e4b41be133ea7faf, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\MetraTech\RMP\Bin\NGenerics.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog, Version=2.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath Condition="Exists('$(MTOUTDIR)\$(Configuration)\NLog.dll')">$(MTOUTDIR)\$(Configuration)\NLog.dll</HintPath>
+      <HintPath Condition="!Exists('$(MTOUTDIR)\$(Configuration)\NLog.dll')">C:\MetraTech\RMP\Bin\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>C:\MetraTech\RMP\Bin\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Oracle.DataAccess">
+      <HintPath>..\..\MetraTech\RMP\Bin\Oracle.DataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.ServiceModel">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BufferedFileSystem\BinaryQueueBufferedFile.cs" />
+    <Compile Include="BufferedFileSystem\BufferedFileCache.cs" />
+    <None Include="BufferedFileSystem\WriteOnceReadManyFile.ABORT" />
+    <Compile Include="BufferedFileSystem\ObjectQueueMerger.cs" />
+    <Compile Include="BufferedFileSystem\ObjectBuffer.cs" />
+    <Compile Include="BufferedFileSystem\ObjectFileMerger.cs" />
+    <Compile Include="BufferedFileSystem\ObjectQueueBufferedFile.cs" />
+    <Compile Include="BufferedFileSystem\FileCopy.cs" />
+    <Compile Include="BufferedFileSystem\IBufferedFile.cs" />
+    <Compile Include="BufferedFileSystem\PackedFileCursor.cs" />
+    <Compile Include="BufferedFileSystem\QueueBufferedFile.cs" />
+    <Compile Include="BufferedFileSystem\UnbufferedFileLoader.cs" />
+    <Compile Include="BufferedFileSystem\UsageHookObject.cs" />
+    <Compile Include="entity_parser\output\EntityGrammarLexer.cs" />
+    <Compile Include="entity_parser\output\EntityGrammarParser.cs" />
+    <Compile Include="extensions\AntlrXPath.cs" />
+    <Compile Include="extensions\AntlrXPathAst.cs" />
+    <Compile Include="extensions\MyAntrITreeAst.cs" />
+    <Compile Include="extensions\MyDecimal.cs" />
+    <Compile Include="extensions\MyDouble.cs" />
+    <Compile Include="extensions\MyEnum.cs" />
+    <Compile Include="extensions\MyEnumerator.cs" />
+    <Compile Include="extensions\MyBinarySearchTreeOfLinkedList.cs" />
+    <Compile Include="extensions\MyLinkedList.cs" />
+    <Compile Include="extensions\MyConsole.cs" />
+    <Compile Include="extensions\MyBinaryReaderWriter.cs" />
+    <Compile Include="extensions\MyMethodInfo.cs" />
+    <Compile Include="extensions\MyStopWatch.cs" />
+    <Compile Include="extensions\MyAntrITree.cs" />
+    <Compile Include="extensions\MyDirectoryInfo.cs" />
+    <Compile Include="extensions\MyCollection.cs" />
+    <Compile Include="extensions\MyComparers.cs" />
+    <Compile Include="extensions\MyEnumerable.cs" />
+    <Compile Include="extensions\MyException.cs" />
+    <Compile Include="extensions\MyStream.cs" />
+    <Compile Include="BufferedFileSystem\BufferedFileSystem.cs" />
+    <None Include="general\BinaryTree.OFF" />
+    <Compile Include="extensions\MyStringTest.cs" />
+    <Compile Include="general\CodeGen.cs" />
+    <Compile Include="general\MVMReader.cs" />
+    <Compile Include="general\TextOffsetReader.cs" />
+    <Compile Include="general\EncryptDecrypt.cs" />
+    <Compile Include="general\LockingLruCache.cs" />
+    <Compile Include="general\LruDictionary.cs" />
+    <Compile Include="general\Quack.cs" />
+    <Compile Include="general\MtReflection.cs" />
+    <Compile Include="general\MultiStringBuilder.cs" />
+    <Compile Include="extensions\MyObject.cs" />
+    <Compile Include="extensions\MyReflection.cs" />
+    <Compile Include="general\RandomUtils.cs" />
+    <Compile Include="general\Reflector.cs" />
+    <Compile Include="general\RmpSearcher.cs" />
+    <Compile Include="general\SetEnv.cs" />
+    <Compile Include="general\SynchronizedDictionary.cs" />
+    <Compile Include="general\XmlComments.cs" />
+    <Compile Include="infrastructure\DbUtilsSql.cs" />
+    <Compile Include="infrastructure\RaptorDBIndex.cs" />
+    <Compile Include="infrastructure\MetranetEncryption.cs" />
+    <Compile Include="infrastructure\CursorOrderByCursor2.cs" />
+    <Compile Include="infrastructure\DbUtilsOra.cs" />
+    <Compile Include="infrastructure\ListOfDictionaryCursor.cs" />
+    <Compile Include="infrastructure\MvmDoc.cs" />
+    <Compile Include="infrastructure\MvmScriptNUnitHarness.cs" />
+    <Compile Include="infrastructure\OracleBulkUpdater.cs" />
+    <Compile Include="infrastructure\CursorUnionAll.cs" />
+    <Compile Include="infrastructure\CursorCommon.cs" />
+    <Compile Include="infrastructure\CursorCommonBase.cs" />
+    <Compile Include="infrastructure\CursorCommonLinqEnabled.cs" />
+    <Compile Include="infrastructure\CursorCommonMeta.cs" />
+    <Compile Include="infrastructure\CursorCommonOp.cs" />
+    <Compile Include="infrastructure\CursorPipeline.cs" />
+    <Compile Include="infrastructure\CursorStatus.cs" />
+    <Compile Include="infrastructure\SearchMemoryIndex.cs" />
+    <Compile Include="infrastructure\CursorSetupCommon.cs" />
+    <Compile Include="infrastructure\DictionaryCursor.cs" />
+    <Compile Include="infrastructure\ICursorSetupCommon.cs" />
+    <Compile Include="infrastructure\OracleBulkLoader.cs" />
+    <Compile Include="infrastructure\OraBulkLoader11g.cs" />
+    <Compile Include="infrastructure\ListOfStringArrayFieldsCursorSync.cs" />
+    <Compile Include="infrastructure\ListOfStringArrayFieldsCursorReverseSync.cs" />
+    <Compile Include="infrastructure\MemoryIndexSync.cs" />
+    <Compile Include="infrastructure\IBulkLoader.cs" />
+    <Compile Include="infrastructure\ListOfStringCursor.cs" />
+    <Compile Include="infrastructure\NestedMemoryIndex.cs" />
+    <Compile Include="infrastructure\EntityService.cs" />
+    <Compile Include="infrastructure\CmdConsole.cs" />
+    <EmbeddedResource Include="modules\SchemaModuleAttribute.xsd" />
+    <EmbeddedResource Include="embedded_files\MetraTech.snk" />
+    <None Include="entity_parser\EntityGrammar.g" />
+    <None Include="entity_parser\output\EntityGrammar.tokens" />
+    <None Include="mvm_script\cgram.g" />
+    <None Include="mvm_script\cgram.tokens" />
+    <None Include="mvm_script\classes\MvmScriptLexer%24DFA19.class" />
+    <None Include="mvm_script\classes\MvmScriptLexer%24DFA28.class" />
+    <None Include="mvm_script\classes\MvmScriptLexer.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24additiveExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24additiveOp_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24andExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24arguments_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24arrowExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24assignmentOp_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24body_statement_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24booleanLiteral_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24braces_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24brackets_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24cast_expression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24classCreator_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24compound_statement_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24conditionalAndExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24conditionalAndOp_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24conditionalExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24conditionalOrExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24conditionalOrOp_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24creator_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24datatype_expression_part_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24datatype_expression_start_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24datatype_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24DFA12.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24DFA26.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24DFA3.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24DFA36.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24DFA39.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24dot_id_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24elementAttributesList_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24elementChildrenList_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24equalityExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24equalityOp_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24exclusiveOrExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24expression_alias_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24expression_list_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24expression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24expression_statement_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24finally_handler_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24handler_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24identifier_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24inclusiveOrExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24instanceOfExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24integerLiteral_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24iteration_statement_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24jump_statement_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24labeled_statement_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24label_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24literal_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24multiplicativeExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24multiplicativeOp_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24nullLiteral_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24paren_expression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24parExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24postfix_expression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24post_decr_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24post_incr_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24primary_expression_part_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24primary_expression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24primary_expression_start_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24relationalExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24relationalOp_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24selection_statement_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24shiftExpression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24shiftOp_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24start_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24statements_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24statement_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24terminator_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24try_block_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24typeArguments_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24unary_expression_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser%24unary_operator_return.class" />
+    <None Include="mvm_script\classes\MvmScriptParser.class" />
+    <None Include="mvm_script\classes\__Test__.class" />
+    <None Include="mvm_script\csharp.g" />
+    <None Include="mvm_script\csharp.tokens" />
+    <None Include="mvm_script\MvmScript.g" />
+    <None Include="mvm_script\MvmScript.g.orig" />
+    <None Include="mvm_script\MvmScript.tokens" />
+    <None Include="mvm_script\MvmScriptTester.cs.orig" />
+    <None Include="mvm_script\MvmXPath.g" />
+    <None Include="mvm_script\output\cgram.tokens" />
+    <None Include="mvm_script\output\classes\MvmScriptLexer%24DFA19.class" />
+    <None Include="mvm_script\output\classes\MvmScriptLexer%24DFA28.class" />
+    <None Include="mvm_script\output\classes\MvmScriptLexer.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24additiveExpression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24additiveOp_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24andExpression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24arguments_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24assignmentOp_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24body_statement_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24booleanLiteral_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24cast_expression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24classCreator_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24compound_statement_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24conditionalAndExpression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24conditionalAndOp_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24conditionalExpression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24conditionalOrExpression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24conditionalOrOp_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24creator_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24dataType_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24derefElement_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24DFA13.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24DFA14.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24DFA22.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24DFA23.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24DFA25.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24DFA29.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24DFA41.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24DFA48.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24DFA54.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24DFA7.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24elementAttributesList_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24elementAttributesStatements_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24elementChildrenList_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24elementChildrenStatements_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24equalityExpression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24equalityOp_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24exclusiveOrExpression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24expressionList_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24expression_alias_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24expression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24expression_statement_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24finally_handler_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24handler_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24inclusiveOrExpression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24initializer_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24instanceOfExpression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24integerLiteral_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24isArray_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24iteration_statement_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24jump_statement_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24labeled_statement_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24literal_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24multiplicativeExpression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24multiplicativeOp_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24nullLiteral_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24parExpression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24postfix_expression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24primary_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24relationalExpression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24relationalOp_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24selection_statement_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24shiftExpression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24shiftOp_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24start_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24statement_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24try_block_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24typeArguments_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24type_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24unary_expression_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24unary_operator_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser%24variableInitializer_return.class" />
+    <None Include="mvm_script\output\classes\MvmScriptParser.class" />
+    <None Include="mvm_script\output\classes\__Test__.class" />
+    <None Include="mvm_script\output\MvmScript.tokens" />
+    <None Include="mvm_script\output\MvmXPath.tokens" />
+    <None Include="mvm_script\RobTest.g" />
+    <None Include="mvm_script\RobTest.tokens" />
+    <None Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="NLog.slave.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="z_class_diagrams\module_view.cd" />
+    <None Include="parser\antlr\MetraScript.g" />
+    <Compile Include="general\Arguments.cs" />
+    <Compile Include="general\FileUtils.cs" />
+    <Compile Include="general\FileUtils2.cs" />
+    <Compile Include="general\RecordReaderStandAlone.cs" />
+    <Compile Include="general\GlobalFileReader.cs" />
+    <Compile Include="general\GlobalFileStream.cs" />
+    <Compile Include="general\RecordReaderEscape.cs" />
+    <Compile Include="general\MergeSort.cs" />
+    <Compile Include="general\FileIndexCursor.cs" />
+    <Compile Include="general\FileIndex.cs" />
+    <Compile Include="general\MSQueue.cs" />
+    <Compile Include="extensions\MyArray.cs" />
+    <Compile Include="extensions\MyDictionary.cs" />
+    <Compile Include="extensions\MyList.cs" />
+    <Compile Include="extensions\MyString.cs" />
+    <Compile Include="general\RecordReader.cs" />
+    <Compile Include="general\SimpleLock.cs" />
+    <Compile Include="general\StringArray.cs" />
+    <Compile Include="general\StringArrayComparer.cs" />
+    <Compile Include="infrastructure\ConsoleLogger.cs" />
+    <None Include="infrastructure\TempContext.cs.orig" />
+    <Compile Include="infrastructure\CursorOrderByCursor.cs" />
+    <Compile Include="infrastructure\IConfigLocator.cs" />
+    <Compile Include="infrastructure\ListOfStringArrayFieldsCursor.cs" />
+    <Compile Include="infrastructure\ModuleExtensions.cs" />
+    <Compile Include="infrastructure\MvmUserException.cs" />
+    <Compile Include="infrastructure\NLogMTLogger.cs" />
+    <Compile Include="infrastructure\Overrider.cs" />
+    <Compile Include="infrastructure\ProcInfo.cs" />
+    <Compile Include="infrastructure\ProducerConsumerPriorityQueue.cs" />
+    <Compile Include="infrastructure\NLogMvmSlaveLogger.cs" />
+    <Compile Include="infrastructure\SqlDbCursor.cs" />
+    <Compile Include="infrastructure\DelimitedRecordCursorWithFormatHeader.cs" />
+    <Compile Include="infrastructure\ListOfStringListCursor.cs" />
+    <Compile Include="infrastructure\ModuleAttribute.cs" />
+    <Compile Include="infrastructure\SqlBulkLoader.cs" />
+    <Compile Include="infrastructure\StreamReaderCursor.cs" />
+    <Compile Include="infrastructure\DelimitedFileCursor.cs" />
+    <Compile Include="infrastructure\OraDbCursor.cs" />
+    <Compile Include="infrastructure\SchemaMaster.cs" />
+    <Compile Include="infrastructure\SterileCursor.cs" />
+    <Compile Include="infrastructure\ListOfStringArrayObjFieldsCursor.cs" />
+    <Compile Include="infrastructure\CounterCallbackProc.cs" />
+    <Compile Include="infrastructure\DbUtils.cs" />
+    <Compile Include="infrastructure\DelimitedRecordCursor.cs" />
+    <Compile Include="infrastructure\IIndex.cs" />
+    <Compile Include="infrastructure\ILogger.cs" />
+    <Compile Include="infrastructure\ICursor.cs" />
+    <Compile Include="infrastructure\LogHelper.cs" />
+    <Compile Include="infrastructure\LogLevels.cs" />
+    <Compile Include="infrastructure\MemoryIndex.cs" />
+    <Compile Include="infrastructure\ListOfStringArrayFieldsCursorReverse.cs" />
+    <Compile Include="infrastructure\NullCursor.cs" />
+    <Compile Include="infrastructure\OracleDumpCtrlFile.cs" />
+    <Compile Include="infrastructure\ProcDefinition.cs" />
+    <Compile Include="infrastructure\ModuleOrder.cs" />
+    <Compile Include="infrastructure\StringListCursor.cs" />
+    <Compile Include="infrastructure\SystemCommand.cs" />
+    <!--
+    <None Include="modules\MGenerateMetraNetConfig.cs.ORIG" />
+-->
+    <Compile Include="infrastructure\ThreeFive.cs" />
+    <Compile Include="KeyValueIO\KeyValuePairKeyComparer.cs" />
+    <Compile Include="KeyValueIO\RawFileEnumeratorForward.cs" />
+    <Compile Include="KeyValueIO\RawFileEnumeratorReverse.cs" />
+    <Compile Include="KeyValueIO\MergeableStack.cs" />
+    <Compile Include="KeyValueIO\MergeableFile.cs" />
+    <Compile Include="KeyValueIO\DynamicParser.cs" />
+    <Compile Include="KeyValueIO\IDynamicParser.cs" />
+    <Compile Include="KeyValueIO\DynamicDescMergableComparer.cs" />
+    <Compile Include="KeyValueIO\DynamicDefaultRawComparer.cs" />
+    <Compile Include="KeyValueIO\DynamicDescLiveComparer.cs" />
+    <Compile Include="KeyValueIO\DynamicDescRawComparer.cs" />
+    <Compile Include="KeyValueIO\DynamicKey.cs" />
+    <Compile Include="KeyValueIO\ConcatenatedStream.cs" />
+    <Compile Include="KeyValueIO\ConcatenatedRawEnumerator.cs" />
+    <Compile Include="KeyValueIO\DynamicKeyComparer.cs" />
+    <Compile Include="KeyValueIO\DynamicLiveKeyComparer.cs" />
+    <Compile Include="KeyValueIO\DynamicMergableStringComparer.cs" />
+    <Compile Include="KeyValueIO\DynamicMergeableComparer.cs" />
+    <Compile Include="KeyValueIO\DynamicRawKeyComparer.cs" />
+    <Compile Include="KeyValueIO\DynamicKeySerializer.cs" />
+    <Compile Include="KeyValueIO\DynamicSerializer.cs" />
+    <Compile Include="KeyValueIO\IBinaryComparable.cs" />
+    <Compile Include="KeyValueIO\IDynamicMergeableComparer.cs" />
+    <Compile Include="KeyValueIO\IDynamicSerializer.cs" />
+    <Compile Include="KeyValueIO\Serializabler.cs" />
+    <Compile Include="KeyValueIO\ISerializer.cs" />
+    <Compile Include="KeyValueIO\Number.cs" />
+    <Compile Include="KeyValueIO\DescComparer.cs" />
+    <Compile Include="KeyValueIO\IMergeableComparer.cs" />
+    <Compile Include="KeyValueIO\MergeableComparer.cs" />
+    <Compile Include="KeyValueIO\DescRawComparer.cs" />
+    <Compile Include="KeyValueIO\DescLiveComparer.cs" />
+    <Compile Include="KeyValueIO\DefaultLiveComparer.cs" />
+    <Compile Include="KeyValueIO\IRawKeyValuePairEnumerator.cs" />
+    <Compile Include="KeyValueIO\IKeyValueEnumerator.cs" />
+    <Compile Include="KeyValueIO\IRawMergeEnumerable.cs" />
+    <Compile Include="KeyValueIO\IRawMergeEnumerator.cs" />
+    <Compile Include="KeyValueIO\DefaultRawComparer.cs" />
+    <Compile Include="KeyValueIO\RawValue.cs" />
+    <Compile Include="KeyValueIO\RawMergeSortReader.cs" />
+    <Compile Include="KeyValueIO\MergeableSortingQueue.cs" />
+    <Compile Include="KeyValueIO\MergeableQueue.cs" />
+    <Compile Include="KeyValueIO\IMergeEnumerator.cs" />
+    <Compile Include="KeyValueIO\IMergeEnumerable.cs" />
+    <Compile Include="KeyValueIO\RawEnumerator.cs" />
+    <Compile Include="KeyValueIO\LiveToRawEnumerator.cs" />
+    <Compile Include="KeyValueIO\RawKeyValuePair.cs" />
+    <Compile Include="KeyValueIO\MergeSortReaderWriter.cs" />
+    <Compile Include="KeyValueIO\MergeSortReader.cs" />
+    <Compile Include="KeyValueIO\TestKeyValueIO.cs" />
+    <Compile Include="KeyValueIO\Text.cs" />
+    <Compile Include="KeyValueIO\IBinarySerializableComparable.cs" />
+    <Compile Include="KeyValueIO\ISerializableComparable.cs" />
+    <Compile Include="KeyValueIO\ISerializable.cs" />
+    <Compile Include="modules\BaseModuleSetup.cs" />
+    <Compile Include="modules\MCallDotNetStaticMethod.cs" />
+    <Compile Include="modules\MGetServerData.cs" />
+    <Compile Include="modules\MIndexClose.cs" />
+    <Compile Include="modules\MExitCode.cs" />
+    <Compile Include="modules\MIndexDrop.cs" />
+    <Compile Include="modules\MInputCursorSelect.cs" />
+    <Compile Include="modules\MSwapObjectIds.cs" />
+    <Compile Include="modules\MStopProfiler.cs" />
+    <Compile Include="modules\MStartProfiler.cs" />
+    <Compile Include="modules\MCursorPipeRow.cs" />
+    <Compile Include="modules\MObjectDeltaPersistCursorChanges.cs" />
+    <Compile Include="modules\MObjectDeltaPersistObjectChanges.cs" />
+    <Compile Include="modules\MTestFalse.cs" />
+    <Compile Include="modules\MTestTrue.cs" />
+    <Compile Include="modules\MCreateShortcut.cs" />
+    <Compile Include="modules\MTestSelect.cs" />
+    <Compile Include="modules\MTestIgnore.cs" />
+    <Compile Include="modules\MTestInconclusive.cs" />
+    <Compile Include="modules\MTestOutputDiff.cs" />
+    <Compile Include="modules\MTestOutputClear.cs" />
+    <Compile Include="modules\MTestFail.cs" />
+    <Compile Include="modules\MTestPass.cs" />
+    <Compile Include="modules\MDuplicate.cs" />
+    <Compile Include="modules\MIndexGet.cs" />
+    <Compile Include="modules\MRoundCurrency.cs" />
+    <Compile Include="modules\MTryFileDelete.cs" />
+    <Compile Include="modules\MValidateField.cs" />
+    <Compile Include="modules\MMatchStatic.cs" />
+    <Compile Include="modules\MGarbageCollect.cs" />
+    <Compile Include="modules\MGenerateMetraNetConfigOra.cs" />
+    <Compile Include="modules\MReallocateSlaves.cs" />
+    <Compile Include="modules\MAnalyzeRecordTypes.cs" />
+    <Compile Include="modules\MRecordType.cs" />
+    <Compile Include="modules\MSortedObjectFileSelect.cs" />
+    <Compile Include="modules\MSortedObjectFileClose.cs" />
+    <Compile Include="modules\MSortedObjectFileWrite.cs" />
+    <Compile Include="modules\MObjectRefRemove.cs" />
+    <Compile Include="modules\MObjectRefGet.cs" />
+    <Compile Include="modules\MCursorOrderBy2.cs" />
+    <Compile Include="modules\MFileSubstring.cs" />
+    <Compile Include="modules\MGetProcText.cs" />
+    <Compile Include="modules\MRemoveSpawnedObjectFromProc.cs" />
+    <Compile Include="modules\MDeleteObject.cs" />
+    <Compile Include="modules\MConsole.cs" />
+    <Compile Include="modules\MFileInfo.cs" />
+    <Compile Include="modules\MObjectRefCountGet.cs" />
+    <Compile Include="modules\MTestOutput.cs" />
+    <Compile Include="modules\MUnionAllSelect.cs" />
+    <Compile Include="modules\MCursorExecute.cs" />
+    <Compile Include="modules\MCursorIsEof.cs" />
+    <Compile Include="modules\MCursorTop.cs" />
+    <Compile Include="modules\MMvmClusterGet.cs" />
+    <Compile Include="modules\MServerCredentialsGet.cs" />
+    <Compile Include="modules\MServerCredentialsSet.cs" />
+    <Compile Include="modules\MMvmClusterSet.cs" />
+    <Compile Include="modules\MCursorWhere.cs" />
+    <Compile Include="modules\MPipeline.cs" />
+    <Compile Include="modules\MCursorObjectIdToInstId.cs" />
+    <Compile Include="modules\MObjectDeltaPersistedTablesSelect.cs" />
+    <Compile Include="modules\MCursorInstIdToObjectId.cs" />
+    <Compile Include="modules\MCursorInstCreateEofIfNone.cs" />
+    <Compile Include="modules\MObjectDeltaAddUpdateTriggeredTable.cs" />
+    <Compile Include="modules\MUsageSaveLocal.cs" />
+    <Compile Include="modules\MUsageHookFetchFlush.cs" />
+    <Compile Include="modules\MUsageHookFetchLocal.cs" />
+    <Compile Include="modules\MObjectDeltaClearOriginals.cs" />
+    <Compile Include="modules\MObjectNullFields.cs" />
+    <Compile Include="modules\MObjectDeltaPersistAudit.cs" />
+    <Compile Include="modules\MObjectDeltaTableStatus.cs" />
+    <Compile Include="modules\MObjectDeltaFromTable.cs" />
+    <Compile Include="modules\MObjectDeltaFlushAll.cs" />
+    <Compile Include="modules\MObjectDeltaAddTable.cs" />
+    <Compile Include="modules\MObjectDeltaPersist.cs" />
+    <Compile Include="modules\MDbExecuteDynamic.cs" />
+    <Compile Include="modules\MDbSelectDynamic.cs" />
+    <Compile Include="modules\MBfsDeleteFile.cs" />
+    <Compile Include="modules\MBfsFlushFile.cs" />
+    <Compile Include="modules\MUsageHookAddObject.cs" />
+    <Compile Include="modules\MDbUpsertDynamic.cs" />
+    <Compile Include="modules\MDbUpsert.cs" />
+    <Compile Include="modules\MObjectDeltaUnpackOriginals.cs" />
+    <Compile Include="modules\MObjectDeltaPackOriginals.cs" />
+    <Compile Include="modules\MObjectDeltaSetOriginal.cs" />
+    <Compile Include="modules\MObjectDeltaGetPersisted.cs" />
+    <Compile Include="modules\MObjectDeltaGetOriginal.cs" />
+    <Compile Include="modules\MObjectDeltaHasOriginalChanges.cs" />
+    <Compile Include="modules\MBfsFileExists.cs" />
+    <Compile Include="modules\MBfsMvFile.cs" />
+    <Compile Include="modules\MObjectDeltaHasPersistedChanges.cs" />
+    <Compile Include="modules\MObjectDeltaSelect.cs" />
+    <Compile Include="modules\MObjectClear.cs" />
+    <Compile Include="modules\MDirectoryDelete.cs" />
+    <Compile Include="modules\MUsageHookRelease.cs" />
+    <Compile Include="modules\MUsageHookCreate.cs" />
+    <Compile Include="modules\MUsageCursorSelect.cs" />
+    <Compile Include="modules\MSetupBufferedFileSystem.cs" />
+    <Compile Include="modules\MWriteObjectToFile.cs" />
+    <Compile Include="modules\MTestOutboxSpeed.cs" />
+    <Compile Include="modules\MTestMessageSpeed.cs" />
+    <Compile Include="modules\MDateDiff.cs" />
+    <Compile Include="modules\MDateToString.cs" />
+    <Compile Include="modules\MMapReduce.cs" />
+    <Compile Include="modules\MShutdownCluster.cs" />
+    <Compile Include="modules\MSlaveNodeIdSelect.cs" />
+    <Compile Include="modules\MDefineMvmCluster.cs" />
+    <Compile Include="modules\MPushIndex.cs" />
+    <Compile Include="modules\MClearBatch.cs" />
+    <Compile Include="modules\MBatchResultsSelect.cs" />
+    <Compile Include="modules\MWaitForBatchComplete.cs" />
+    <Compile Include="modules\MSetServerModeOff.cs" />
+    <Compile Include="modules\MSetServerModeOn.cs" />
+    <Compile Include="modules\MSendRemoteResults.cs" />
+    <Compile Include="modules\MWaitForRemoteProcCall.cs" />
+    <Compile Include="modules\MRemoteQueueProc.cs" />
+    <Compile Include="modules\MStartupSlaveListener.cs" />
+    <Compile Include="modules\MStartupCluster.cs" />
+    <Compile Include="modules\MLoggerNLog.cs" />
+    <Compile Include="modules\MDefineEntityMapType.cs" />
+    <Compile Include="modules\MExtractEmbeddedFile.cs" />
+    <Compile Include="modules\MDbBulkInsertAbortAll.cs" />
+    <Compile Include="modules\MDbBulkInsertAbort.cs" />
+    <Compile Include="modules\MDbBulkInsertFlushAll.cs" />
+    <Compile Include="modules\MDbCommon.cs" />
+    <Compile Include="modules\MDbBulkInsertFlush.cs" />
+    <Compile Include="modules\MDbBulkInsertDynamic.cs" />
+    <Compile Include="modules\MDbBulkInsert.cs" />
+    <Compile Include="modules\MScopeUnsnapshot.cs" />
+    <Compile Include="modules\MScopeSnapshot.cs" />
+    <Compile Include="modules\MStringToDate.cs" />
+    <Compile Include="modules\XmlConfigParser.cs" />
+    <Compile Include="modules\MScopePush.cs" />
+    <Compile Include="modules\MStopwatch.cs" />
+    <Compile Include="modules\MStopwatchReset.cs" />
+    <Compile Include="modules\MStopwatchStop.cs" />
+    <Compile Include="modules\MStopwatchStart.cs" />
+    <Compile Include="modules\MGotoLabel.cs" />
+    <Compile Include="modules\MLabel.cs" />
+    <Compile Include="modules\IModuleLabel.cs" />
+    <Compile Include="modules\MJoin.cs" />
+    <Compile Include="modules\MIndexInsertIfNone.cs" />
+    <Compile Include="modules\MExecuteImmediate.cs" />
+    <Compile Include="modules\MMtMsixdefSelect.cs" />
+    <Compile Include="modules\MProcInstGetParams.cs" />
+    <Compile Include="modules\MProcInstDelete.cs" />
+    <Compile Include="modules\MProcInstIsComplete.cs" />
+    <Compile Include="modules\MYield.cs" />
+    <Compile Include="modules\MProcInstResume.cs" />
+    <Compile Include="modules\MGetStackTrace.cs" />
+    <Compile Include="modules\MGetProcNamespace.cs" />
+    <Compile Include="modules\MGetFullProcName.cs" />
+    <Compile Include="modules\MGetProcName.cs" />
+    <Compile Include="modules\MCursorFieldNameSelect.cs" />
+    <Compile Include="modules\MProcSelect.cs" />
+    <Compile Include="modules\MPipeRow.cs" />
+    <Compile Include="modules\MReturn.cs" />
+    <Compile Include="modules\MBreakFromProcName.cs" />
+    <Compile Include="modules\MGetExceptionInfo.cs" />
+    <Compile Include="modules\MGetExceptionTrace.cs" />
+    <Compile Include="modules\MGetExceptionMessage.cs" />
+    <Compile Include="modules\MGetExceptionName.cs" />
+    <Compile Include="modules\MThrow.cs" />
+    <Compile Include="modules\MTry.cs" />
+    <Compile Include="modules\MReadTextFile.cs" />
+    <Compile Include="modules\MGetMvmGeneratedDir.cs" />
+    <Compile Include="modules\MGetProcFileName.cs" />
+    <Compile Include="modules\MGetProcExtensionDir.cs" />
+    <Compile Include="modules\MGetRmpDir.cs" />
+    <Compile Include="modules\MGetRmpBinDir.cs" />
+    <Compile Include="modules\MGetMetraTechDir.cs" />
+    <Compile Include="modules\MMashId.cs" />
+    <Compile Include="modules\MDefineEntityGroup.cs" />
+    <Compile Include="modules\MDefineEntity.cs" />
+    <Compile Include="modules\MGetMtDbInfo.cs" />
+    <Compile Include="modules\MServerInfo.cs" />
+    <Compile Include="modules\MLoggerMtLog.cs" />
+    <Compile Include="modules\MCompileDll.cs" />
+    <Compile Include="modules\MPathTail.cs" />
+    <Compile Include="modules\MPathHead.cs" />
+    <Compile Include="modules\MUncapitalize.cs" />
+    <Compile Include="modules\MPrintTextToFile.cs" />
+    <Compile Include="modules\MShutdownWcfHost.cs" />
+    <Compile Include="modules\MHostWcfService.cs" />
+    <Compile Include="modules\MCursorOrderBy.cs" />
+    <Compile Include="modules\MDumpMemory.cs" />
+    <Compile Include="modules\MObjectsEqual.cs" />
+    <Compile Include="modules\MDbInsertDynamic.cs" />
+    <Compile Include="modules\MSplit.cs" />
+    <Compile Include="modules\MGenerateEntities.cs" />
+    <Compile Include="modules\IModuleGlobal.cs" />
+    <!--
+    <Compile Include="modules\MCallDotNetStaticMethod.cs" />
+-->
+    <Compile Include="modules\MGetAssemblyPath.cs" />
+    <Compile Include="modules\MGetMachineName.cs" />
+    <Compile Include="MultiProcess\AnyRequestMessage.cs" />
+    <Compile Include="MultiProcess\AnyNotFoundMessage.cs" />
+    <Compile Include="MultiProcess\AsyncShutdown.cs" />
+    <Compile Include="MultiProcess\BundleMessage.cs" />
+    <Compile Include="MultiProcess\MvmClusterCommon.cs" />
+    <Compile Include="MultiProcess\UpdateNodeMessage.cs" />
+    <Compile Include="MultiProcess\ProfilerStatusMessage.cs" />
+    <Compile Include="MultiProcess\ProfilerStopMessage.cs" />
+    <Compile Include="MultiProcess\ProfilerStartMessage.cs" />
+    <Compile Include="MultiProcess\ProfilerInitMessage.cs" />
+    <Compile Include="MultiProcess\MvmClusterProfiler.cs" />
+    <Compile Include="MultiProcess\TfidUfnResponseMessage.cs" />
+    <Compile Include="MultiProcess\TfidUfnRequestMessage.cs" />
+    <Compile Include="MultiProcess\MvmClusterBase.cs" />
+    <Compile Include="MultiProcess\RcnResponseMessage.cs" />
+    <Compile Include="MultiProcess\RcnRequestMessage.cs" />
+    <Compile Include="MultiProcess\DbInfoRequestMessage.cs" />
+    <Compile Include="MultiProcess\DbInfoResponseMessage.cs" />
+    <Compile Include="MultiProcess\ReallocateSlavesMessage.cs" />
+    <Compile Include="MultiProcess\SetMasterNodeIdMessage.cs" />
+    <Compile Include="MultiProcess\SlaveInitMessage.cs" />
+    <Compile Include="MultiProcess\UpdateClusterInfoMessage.cs" />
+    <Compile Include="MultiProcess\UsageResponseMessage.cs" />
+    <Compile Include="MultiProcess\UsageRequestMessage.cs" />
+    <Compile Include="MultiProcess\PortResponseMessage.cs" />
+    <Compile Include="MultiProcess\PortRequestMessage.cs" />
+    <Compile Include="MultiProcess\FormatFieldsRequestMessage.cs" />
+    <Compile Include="MultiProcess\FormatFieldsResponseMessage.cs" />
+    <Compile Include="MultiProcess\FormatIdResponseMessage.cs" />
+    <Compile Include="MultiProcess\FormatIdRequestMessage.cs" />
+    <Compile Include="MultiProcess\OutboxCountingMessage.cs" />
+    <Compile Include="MultiProcess\CountingMessage.cs" />
+    <Compile Include="MultiProcess\HungryMessage.cs" />
+    <Compile Include="MultiProcess\DisconnectRequest.cs" />
+    <Compile Include="MultiProcess\StopReceivingMessage.cs" />
+    <Compile Include="MultiProcess\ShutdownResponse.cs" />
+    <Compile Include="MultiProcess\ShutdownRequest.cs" />
+    <Compile Include="MultiProcess\ShutdownMessage.cs" />
+    <Compile Include="MultiProcess\MvmClusterNode.cs" />
+    <Compile Include="MultiProcess\GetSlaveNodeIdsResponseMessage.cs" />
+    <Compile Include="MultiProcess\GetSlaveNodeIdsRequestMessage.cs" />
+    <Compile Include="MultiProcess\MvmCluster.cs" />
+    <Compile Include="MultiProcess\MvmClusterSuper.cs" />
+    <Compile Include="MultiProcess\NodeIdInfoResponseMessage.cs" />
+    <Compile Include="MultiProcess\NodeIdInfoRequestMessage.cs" />
+    <Compile Include="MultiProcess\SendGlobalObjectMessage.cs" />
+    <Compile Include="MultiProcess\PushIndexMessage.cs" />
+    <Compile Include="MultiProcess\QueueProcResultsMessage.cs" />
+    <Compile Include="MultiProcess\SpecificNotFoundMessage.cs" />
+    <Compile Include="MultiProcess\SpecificRequestMessage.cs" />
+    <Compile Include="MultiProcess\MessagePriority.cs" />
+    <Compile Include="MultiProcess\NotifyMaxPriorityMessage.cs" />
+    <Compile Include="MultiProcess\QueueProcMessage.cs" />
+    <Compile Include="MultiProcess\RemoteWorkManager.cs" />
+    <Compile Include="MultiProcess\LogMessage.cs" />
+    <Compile Include="MultiProcess\RequestMessage.cs" />
+    <Compile Include="MultiProcess\MvmMessage.cs" />
+    <Compile Include="MultiProcess\MessageOutbox.cs" />
+    <Compile Include="MultiProcess\MessageReceiver.cs" />
+    <Compile Include="MultiProcess\MessageSender.cs" />
+    <Compile Include="MultiProcess\SlaveListener.cs" />
+    <Compile Include="MultiProcess\SocketAccesor.cs" />
+    <Compile Include="MultiProcess\SocketHandler.cs" />
+    <Compile Include="mvm_functions\DateFunctions.cs" />
+    <Compile Include="mvm_functions\NumericFunctions.cs" />
+    <Compile Include="mvm_functions\IndexFunctions.cs" />
+    <Compile Include="mvm_functions\MiscMvmFunctions.cs" />
+    <Compile Include="mvm_functions\StringAndScalarFunctions.cs" />
+    <Compile Include="mvm_script\AstData.cs" />
+    <Compile Include="mvm_script\AstElement.cs" />
+    <Compile Include="mvm_script\AstNode.cs" />
+    <Compile Include="mvm_script\AstNodeAdaptor.cs" />
+    <Compile Include="mvm_script\AstNodeNamer.cs" />
+    <Compile Include="mvm_script\AstValue.cs" />
+    <Compile Include="mvm_script\FileLocation.cs" />
+    <Compile Include="mvm_script\ILocation.cs" />
+    <Compile Include="mvm_script\MvmScriptLexer.cs" />
+    <Compile Include="mvm_script\MvmScriptMissingClosingException.cs" />
+    <Compile Include="mvm_script\MvmScriptParser.cs" />
+    <Compile Include="mvm_script\MvmScriptParserException.cs" />
+    <Compile Include="mvm_script\MvmScriptRecognitionException.cs" />
+    <Compile Include="mvm_script\MvmScriptTester.cs" />
+    <Compile Include="mvm_script\MvmScriptUtils.cs" />
+    <Compile Include="mvm_script\MvmXPathLexer.cs" />
+    <Compile Include="mvm_script\MvmXPathParser.cs" />
+    <Compile Include="object_data\Delta.cs" />
+    <Compile Include="object_data\ObjectDataFormattedDelta.cs" />
+    <Compile Include="object_data\ObjectDataFormattedBase.cs" />
+    <Compile Include="object_data\ObjectDataFormatted.cs" />
+    <Compile Include="object_data\ObjectDataStringHash.cs" />
+    <Compile Include="object_data\ObjectDataBase.cs" />
+    <Compile Include="object_data\FormatId.cs" />
+    <Compile Include="object_data\IObjectData.cs" />
+    <Compile Include="object_data\ObjectCache.cs" />
+    <Compile Include="object_data\ObjectDataSerializer.cs" />
+    <Compile Include="object_data\ZeroBasedEncoder.cs" />
+    <Compile Include="parser\CallFunction.cs" />
+    <Compile Include="parser\OpCaseInsensitiveOrNumericNe.cs" />
+    <Compile Include="parser\OpCaseSensitiveOrNumericNe.cs" />
+    <Compile Include="parser\OpCaseInsensitiveOrNumericEq.cs" />
+    <Compile Include="parser\OpCaseInsensitiveLte.cs" />
+    <Compile Include="parser\OpCaseInsensitiveLt.cs" />
+    <Compile Include="parser\OpCaseInsensitiveGte.cs" />
+    <Compile Include="parser\OpCaseInsensitiveGt.cs" />
+    <Compile Include="parser\OpCaseInsensitiveNe.cs" />
+    <Compile Include="parser\OpCaseInsensitiveEq.cs" />
+    <Compile Include="parser\OpCaseSensitiveOrNumericEq.cs" />
+    <Compile Include="type_conversions\ReadStringAsBool.cs" />
+    <Compile Include="type_conversions\IReadBool.cs" />
+    <Compile Include="type_conversions\ReadBoolAsString.cs" />
+    <Compile Include="type_conversions\WriteStringWithBool.cs" />
+    <Compile Include="type_conversions\ReadNull.cs" />
+    <Compile Include="type_conversions\WriteStringWithInt.cs" />
+    <Compile Include="type_conversions\IConvertWritable.cs" />
+    <Compile Include="type_conversions\IConvertReadable.cs" />
+    <Compile Include="type_conversions\WriteStringBase.cs" />
+    <Compile Include="type_conversions\ReadStringBase.cs" />
+    <Compile Include="type_conversions\IWritable.cs" />
+    <Compile Include="type_conversions\IReadable.cs" />
+    <Compile Include="type_conversions\IReadInt.cs" />
+    <Compile Include="type_conversions\ReadableConstructor.cs" />
+    <Compile Include="modules\MRenameObjectFields.cs" />
+    <Compile Include="modules\MRenameObjectField.cs" />
+    <Compile Include="modules\MRemoveObjectField.cs" />
+    <Compile Include="modules\MCopyObjectField.cs" />
+    <Compile Include="modules\MRegexReplace.cs" />
+    <Compile Include="modules\MSetObjectField.cs" />
+    <Compile Include="modules\MGetObjectField.cs" />
+    <Compile Include="modules\MDbExecute.cs" />
+    <Compile Include="modules\MDbInsert.cs" />
+    <Compile Include="modules\MAddParentSortFields.cs" />
+    <Compile Include="modules\MGenerateMetraNetConfig.cs" />
+    <Compile Include="modules\MObjectFieldExists.cs" />
+    <Compile Include="modules\MObjectFieldValueSelect.cs" />
+    <Compile Include="modules\MFileTouch.cs" />
+    <Compile Include="modules\MFileClose.cs" />
+    <Compile Include="modules\MFileDelete.cs" />
+    <Compile Include="modules\MProduceWork.cs" />
+    <Compile Include="modules\MSystemCommandSelect.cs" />
+    <Compile Include="modules\MCreateDirectory.cs" />
+    <Compile Include="modules\MDirectoryExists.cs" />
+    <Compile Include="modules\MFileExists.cs" />
+    <Compile Include="modules\MFileCopy.cs" />
+    <Compile Include="modules\MGetLength.cs" />
+    <Compile Include="modules\MFileMove.cs" />
+    <Compile Include="modules\MPathToAbsolute.cs" />
+    <Compile Include="modules\MPathParent.cs" />
+    <Compile Include="modules\MPathBasename.cs" />
+    <Compile Include="modules\MMatch.cs" />
+    <Compile Include="modules\MPrintFile.cs" />
+    <Compile Include="modules\MParse.cs" />
+    <Compile Include="modules\MLoadProcsFromGlob.cs" />
+    <Compile Include="modules\MGetCurrentDirectory.cs" />
+    <Compile Include="modules\MGlobSelect.cs" />
+    <Compile Include="modules\MAtomicDecrement.cs" />
+    <Compile Include="modules\MAtomicIncrement.cs" />
+    <Compile Include="modules\MTimeEnd.cs" />
+    <Compile Include="modules\MTimeStart.cs" />
+    <Compile Include="modules\MTime.cs" />
+    <Compile Include="modules\MIdeBreak.cs" />
+    <Compile Include="modules\MSterilizeCursor.cs" />
+    <Compile Include="modules\MCopyCursorToTemp.cs" />
+    <Compile Include="modules\MCallbackCreateWithScopePop.cs" />
+    <Compile Include="modules\MBlock.cs" />
+    <Compile Include="modules\MCallbackCreate.cs" />
+    <Compile Include="modules\MMultiThreadCursor.cs" />
+    <Compile Include="modules\MLoggerDatabase.cs" />
+    <Compile Include="modules\MLoggerConsole.cs" />
+    <Compile Include="modules\MRound.cs" />
+    <Compile Include="modules\MFloatDivide.cs" />
+    <Compile Include="modules\MDateAdd.cs" />
+    <Compile Include="modules\MFloatAdd.cs" />
+    <Compile Include="modules\MCapitalize.cs" />
+    <Compile Include="modules\MInheritCursorDefault.cs" />
+    <Compile Include="modules\MTrim.cs" />
+    <Compile Include="modules\MToLower.cs" />
+    <Compile Include="modules\MReplace.cs" />
+    <Compile Include="modules\MPrintTableForCtrl.cs" />
+    <Compile Include="modules\MDbLog.cs" />
+    <Compile Include="modules\MLog.cs" />
+    <Compile Include="modules\MBatchSelect.cs" />
+    <Compile Include="modules\MCounterSelect.cs" />
+    <Compile Include="modules\MSerial.cs" />
+    <Compile Include="modules\MParallel.cs" />
+    <Compile Include="modules\MGetClusterObjectId.cs" />
+    <Compile Include="modules\MGetDate.cs" />
+    <Compile Include="modules\MSleep.cs" />
+    <Compile Include="modules\MInheritObject.cs" />
+    <Compile Include="modules\MDbCallProc.cs" />
+    <Compile Include="modules\MRemoveNamedClass.cs" />
+    <Compile Include="modules\MAddParentSortField.cs" />
+    <Compile Include="modules\MToUpper.cs" />
+    <Compile Include="modules\MDateConvert.cs" />
+    <Compile Include="modules\MSubstring.cs" />
+    <Compile Include="modules\MFileConvert.cs" />
+    <Compile Include="modules\MFileGrep.cs" />
+    <Compile Include="modules\MGetFile.cs" />
+    <Compile Include="modules\MFileSort.cs" />
+    <Compile Include="modules\MMd5Hash.cs" />
+    <Compile Include="modules\MIndexSelectKeys.cs" />
+    <Compile Include="modules\MIndexRemove.cs" />
+    <Compile Include="modules\MWarn.cs" />
+    <Compile Include="modules\MDebug.cs" />
+    <Compile Include="modules\MGetGuid.cs" />
+    <Compile Include="modules\MInheritCursor.cs" />
+    <Compile Include="modules\MIndexClear.cs" />
+    <Compile Include="modules\MRunOnce.cs" />
+    <Compile Include="modules\MDefineMemoryIndex.cs" />
+    <Compile Include="modules\MIndexInsert.cs" />
+    <Compile Include="modules\MFatal.cs" />
+    <Compile Include="modules\MLoadProcsFromFiles.cs" />
+    <Compile Include="modules\MPrintTable.cs" />
+    <Compile Include="modules\MDbSelect.cs" />
+    <Compile Include="modules\MRun.cs" />
+    <Compile Include="modules\MDbQueryToFile.cs" />
+    <Compile Include="modules\MCreateMemoryIndexFromCursor.cs" />
+    <Compile Include="modules\MCursorClear.cs" />
+    <Compile Include="modules\MIndexSelect.cs" />
+    <Compile Include="modules\MCreateFileIndex.cs" />
+    <Compile Include="modules\MGetWorkerNo.cs" />
+    <Compile Include="modules\MPrintRecord.cs" />
+    <Compile Include="modules\MNothing.cs" />
+    <Compile Include="modules\MProduce.cs" />
+    <Compile Include="parser\AccessGlobal.cs" />
+    <Compile Include="parser\AccessThread.cs" />
+    <Compile Include="type_conversions\IWriteString.cs" />
+    <Compile Include="modules\MCursorNext.cs" />
+    <Compile Include="modules\MFileSelect.cs" />
+    <Compile Include="modules\MScopePop.cs" />
+    <Compile Include="modules\MRemoveObjectFromCache.cs" />
+    <Compile Include="modules\MWhile.cs" />
+    <Compile Include="modules\MDo.cs" />
+    <Compile Include="type_conversions\IReadString.cs" />
+    <Compile Include="modules\MPushAfter.cs" />
+    <Compile Include="modules\MCallback.cs" />
+    <Compile Include="modules\MIf.cs" />
+    <Compile Include="modules\MPushBefore.cs" />
+    <Compile Include="modules\MSpawn.cs" />
+    <Compile Include="modules\MCallProc.cs" />
+    <Compile Include="modules\IModuleSetup.cs" />
+    <Compile Include="modules\MSyncEnd.cs" />
+    <Compile Include="modules\MSyncStart.cs" />
+    <Compile Include="modules\MXmlModule.cs" />
+    <Compile Include="modules\ProcLoader.cs" />
+    <Compile Include="extensions\MyXml.cs" />
+    <Compile Include="infrastructure\Scheduler.cs" />
+    <Compile Include="infrastructure\ProcInst.cs" />
+    <Compile Include="infrastructure\Worker.cs" />
+    <Compile Include="infrastructure\GlobalContext.cs" />
+    <Compile Include="modules\IModuleRun.cs" />
+    <Compile Include="modules\MSynchronized.cs" />
+    <Compile Include="infrastructure\ModuleContext.cs" />
+    <Compile Include="infrastructure\MVM.cs" />
+    <Compile Include="modules\MPrint.cs" />
+    <Compile Include="infrastructure\ProcContext.cs" />
+    <Compile Include="parser\antlr\MetraScriptLexer.cs" />
+    <Compile Include="parser\antlr\MetraScriptParser.cs" />
+    <Compile Include="parser\antlr\MetraScriptTester.cs" />
+    <Compile Include="parser\antlr\ParserExtensions.cs" />
+    <Compile Include="parser\antlr\StringExtensions.cs" />
+    <Compile Include="parser\AccessNumber.cs" />
+    <Compile Include="parser\AccessString.cs" />
+    <Compile Include="parser\BaseBinaryOpSetup.cs" />
+    <Compile Include="parser\BaseLiteral.cs" />
+    <Compile Include="parser\BaseUnaryOpSetup.cs" />
+    <Compile Include="parser\AccessBool.cs" />
+    <Compile Include="parser\AccessNull.cs" />
+    <Compile Include="parser\BaseTernaryOpSetup.cs" />
+    <Compile Include="parser\AccessTemp.cs" />
+    <Compile Include="type_conversions\ISetupWritable.cs" />
+    <Compile Include="parser\OpThisEquals.cs" />
+    <Compile Include="parser\OpTBD.cs" />
+    <Compile Include="parser\OpIff.cs" />
+    <Compile Include="parser\OpOr.cs" />
+    <Compile Include="parser\OpAnd.cs" />
+    <Compile Include="parser\OpCaseSensitiveLte.cs" />
+    <Compile Include="parser\OpCaseSensitiveGte.cs" />
+    <Compile Include="parser\OpCaseSensitiveLt.cs" />
+    <Compile Include="parser\OpCaseSensitiveGt.cs" />
+    <Compile Include="parser\OpLte.cs" />
+    <Compile Include="parser\OpGte.cs" />
+    <Compile Include="parser\OpLt.cs" />
+    <Compile Include="parser\OpGt.cs" />
+    <Compile Include="parser\OpDivide.cs" />
+    <Compile Include="parser\OpMultiply.cs" />
+    <Compile Include="parser\OpSubtract.cs" />
+    <Compile Include="parser\OpNe.cs" />
+    <Compile Include="parser\OpEq.cs" />
+    <Compile Include="parser\OpCaseSensitiveNe.cs" />
+    <Compile Include="parser\OpNot.cs" />
+    <Compile Include="parser\OpCaseSensitiveEq.cs" />
+    <Compile Include="parser\OpAdd.cs" />
+    <Compile Include="parser\OpAssign.cs" />
+    <Compile Include="parser\ISetupSyntax.cs" />
+    <Compile Include="parser\AccessObject.cs" />
+    <Compile Include="parser\LiteralString.cs" />
+    <Compile Include="parser\OpConcat.cs" />
+    <Compile Include="parser\SyntaxMaster.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="infrastructure\SchedulerMaster.cs" />
+    <Compile Include="general\StringDecimal.cs" />
+    <Compile Include="general\SyncDictionary.cs" />
+    <Compile Include="infrastructure\TempContext.cs" />
+    <Compile Include="infrastructure\ThreadContext.cs" />
+    <Compile Include="infrastructure\WorkMgr.cs" />
+    <Compile Include="infrastructure\WorkList.cs" />
+    <Compile Include="type_conversions\ReadStringAsInt.cs" />
+    <Compile Include="type_conversions\TypeConverter.cs" />
+    <Compile Include="xpath_parser\output\XPathLexer.cs" />
+    <Compile Include="xpath_parser\output\XPathParser.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="modules\ProcModuleSchema.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Content Include="general\XmlComments.xml" />
+    <Content Include="mvm_script\cgramLexer.java" />
+    <Content Include="mvm_script\cgramParser.java" />
+    <Content Include="mvm_script\MvmScriptLexer.java" />
+    <Content Include="mvm_script\MvmScriptParser.java" />
+    <Content Include="mvm_script\output\cgramLexer.java" />
+    <Content Include="mvm_script\output\cgramParser.java" />
+    <Content Include="mvm_script\output\MvmScriptLexer.java" />
+    <Content Include="mvm_script\output\MvmScriptParser.java" />
+    <Content Include="mvm_script\output\MvmXPathLexer.java" />
+    <Content Include="mvm_script\output\MvmXPathParser.java" />
+    <Content Include="mvm_script\output\__Test__.java" />
+    <Content Include="mvm_script\output\__Test___input.txt" />
+    <Content Include="mvm_script\RobTestLexer.java" />
+    <Content Include="mvm_script\RobTestParser.java" />
+    <Content Include="mvm_script\sample_xml\bookstore.txt" />
+    <Content Include="mvm_script\sample_xml\bookstore.xml" />
+    <Content Include="mvm_script\unit_tests\array_access.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\array_access.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\array_access.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\array_access.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\array_access.3.in.txt" />
+    <Content Include="mvm_script\unit_tests\array_access.3.out.txt" />
+    <Content Include="mvm_script\unit_tests\array_initializer.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\array_initializer.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\array_instance.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\array_instance.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\array_lvalue.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\array_lvalue.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\array_lvalue.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\array_lvalue.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\as_type.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\as_type.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\as_type.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\as_type.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\as_type.3.in.txt" />
+    <Content Include="mvm_script\unit_tests\as_type.3.out.txt" />
+    <Content Include="mvm_script\unit_tests\block.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\block.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\block.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\block.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\bookstore.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\bookstore.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\break.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\break.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\break.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\break.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\break.3.in.txt" />
+    <Content Include="mvm_script\unit_tests\break.3.out.txt" />
+    <Content Include="mvm_script\unit_tests\continue.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\continue.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\continue.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\continue.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\continue.3.in.txt" />
+    <Content Include="mvm_script\unit_tests\continue.3.out.txt" />
+    <Content Include="mvm_script\unit_tests\dictionary_instance.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\dictionary_instance.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\dictionary_instance.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\dictionary_instance.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\dictionary_instance.3.in.txt" />
+    <Content Include="mvm_script\unit_tests\dictionary_instance.3.out.txt" />
+    <Content Include="mvm_script\unit_tests\do_while.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\do_while.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\do_while.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\do_while.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\do_while.3.in.txt" />
+    <Content Include="mvm_script\unit_tests\do_while.3.out.txt" />
+    <Content Include="mvm_script\unit_tests\dynamic_object_field_access.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\dynamic_object_field_access.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\error_dangling_comma.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\error_dangling_comma.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\error_dangling_operator.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\error_dangling_operator.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\error_missing_end_brace.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\error_missing_end_brace.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\error_missing_end_bracket.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\error_missing_end_bracket.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\error_missing_semi.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\error_missing_semi.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\error_missing_semi.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\error_missing_semi.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\error_missing_semi.3.in.txt" />
+    <Content Include="mvm_script\unit_tests\error_missing_semi.3.out.txt" />
+    <Content Include="mvm_script\unit_tests\error_quote_mismatch.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\error_quote_mismatch.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\for.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\for.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\for.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\for.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\foreach.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\foreach.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\foreach.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\foreach.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\if.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\if.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\if.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\if.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\if.3.in.txt" />
+    <Content Include="mvm_script\unit_tests\if.3.out.txt" />
+    <Content Include="mvm_script\unit_tests\if.4.in.txt" />
+    <Content Include="mvm_script\unit_tests\if.4.out.txt" />
+    <Content Include="mvm_script\unit_tests\if.5.in.txt" />
+    <Content Include="mvm_script\unit_tests\if.5.out.txt" />
+    <Content Include="mvm_script\unit_tests\if.6.in.txt" />
+    <Content Include="mvm_script\unit_tests\if.6.out.txt" />
+    <Content Include="mvm_script\unit_tests\label.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\label.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\label.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\label.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\named_code_argument.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\named_code_argument.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\named_parameters.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\named_parameters.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\named_parameters.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\named_parameters.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\operators.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\operators.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\php_array.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\php_array.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\proc.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\proc.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\proc.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\proc.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\return.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\return.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\return.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\return.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\set_var_to_ast.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\set_var_to_ast.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\try.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\try.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\try.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\try.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\try.3.in.txt" />
+    <Content Include="mvm_script\unit_tests\try.3.out.txt" />
+    <Content Include="mvm_script\unit_tests\use_case.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\use_case.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\while.1.in.txt" />
+    <Content Include="mvm_script\unit_tests\while.1.out.txt" />
+    <Content Include="mvm_script\unit_tests\while.2.in.txt" />
+    <Content Include="mvm_script\unit_tests\while.2.out.txt" />
+    <Content Include="mvm_script\unit_tests\while.3.in.txt" />
+    <Content Include="mvm_script\unit_tests\while.3.out.txt" />
+    <Content Include="mvm_script\__Test__.java" />
+    <Content Include="mvm_script\__Test___input.txt" />
+    <Content Include="parser\antlr\test_syntax.txt" />
+    <Content Include="xslt\ModuleHelp.xslt" />
+    <Content Include="_NOTES\notes.txt" />
+    <Content Include="_TESTS\main.xml" />
+    <Content Include="_TESTS\misc_unit_tests.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.0 %28x86%29</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\RaptorDB\RaptorDB\RaptorDB.csproj">
+      <Project>{45F6BE30-989A-4749-B6A0-69099C8661F4}</Project>
+      <Name>RaptorDB</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ShellLink\ShellLinkSample.csproj">
+      <Project>{28923F6E-8A68-4BC8-A507-825B09C3F64E}</Project>
+      <Name>ShellLinkSample</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,18 @@
+(
+  do_while
+    (
+      Ast_Element => a
+    )
+    {
+      do_while
+        (
+          Ast_Element => b
+        )
+        {
+          print
+            (
+              "a,b"
+            )
+        }
+    }
+)

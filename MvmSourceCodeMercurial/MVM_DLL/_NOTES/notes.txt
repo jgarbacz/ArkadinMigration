@@ -1,0 +1,665 @@
+﻿BUGS:
+-Cannot produce with TEMP.csr. This messes up b/c user passes in macro syntax to generate the object id
+ for each row and we don't have a way to pass TEMP scope at the calling level through to the producer who
+ self queues.
+-I need ability to generate a real stacktrace from my callbacks. If an exception is thrown, i need to show my stack trace
+ not the code one, which is useless.
+-Parse had bug where if you leave off a trailing quote it just ignores the atom
+
+
+
+NOTES:
+
+-If we determine we need to improve time to read fields we can setup a universal hash
+ FIELD_CODES{"longer field name"}="compact field code". Then all fields will be stored like this
+ OBJECT_FIELDS{"compact field code"}="field value". The win here is that on setup we can do the 
+ compact field code lookup, so at run time we're hashing a smaller key. This should result in
+ faster hashing.
+- Seems like a bad idea to tune before we need to.
+
+FUNCTIONALITY:
+
+-- call steps and phases for objects and txns
+call step for object
+call step for txn
+call phase for txn
+call phase for object
+
+-- catchup after a spawn from different points
+catchup from current phase
+catchup from parent phase path: main/mapping/legacy/mapping
+
+-- building/modifying the schedule, phases, and procs with different scopes
+add a phase to a parent phase (/w optional object type predicate)(w/ optional runtime predicate info)
+add a proc to a parent phase (/w optional object type predicate)(w/ optional runtime predicate info)
+add a phase to occur before/after a phase (/w optional priority)(/w optional object type predicate)  (w/ optional runtime predicate info)
+add a phase to occur before/after a step (/w optional priority)(/w optional object type predicate)  (w/ optional runtime predicate info)
+replace/skip a proc for txn (w/ optional runtime predicate info)
+replace/skip a proc for all (w/ optional runtime predicate info)
+replace/skip a proc for object type (w/ optional runtime predicate info)
+
+-- we have different levels for schedules, phases, and procs
+master schedule
+master procs
+master phases
+
+txn schedule = points to master or overridden
+txn procs = points to master or overridden
+txn phases = points to master or overridden
+
+ProcWork(
+  prework=[]
+  precondition='x==x'
+  beforeWork=[]
+  IProc
+  afterWork=[]
+  elseWork=[]
+)
+
+you do need a priority (or order) on before and after. We cannot say do all before phases and then all before procs. 
+really we need a [before_proc_'procname'] phase and so on 
+
+so if a phase has no work, i want to avoid calling it all together. If I solve this, i don't pay a price for before/after
+
+TBD - it would be nice to be able to do if/elseif/else at the phase level whichout having to deal with mutually exclusive conditions
+ *
+It can be expensive to build the schedule but must be cheap to use it.
+Does it need structural bounderies?
+
+
+sched[phase][order]=IWork
+IWork.run()
+ if(precondition){
+   --do the proc
+ }else{
+ 
+ }
+
+ NOTE: we definitely want our gui to look inside procs, code procs can use annotations.
+ phase is where you can push in
+ procs yield ctrl to the scheduler
+ 
+ do you predefine spots where you yield 
+ 
+ every module is a method now for sure!!! So we yield all over the place (no way around that!)
+
+push work before and after a step (in the same context?)
+
+Can I push modules before and after a step? Allows same scope, more powerful then calling a before step.
+
+phases{name}=work
+
+NEW NOTES:
+-object data is an interface (or abstract class) and we'll implement versions that 
+ support multiple reader/one writer and versions that assume one thread access. (default is nonlocking)
+ It might be good if you can be in on thread mode, then switch to multithread mode when you decided,
+ to parallelize work on the same txn.
+-we're going to implement caching like this
+     -threads will be allowed to create x objects before checking in
+     -no matter what threads always check in every X ms. 
+     -swapping to cache happens when all threads are checked in
+     -System.GC.getTotalMem() will tell us how much mem we're using.
+ *-we're going to encode fields like this
+     -first time you see a field name you get the field pos in our array
+     -modules can be smart so that on subsequent calls they will use lookups
+     by position.
+     -we don't preassign positions b/c we don't want to alot a position unless the
+     field is written to. 
+     -we assign positions for an object type so our array will be the superset of all
+     fields that are written to for an object type.
+     -we can use the same approach for procs
+ *-Phase and Proc are now the same. 
+     -A phase is simply an empty proc
+     -proc works happen in order 0, before work is negative, after work is positive
+ *-Modules should also allow for push in before and after with pos and neg. the difference is
+that share the same temp scope.
+-you can push in for wild card and the machine precomputes the wild card so we have 
+ no penalty at runtime. This means we'll do stuff like set object type to 
+ 'functionality' + 'field_layout'. Then we'll push in work for 'functionality*'
+ and we'll get the benefit of more object types with specific (no waste) field 
+ layouts and still get the functionality abstraction.
+-we are going to order out datastructures by object type so we can get cheap querying of them
+-what did we decide about before and after logic?
+     -phase and proc are the same so you can just replace a proc w/ a new proc
+     -we do need before and after logic for modules
+-need ability to replace a module or proc with a new module or proc at runtime.
+-need the ability to push in work for fields other than object type. these get resolved at runtime.
+-need ability to modify schedule on the txn or global level.
+
+?? what did we decide object locking for caching?
+
+DATA MODEL
+schedule: puts objects together with procs and defines procs to determine which are dispatched at runtime
+transaction: commit points
+object cluster: group of objects driven through a schedule together.
+proc:can be called directly or implicitly from the schedule. can be called on a transaction,
+an object cluster, a slice of objects, or individual objects. contains modules in order zero
+and pushed procs before and after. A module needs to be in a proc because a proc gives the module
+scope.
+
+REQUIREMENT:
+-we need to ability for a thread to work on more than one txn at a time. This gives us batching 
+on the db. To do this we need to be able to yield control up to the machine
+
+TENETS:
+-be as flexible as possible (worry about speed later if we need to)
+-want to be able to go parallel whenever we logically can. User is responsible
+ for getting locks if necessary. We'll provide atomic modules to help (aggregate etc)
+-we're gonna put of encoding things until we're done so debugging is easier.
+-don't restrict functionality b/c someone 'might' do something stupid. let them shoot themselves in the foot.
+-no global pass, setup happens in the order you hit things. if user wants define something, do it 
+ upfront in the execution path.
+ 
+MORE NOTES:
+-When we call a module, it returns the name (or number) of the next module that should be called
+ We have special return names (or numbers) that mean YIELD or CALL_PROC
+-We have templates for work in a proc. Any changes to the flow (of modules or procs) will be stored
+ on the txn. When a thead picks up a txn to do work it applys deltas to its master template, then
+ undoes the changes when it is finished with the txn.
+-when we process work for the same order we potentially multithread it. we should have this parallize 
+ work stuff be a module. If so we can probably make running a proc a module.
+
+MORE ROB IDEAS: 3/28
+-to implement any nested module, need to go through the work stack and treat it like
+ calling a proc, only don't get a new stack
+-only allow pushins as replacing what you are on. So since loop in a unit you can only replace
+ before the whole loop or after the whole loop.
+-right now we return the name of the next module inst to fire, i could instead return the direct
+ reference. Then if (and only if you need to yield) do you need store the name of the module inst.
+-for sure we need the ability to call a proc and return values. If we have this, should be able
+ to return up exceptions, continues, and breaks. 
+-we're going to assume that procs and modules are parsed when they are first executed. When proc
+ x is called, we parse it into xmlModules, when an xml module is run, it can push a pure runtime
+ module in front of itself, and remove itself for the list. Next time the proc is called we have
+ a fully parsed version. At anytime though, the compiled version and toss an xml version in front 
+ of itself.
+ 
+NEAR TERM TODO:
+-get call proc callbacks going
+-get module yield callbacks going
+-get spawn going
+-give clusters their own objects
+-test calling proc for object type and cluster levels
+-xml module and setup on demand stuff
+
+MORE NOTES: 3/30
+-we need synchronized procs.
+ -anytime your syncronized you go onto the machine queue instead of the stack
+ -when you hit a synchronized bit and you fail to lock, yield and go back on the queue.
+ -definitely need ability to have storeage attached to a proc and have the storage persist
+ -also need ability to lock structures.
+
+MORE NOTES: 3/31
+-anytime we pull work we check to see if the master scheduler has been updated
+ and if it has then we apply the master deltas to our worker copy before doing the work
+-setup modules internal synchronization so only 1 generates at a time
+-we are no longer worried about optimizing object type (save this for tuning)
+-if i say call arb_account_mapping for oid="123ACCOUNT" and someone pushed work into this for a service
+ we simply don't end up doing this work.
+-objectId is now object type plus unique identifier
+-we support call proc with arbitrary predicates
+-we support pushing work in that applies to '*'
+
+NOTES: 4/1
+-proc and label are the same thing
+-we need to support N-dimensional order for each proc
+-1st dimension: 0=before proc, 1=during proc, 2=after proc
+-if 1st==before/after
+     -2nd: explicit 'order' the work was pushed for
+     -3rd: implicit order modules were pushed into the explicit order
+-if 1st==during
+     -2nd: explicit 'order' the modules were listed in the step
+     -3rd: there is no implicit order, so 0
+- generically i think of these as [b/d/a].[exp ord].[imp ord]
+-anytime a module generates another N modules it adds another set of .[b/d/a].[exp ord].[imp ord]
+-x.y is a higher order than x.y.0
+-although we're gonna run of the serial chain of modules, outside of that we have something
+ that manages order and modifies the chain.
+-for sync between master we're gonna manage that chaining at the proc level and we're gonna check for
+ differences when we pickup a piece of work from the stack.
+-the only time you need to store do/undo on the txn is if you customized it. If you store do/undo on the
+ txn and you have updates from master you need to fully sync w/ master and then re-apply custom chges.
+-we no longer deal w/ undo, we just mark as dirty and sync with master. syncing with master should now
+ just be a simple switching of a reference.
+-Proc input outputs:
+ -we create an object of type "proc_name"+"_params and write the object id of this 
+  onto the work;
+ -eventually when we make objects back by arrays and not hashes this will benefit.
+-CONCEPT
+ -our modules never really nest. they simply call_proc with same proc context.
+ -so when loop generates, it defines a proc for its insides.
+ -because we don't nest at the module level, we don't need to goto any module but the next one in 
+     the list. this means don't need to return a next module. we do however need to be able to schedule
+     the next module on the work in the case we are yielding. we talked about having 2 parallel arrays
+     where 1 is the array of modules to execute and 2 is the order (aka) name of the module. when we 
+     resume, we need to lookup the starting module in a hash using the order. it is entirely possible
+     that the order now points to a new (always > order) module.
+ 
+ROB NOTES: 4/6
+-there is a difference between checking out and rw locking
+     -we want to be able to checkout custers so they don't swap
+     -but we need to back the object list with an array that 'can' swap
+     -if we're working on the same cluster over and over again, we can be smart enough to not keep re-checking it out.
+     -same goes for objects we work with over and over again.
+-Need to add rwlocks to objectdata
+
+ROB NOTES: 4/7
+-object_id is system wide unique, user is responsible for setting it.
+-at some point we'll add object_type which will be used purely for perfomance
+-at some point we'll have a hash that translates object_id to an array index which really stores the object
+     -this will allow someone to lookup the idx once and use it multiple times, avoiding hashing
+     -we'll need to keep reference counters so we don't repurpose the index until everyone release it
+     -this doesn't mean the indexes object cannot be cached, just that we need to keep the slot
+ -for now we're only going to have our parser support:
+     -OBJECT.field
+     -OBJECT(OBJECT.foreign_oid).field
+     -TEMP.field
+     -literal
+     -parens
+     -normal operators
+-we're gonna have 2 kinds of modules 
+     -modules that can contain stuff that can yield (need to call thur the stack)
+     -modules that can cannot have stuff that can yield (can call recursively for speed)
+     -for now all our syntax is gonna be recursive based.
+
+Notes: 4/11
+-we have a good way to deal w/ producer/consumer flow ctrl
+     -say i am the only thread working and i have big worklist i want to get ppl working on
+     -the thread makes a 'producer' piece of 'work' (just like any other work) and gives it to the work mgr
+     -the work mgr, put it on all the workers stacks (if it spawns new workers it can add it to their stacks too)
+     -this producer work will:
+         -produce its self back to the stack
+         -produce a bunch of work for itself on the stack
+     -this has the effect that all threads will produce and consume their own work which gives us multiple
+      producers and multiple consumers which is what you want.
+     -how do you know you are done? 
+         -if producer work can't produce it doesn't put itself back on the stack
+         -this causes the worker to block
+         -the mgr knows what producer blocks it has given to what threads
+         -it never gives a thread the same producer block more than once
+         -if a thread is blocking, that tells the mgr that the producer block is done
+         -when the mgr has no more producer blocks to give out and all threads are blocking the whole thing is done
+     -how do you load balance??
+         -not worrying about this now b/c we don't need it on rev 1
+-CURSORS
+     -we want cursor to be a general concept in the tool
+     -we're gonna implement cursors by updating the cursor object. this should be able to benefit from array access once we tune.
+     -we don't want to for cursors to be lexical scope, we want them to be able to be pinned anywhere.
+     -ofcourse cursers need to be able to be serialized and reconstituted.
+     -since we'll be using real object for the cursor, we want to add a destructor to the curser that purges the object if/when the curser is gc'ed
+     -how do i get MYCSR.field to work? right now i do not have lexical translation??
+     -OBJECT(OBJECT.csr).field
+     -cursor operations will be thru modules <next>OBJECT.csr</next>
+-general indexing
+ - we don't need to use a dictionary we can hash/mod the value and put it into an array that points to a list
+ - that means some elems of the list won't be the ones we want and we'll have to skip them but this shouldn't be too expensive b/c were talking sequential io
+NOTES: 4/13
+-TEMP SCOPE
+     -when i nest i am always doing a call proc (w/ same scope)
+     -before i call, i'll the TEMP.scope.push()
+     -i'll tie the callback through pop_callback_proc that will do the TEMP.scope.pop() then go on to the 
+      real callback.
+     -the callback name will be passed as a step input.
+     
+NOTES: 6/4
+-i am always torn w/ what should be allowed to be dynamic and what can be frozen the first time thru (essentially what
+ does setup build one time). When everything is always dynamic it is easier to build more building blocks. If we had a good
+ marcoing language i think we could also achieve this. Of course anytime you can detect something is static you should just 
+ resolve it up front. The issue that lots of things are dynamic but don't actually change so you would want to resolve it just
+ once. How do you decide this? Which way do we default this behavior? Lean toward performance -or- lean towards correctness. 
+ It would be good to take a consistant stance accross all modules. Right now I have an ugly mix of functionality. The best
+ answer is probably to have dynamic and static versions of everything. Autodetect whenever possible and allow full ctrl
+ to specify the default approach for the module and to override the approach.
+ 
+NOTES: 6/25
+-really need to solve how to make modules configurable at the system level. For example, anything a module defaults
+ should be configurable. We want this b/c for different applications we want different defaults. Sometime you'll want
+ something defaulted to GLOBAL.x and sometime to OBJECT.x or sometimes just default it to fixed value. Having this power
+ will allow us make the the config look simpler.
+-want the ability to specify how many threads can work on any given edge. for example, i might say for RAC we only want
+ 4 threads hitting any one db a time. Also, i want to logically separate my local workers from the workers that simply wait
+ for a reply from an edge. We can do this by using an edge worker, whose job is simply to wait for the edge to return and 
+ perform callbacks and then wait until needed again. The idea is you pick N threads that hammer the local box and Y
+ threads that hammer a remove box.
+- TURN BACK ON THE VALIDATING PARSER!!!!!
+- FIX THE MEMORY LEAK IN SELECT/PARALLEL!!!!!!!!!
+
+NOTES: 9/29
+-although we want totally dynamic macros, these will always be less visable than static macros (like lisp supports).
+ we should support static macros so they can be transformed in place and be more visable to the user. i am
+ picturing a gui that can auto-expand the macro without need to run the tool. This is only possible if
+ the macro doesn't depend on runtime values. I think many macros will fall into this category. Another
+ extra benefit of these is that they are likely candidates to benefit from global sweep. Dynamic macros
+ have trouble being included in global sweep b/c the sweep is complete before the macro is expanded.
+ 
+NOTES: 9/30
+-we got great benefit by implementing cursor ops (loop/then/else/run in one spot and then have all
+ cursor selects use these ops. I should do the same thing for any modules that needs a file or list
+ of files as input. make it so all of these types of modules can take a file name, a glob cursor, a
+ a file glob, a dir/match etc. Ofcourse this means these modules must do their work on a list of files.
+ If it is logically inpossible for them to work on a list, they should simple use <file_name/>.
+-cursors are nice b/c they let you iterate through a set of values, but many times we will only have
+ a single cursor field ( or value). For example, glob_select will result in a single field. I think
+ in these cases we should try to standardize and use the field name 'value'. I can still allow 
+ renaming of these but by default i might as well use 'value'. similarly, if i ever have a module that
+ takes a cursor as input and needs to work on a single field, the module can interogate the cursor and
+ if the cursor only has one field, then there is no need for the user to tell me which one to use. This
+ means cursors need to support the function get number of fields. 
+-it is stupid that i have to manually register modules. There must be a way to use reflection to 
+ interogate the assembly looking for classes that implement "IModule" and then call a method called
+ GetModuleTagNames() and fill out the moduleMap automatically.
+ 
+NOTES: 10/07
+- Need built in support for doing asynchronous work with audit points.
+- If i put <log> around modules, that should make module do their own logging. This would be huge for debugging and tracing the config.
+  we'll want this to work on different depths. some can transcend proc calls etc.
+  
+NOTES: 11/12
+- OBJECT.field is same as OBJECT{field}, both of which have a static field name. OBJECT{TEMP.field} is how you get/set dynamic field names
+- should be able to do hash like operations on an OBJECT. OBJECT.keys() OBJECT.remove("key")
+- static named access gets array index tuning.
+
+
+NOTES: 1/12/2010
+- ok to be slow with casting for elegance on setup time, but try to avoid casting where possible
+  at runtime. Since we always know type, we should not have to cast at runtime.
+
+NOTES: 4/28/2010
+- found a syntax that i like. we want to be able to express your config in both xml and script, and xml 
+  with nested script inside of it. both forms should be parsed into an identical syntax tree and the
+  tree should have back links the the real user config in its exact for either xml or script. given
+  chunk of xml we should be able to display it as all script or given a chunk of script we should
+  be able to display it as all xml. our gui might work with xml under the hood but display things as
+  script since it is more terse and cleaner to look at. The script will work 2 way. it will have
+  a consistent way to represent any piece of xml in a 2 way repeatable reverse mapping so you can
+  switch between the 2 represention and it is always consistent. It will also have some hard coded
+  constructs to that have a knowledge of the language to make the common things like if/loop/cursor
+  stuff look clean. 
+  
+  some goals:
+  procs/modules/function all look the same regardless of how they are implemented.
+  we also wanna be able to call db stored procs the same way ours are called.
+  
+  2 way arbitrary module example:
+  
+	<blah>
+	<a>b</a>
+	<field name='acct_no'>101</field>           -- name is a special construct
+	<field name='sub_no'>102</field>
+	<field name='id_no' key='true'>103</field>
+	<g>10</x>
+	<g>11</x>
+	<y q='qq' w='ww'>z</y>      -- attributes (not called name are treated the same)
+	<j q='qq' w='ww'><hi>rob<hi><ho>me</ho></j>
+	<jj><hi>rob<hi><ho>me</ho></jj>
+	</blah>
+
+	blah(
+		a=>b,
+		field(acct_no)=>101,
+		field(sub_no)=>102,
+		field(id_no,key=>true)=>103,
+		g=>10,
+		g=>11,
+		y(q=>'qq', w=>'ww')=>z,
+		j(q=>'qq', w=>'ww')=>(hi=>rob,ho=>me)
+		jj=>(hi=>rob,ho=>me)
+	); 
+	
+ Rules:
+   1) attribute 'name' is special and is the default attribute in that you don't need to say name=>x, just say x
+   2) modules have the for TAG(...); where semi ends the module.
+   3) we have a default module of <do> so [xxx;] == <do>xxx</do> == do(xxx);
+   4) child elements of a module are separated with comma
+   5) what if blah has properties? well my goal is to keep the simple things looking simple because most stuff is simple
+      my base case is module work like functions with positional and/or named args. substring(x,y,optional_param=>z);
+      if this means that i cannot allow modules to be define with top level args so be it.
+   6) this stinks when you kids are really sub module and you want to have all configurabilty of the parent be attributes. 
+      for example <sync semaphore='xx'> ... </sync>. this is nice with xml but not nice with script
+      sync(semaphore=>xx)=>(...); so now we get parallel(degree=>1)=>(...); or parallel(...); This is 
+   7) our script syntax thus far is starting to look like a data structure of some sort. it would be good if it was so we could
+      generate code this way.
+ 
+ What would an xml format looks like
+ format(
+	name=>acct_format
+	field_delim=>',',
+	record_delim=>'$'
+	field(id_acc, int, not null),
+	field(fname, varchar, not
+ )
+ 
+   Some specialized constructs we will support:
+   
+   for (TEMP.i=0;TEMP.i<10;TEMP.i++) loop
+   end loop;
+   
+   for CURSOR in [domain]:[domain specific thing] loop|then|...
+     print(CURSOR.field);	
+   end loop|then...;
+   
+   for CURSOR in db:select('select * from table') parallel_process(batch_size=>10)
+     print(CURSOR.field);
+   end parallel_process;
+   
+   for CURSOR in index:select('MY_INDEX',mykey1=>'a',mykey2=>'b') loop
+     print(CURSOR.field);
+   end loop;
+   
+   for CURSOR in index:select('MY_INDEX',mykey1=>'a',mykey2=>'b') then
+     print(CURSOR.field);
+   else
+    print('no rows');
+   end if;
+   
+   for CURSOR in proc:myproc(arg,arg,arg) loop
+     print(CURSOR.field);
+   end loop;
+   
+   if TEMP.j eq '' then
+		x;
+   else if TEMP.j eq '1' then
+		y;
+   else
+		z;
+   end if;
+   
+   while 1=1 loop
+		x;
+   end loop;
+   
+   with default_context('TEMP','CURSOR','OBJECT','GLOBAL')
+   end with;
+   
+   with alias('TEMP.x','nvl(OBJECT.x,GLOBAL.y)')
+   end with;
+   
+   // insert into our memory indexes with insert statements
+   index:insert into MYINDEX (a,b,c) values (x,y,z);
+   index:insert into MYINDEX values (x,y,z);
+   index:insert into MYINDEX values (a=>x,b=>y,z=>z);
+   
+  // if you wanna call a proc on a database you can call it like on of our procs:
+  db:procname(a,b,c)
+  // or simply
+  procname(a,b,c) // assuming procname does not exists locally 
+  
+  // also we'll have a search path so if you do not specify we'll figure it out.
+  // now that i am thinking about it domain: is really like namespace except
+  // that namespace can now be a database login.
+  
+   
+   Probably going to have specialized constructs for defining and using data structures
+   my map<string,int> TEMP.thehash;
+   TEMP.thehash[a]=99;
+   
+   we really want to stop w/ the TEMP.thehash and just say 'temp thehash;' local vars do not need to be
+   ugly and have TEMP in front of them.
+   
+   probably want some way to decide how we treat bare vars. we want the option of switching them
+   between OBJECT. and TEMP.  Forcing the other to be explicitly mentioned.
+   
+   
+NOTES: 3/10/2010
+
+- this tool is setup for lazy evaluation procs that return cursor. 
+- we have the ability to yield and resume so we can do slick things like 
+  call run <proc_select><call>blah(x)</call><loop> type of thing.
+- so you would write a proc that counts to infinity and just have it lazy eval to
+  only chug through one value at a time.
+- we'll just need the hook to cancel a call since it may not exit on its own.
+- when we add exception handling we'll have a good way to break out.
+
+NOTES: 7/28/2010
+
+
+Variable scope and access paths:
+
+temp x;		// visable proc scope
+my x;			// lexical block scope, can think of it as 'my version of the temp'
+local x;	// true local scope, can think of it as 'my version of the global'
+global x;	// true global scope
+
+Read from x means check temp, my, local, global
+Write to x means 
+	if defined in my, write to my
+	elsif defined in temp, write to temp
+	elsif defined in local, write to local
+	elsif defined in global, write to global
+	else write to temp.
+
+We can have any number of prefixes which store different access paths. 
+- want a prefix that means check MY or TEMP since these should be thought of interchangably
+- i think TEMP.field is valid for this since MY just means my version of the temp. Also,
+	i can deal with this on the generate sweep assuming i do not allow dynamic access to 
+	temp scope.
+	
+NOTES: 8/25/2010
+
+There is always a current object in scope in a proc so it should be natural to say
+OBJECT.proc_name() or OBJECT.myservice.proc_name() instead of call_proc_for_object etc.
+Right now any object can be sent to any proc.
+We might want to allow restrictions to get some sort of paired down auto complete in the 
+vaporware ide.
+
+Our script language should support <<here documents which will be handy for embedding 
+xml inside script and script inside xml. The key is that the user gets to decide what 
+they call 'here' so they can pick something they know they will no have to escape.
+
+<do>TEMP.config=quote<<EOF(
+	<do>TEMP.x=11;<do>
+	<do>TEMP.y=22;</do>
+)EOF;
+</do>
+
+<do>TEMP.query=<<EOF(select * from t where x='a')EOF;</do>
+
+the whole point is to put tect inside and decorate the end quote
+This is much better then having to use <![CDATA[ ... ]]> 
+
+It is also good for when we are generating scripts and storing them in strings and we do not
+to have to be escape our inner quotes etc. or for querys for that matter!
+
+parser is either in xml mode or in proc mode. never both because i do not want to have to repect xml rules 
+in the scripting language. we start out knowing the mode based on filename.
+
+To embed xml config inside script do this:
+
+x=y++;
+xml<<endofxmlconfig(
+	<do>x=y+1</do>
+)endofxmlconfig;
+x++;
+
+so here documents work for xml config and work for making strings without escaping.
+to embed a script inside xml just works but you gotta type it with the proper escapes.
+
+NOTES: 9/10/2010
+
+Datatype and structures:
+
+We need to support datastructures to do more complex tasks. We'll also need these structures to be able to store references
+to other structures so we can create arbitrary complext structures. I think we should take the approach of being dynamic
+like perl but then remember the structure on a per object type basis. So after we run we could spit out what all the objects
+ended up looking like. Perl takes the approach that every name can be a hash/scalar/coderef etc. We won't play that game. For
+an object_type first in wins. We can store the type information of an object fields statically. 
+
+ObjectStaticMetaData{
+	object_type='service'
+	fieldtypes{'fieldname'}=ObjectFieldStaticMetaData
+}
+ObjectFieldStaticMetaData{
+	type=int/decimal/string/objectref/cursor
+	user_defined_attributes{'enum_namespace'}='/x/y/z'  # give users access to reading/writing static metadata on first in wins basis
+}
+
+First time thru we can look at the static metadata to compile type specific reads and writes. If user ever tries to access
+a field in an incompatible way it is an error. So if on first use they say it is an int but hey write to 'abc' to it we'll
+error. We're string by default so it is their issue if they misuse.
+
+##### KEEPING THIS HERE B/C IT WAS MY THOUGHT PROCESS BUT I JUNK THIS CONCEPT BELOW! #####
+
+We should have barewords for scalar but allow % and @ for hash and array. 
+OBJECT.x is scalar
+%OBJECT.y is hash
+@OBJECT.z is list
+
+Decoration is only needed when things are ambiguous. Most of the time we can figure it out like this:
+OBJECT.myHashOfArray{'hi'}=[1,2,3];
+
+If you ever want to fully declare a structure you can do so like this:
+%@OBJECT.myHashOfArray=null;
+
+I think we're gonna need some magic char to mean object reference. Hashes and Arrays don't need to point to other hashes and arrays but the
+do need to be able to point to object references which can then go back and point to hashes, arrays etc.
+
+So how do i define that an OBJECT.xx is a obj ref?
+\OBJECT.myobjref=null 
+
+So hash of array of object refs is
+%@\OBJECT.myHashOfArrayOfObjectRefs=null
+OBJECT{id}=[objref1,objref2]
+
+We also want to allow \typed\ object refs like this:
+%@\service\OBJECT.myHashOfArrayOfServiceRefs=null
+
+So what about the simple case of adding specific scalar type??
+
+int OBJECT.counter=1  
+
+Now what about a hash of int/int??
+
+map<int,int> OBJECT.blah;
+
+#### OK NOW I'VE TOTALLY CHANGED MY MIND. SCREW THE PERL SYNTAX. DECLARE TYPES  ####
+#### LIKE GENERICS WHEN YOU NEED/WANT TO DECLARE TYPE!                          ####
+
+Now here is the question?? Do i codegen specific c# types when someone declares a type. I think i do. This is going to allow
+me to integrate with external c# libraries way better then I current do. To support this I will be not only generating the 
+instance but also the accessors to the instance. You need to be able to fully use the C# type from within our language. This
+would be awesome. I am gonna have to do a lot of reflection but since we are runtime static typed i only need to do it on the
+compile. 
+
+Object oriented techniques:
+Although our goal isn't to be a fully object orient language we should be able to support some OO concepts and use 
+them when they make sense. We already have the concept of object and the concept of a proc that works on an object. 
+Right now we are essentially an object oriented language with a single class where ever proc is a member of that 
+class. So certainly right now it is natural to have syntax MYOBJREF.some_proc() or OBJECT.some_proc(). It doesn't
+take much more effort to allow different procs to fire for different object types. We already have the ability
+to resolve procs differently based on namespace, now we want to resolve them differently based on object type as
+well. I don't think this is going to be used all the time but it is certainly easy for us to support and it will 
+probably be useful for some of the stuff we do. Here is a good example. I want to be able to say:
+MYOBJREF.ToString() and have that return a stringified version of the object for debugging. I also want to be 
+able to override ToString() for some object types and have the print in a pretty way that I see fit. Of course
+the user should always be able to access the non-object type specific proc if they want to. This is how we can
+get polymorphism. We might also want to allow some sort of object hierarchy. We can say that object type EMPLOYEE
+extends object type PERSON and that means when we resolve EMPLOYEE which check for object type specific procs 
+for EMPLOYEE then for PERSON, then use the appropriate namespace resolution.
+
+Everything available everywhere:
+I like that you can just call stuff from anywhere but I also think we want the ability to 'package' things and allow
+people to include certain packages and not otheres. This limits the scope of what you can call. We'll still be able to say
+looks like you want to call proc X but it doesn't exist in your current packages but it does exist in package A do you want 
+to include package A?
+
+
